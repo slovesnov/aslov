@@ -10,7 +10,8 @@
 
 #include <cstring>
 #include <cassert>
-#include <windows.h> //getNumberOfCores
+
+
 #ifdef NOGTK
 #include <iconv.h>
 #include <cstdarg>
@@ -18,7 +19,19 @@
 #else
 #include <glib/gstdio.h>
 #endif
+
 #include "aslov.h"
+
+//for getNumberOfCores() function, after "aslov.h" so G_OS_WIN32 will be defined
+#ifdef G_OS_WIN32
+#include <windows.h>
+#elif G_OS_UNIX
+#include <unistd.h>
+#else
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#endif
+
 std::string applicationName, applicationPath, workingDirectory;
 
 //format to string example format("%d %s",1234,"some")
@@ -271,12 +284,16 @@ bool stringToInt(const char*d,int&v){
 }
 
 
-bool startsWith(const char *buff, const char *begin) {
-	return strncmp(buff, begin, strlen(begin)) == 0;
+bool startsWith(const char *s, const char *begin) {
+	return strncmp(s, begin, strlen(begin)) == 0;
 }
 
-bool startsWith(const char *buff, const std::string &begin) {
-	return startsWith(buff, begin.c_str());
+bool startsWith(const char *s, const std::string &begin) {
+	return startsWith(s, begin.c_str());
+}
+
+bool startsWith(const std::string& s, const char* begin){
+	return startsWith(s.c_str(), begin);
 }
 
 bool endsWith(std::string const &s, std::string const &e) {
@@ -294,8 +311,61 @@ std::string replaceAll(std::string subject, const std::string &from,
 	return subject;
 }
 
+VString split(const std::string& subject, const std::string& separator) {
+	VString r;
+	size_t pos, prev;
+	for (prev = 0; (pos = subject.find(separator, prev)) != std::string::npos;
+			prev = pos + separator.length()) {
+		r.push_back(subject.substr(prev, pos - prev));
+	}
+	r.push_back(subject.substr(prev, subject.length()));
+	return r;
+}
+
+int countOccurence(const std::string &subject, const std::string &a) {
+	size_t pos = 0;
+	int i = 0;
+	while ((pos = subject.find(a, pos)) != std::string::npos) {
+		pos += a.length();
+		i++;
+	}
+	return i;
+}
+
 int charIndex(const char *p, char c) {
 	return strchr(p, c) - p;
+}
+
+int indexOfNoCase(const char *a[], unsigned size, const char *item) {
+	unsigned i;
+	for (i = 0; i < size; i++) {
+		if (cmpnocase(a[i], item)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int indexOfNoCase(const char *a[], unsigned size, const std::string item) {
+	return indexOfNoCase(a, size, item.c_str());
+}
+
+//int countOccurence(const std::string& subject, const std::string& a);
+
+bool cmpnocase(const std::string& a, const char* b) {
+	return cmpnocase(a.c_str(), b);
+}
+
+bool cmpnocase(const char* a, const char* b) {
+	return strcasecmp(a, b) == 0;
+}
+
+bool cmp(const char* a, const char* b) {
+	return strcmp(a, b) == 0;
+}
+
+bool cmp(const std::string& a, const char* b) {
+	return cmp(a.c_str(), b);
 }
 
 #ifdef NOGTK //local function should be before localeToUtf8 & utf8ToLocale
@@ -308,7 +378,7 @@ std::string encodeIconv(const std::string& s, bool toUtf8) {
 		printl("error iconv_open");
 		perror("iconv_open");
 		return r;
-	}
+	}::im
 
 	size_t inbytesleft = s.length();
 	char*in=new char[inbytesleft];
@@ -367,6 +437,23 @@ std::string utf8ToLowerCase(const std::string &s,
 		bool onlyRussainChars/*=false*/) {
 	return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
 }
+
+#ifndef NOGTK
+std::string utfLowerCase(const std::string& s) {
+	std::string p = localeToUtf8(s);
+	gchar*a=g_utf8_strdown(p.c_str(), p.length());
+	std::string r(a);
+	g_free(a);
+	return r;
+}
+
+std::string utfLower(const std::string& s) {
+	gchar*a=g_utf8_strdown(s.c_str(), s.length());
+	std::string r(a);
+	g_free(a);
+	return r;
+}
+#endif
 //END string functions
 
 //BEGIN pixbuf functions
@@ -398,12 +485,22 @@ GdkPixbuf* pixbuf(const std::string& s){
 	return pixbuf(s.c_str());
 }
 
+GdkPixbuf* pixbuf(std::string s, int x, int y, int width,
+		int height) {
+	return gdk_pixbuf_new_subpixbuf(pixbuf(s), x, y, width, height);
+}
+
 GtkWidget* image(const char* s){
 	return gtk_image_new_from_file(getImagePath(s).c_str());
 }
 
 GtkWidget* image(const std::string& s){
 	return image(s.c_str());
+}
+
+GtkWidget* animatedImage(const char* s){
+	return gtk_image_new_from_animation(
+			gdk_pixbuf_animation_new_from_file(getImagePath(s).c_str(), 0));
 }
 
 #endif
@@ -446,10 +543,43 @@ void loadCSS(){
 void openURL(std::string url) {
 	gtk_show_uri_on_window(0, url.c_str(), gtk_get_current_event_time(), NULL);
 }
+
+void destroy(cairo_t* p) {
+	if (p) {
+		cairo_destroy(p);
+	}
+}
+
+void destroy(cairo_surface_t * p) {
+	if (p) {
+		cairo_surface_destroy(p);
+	}
+}
+
 #endif
 
 int getNumberOfCores() {
+#ifdef G_OS_WIN32
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	return sysinfo.dwNumberOfProcessors;
+#elif G_OS_UNIX
+	//tested ok
+	return sysconf(_SC_NPROCESSORS_ONLN);
+#else
+	//Did not tested
+	int nm[2];
+	size_t len = 4;
+	uint32_t count;
+
+	nm[0] = CTL_HW; nm[1] = HW_AVAILCPU;
+	sysctl(nm, 2, &count, &len, NULL, 0);
+
+	if(count < 1) {
+		nm[1] = HW_NCPU;
+		sysctl(nm, 2, &count, &len, NULL, 0);
+		if(count < 1) {count = 1;}
+	}
+	return count;
+#endif
 }

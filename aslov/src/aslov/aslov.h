@@ -26,7 +26,9 @@
 #define SIZE G_N_ELEMENTS
 #define SIZEI(a) int(G_N_ELEMENTS(a))
 #define INDEX_OF(a,id) indexOf(a,SIZEI(a),id)
-#define IN_ARRAY(array,item) (INDEX_OF(array,item)!=-1)
+#define ONE_OF(a,id) oneOf(a,SIZE(a),id)
+#define INDEX_OF_NO_CASE(a,id) indexOfNoCase(a,SIZE(a),id)
+
 #ifdef NOGTK
 #define g_print printf
 #define G_DIR_SEPARATOR '\\'
@@ -137,12 +139,24 @@ PairStringString pairFromBuffer(const char*b);
 std::string intToString(int v, char separator);
 bool stringToInt(const std::string&d,int&v);
 bool stringToInt(const char*d,int&v);
-bool startsWith(const char *buff, const char *begin);
-bool startsWith(const char *buff, const std::string &begin);
+bool startsWith(const char *s, const char *begin);
+bool startsWith(const char *s, const std::string &begin);
+bool startsWith(const std::string& s, const char* begin);
 bool endsWith(std::string const &s, std::string const &e);
 std::string replaceAll(std::string subject, const std::string &from,
 		const std::string &to);
+VString split(const std::string& subject, const std::string& separator);
+int countOccurence(const std::string& subject, const std::string& a);
+
 int charIndex(const char *p, char c);
+int indexOfNoCase(const char *a[], unsigned size, const char *item);
+int indexOfNoCase(const char *a[], unsigned size, const std::string item);
+
+bool cmpnocase(const std::string& a, const char* b);
+bool cmpnocase(const char* a, const char* b);
+bool cmp(const char* a, const char* b);
+bool cmp(const std::string& a, const char* b);
+
 
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
@@ -152,7 +166,11 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =
 		false);
 std::string utf8ToLowerCase(const std::string &s,
 		bool onlyRussainChars = false);
-
+#ifndef NOGTK
+//TODO
+std::string utfLowerCase(const std::string& s);
+std::string utfLower(const std::string& s);
+#endif
 //END string functions
 
 
@@ -177,17 +195,29 @@ template<class T>void delete2dArray(T **p, int dimension1){
 #ifndef NOGTK
 void getPixbufWH(GdkPixbuf *p,int&w,int&h);
 void free(GdkPixbuf*&p);
+
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 		int height, int sourcex, int sourcey);
+
 GdkPixbuf* pixbuf(const char* s);
 GdkPixbuf* pixbuf(const std::string& s);
+GdkPixbuf* pixbuf(std::string s, int x, int y, int width, int height);
 GtkWidget* image(const char* s);
 GtkWidget* image(const std::string& s);
+GtkWidget* animatedImage(const char* s);
 #endif
 //END pixbuf/image functions
 
+template<class T> typename std::vector<T>::const_iterator find(std::vector<T> const& v, const T& item) {
+	return std::find(v.begin(),v.end(),item);
+}
+
+template<class T> typename std::vector<T>::iterator find(std::vector<T>& v, const T& item) {
+	return std::find(v.begin(),v.end(),item);
+}
+
 template <typename Arg, typename... Args>
-bool oneOf(Arg const& arg, Args const&... args){
+bool oneOfV(Arg const& arg, Args const&... args){
 	return ((arg== args)|| ...);
 }
 
@@ -210,13 +240,41 @@ template<class T> int indexOf(const T a[], const unsigned aSize,
 	return i == aSize ? -1 : i;
 }
 
+template<class T> bool oneOf(T const a[], int size,
+		const T& item) {
+	return indexOf(a, size, item) != -1;
+}
+
+template<class T> int indexOf(T const a[], int size, const T& item) {
+	int i;
+	for (i = 0; i < size; i++) {
+		if (item == a[i]) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+template<class T> int indexOf(std::vector<T> const& v, const T& item) {
+	typename std::vector<T>::const_iterator it=find(v,item);
+	return it==v.end()?-1:it-v.begin();
+}
+
+template<class T> bool oneOf(std::vector<T> const& v, const T& item) {
+	return indexOf(v,item)!=-1;
+}
+
+
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s);
 void removeClass(GtkWidget *w, const gchar *s);
 void loadCSS();
 void openURL(std::string url);
+void destroy(cairo_t* p);
+void destroy(cairo_surface_t * p);
 #endif
 int getNumberOfCores();
+
 
 
 #endif /* ASLOV_H_ */

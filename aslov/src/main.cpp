@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 //	gtk_init(&argc, &argv); //do not remove
 
 	//aslovInit("C:\\slovesno\\eclipse\\gtktest\\Debu\\gtktest.exe");
-	aslovInit(argv[0]);
+	aslovInit(argv);
 
 	MapStringString m;
 	m.insert({"dictionary","en"});
