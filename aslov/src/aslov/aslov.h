@@ -173,14 +173,18 @@ template<class T>void delete2dArray(T **p, int dimension1){
 }
 //END 2 dimensional array functions
 
-//BEGIN pixbuf functions
+//BEGIN pixbuf/image functions
 #ifndef NOGTK
 void getPixbufWH(GdkPixbuf *p,int&w,int&h);
 void free(GdkPixbuf*&p);
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 		int height, int sourcex, int sourcey);
+GdkPixbuf* pixbuf(const char* s);
+GdkPixbuf* pixbuf(const std::string& s);
+GtkWidget* image(const char* s);
+GtkWidget* image(const std::string& s);
 #endif
-//END pixbuf functions
+//END pixbuf/image functions
 
 template <typename Arg, typename... Args>
 bool oneOf(Arg const& arg, Args const&... args){

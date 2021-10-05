@@ -389,6 +389,23 @@ void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 	cairo_rectangle(dest, destx, desty, width, height);
 	cairo_fill(dest);
 }
+
+GdkPixbuf* pixbuf(const char* s){
+	return gdk_pixbuf_new_from_file(getImagePath(s).c_str(), NULL);
+}
+
+GdkPixbuf* pixbuf(const std::string& s){
+	return pixbuf(s.c_str());
+}
+
+GtkWidget* image(const char* s){
+	return gtk_image_new_from_file(getImagePath(s).c_str());
+}
+
+GtkWidget* image(const std::string& s){
+	return image(s.c_str());
+}
+
 #endif
 //END pixbuf functions
 
