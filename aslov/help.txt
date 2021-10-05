@@ -1,0 +1,27 @@
+how to use aslov library
+
+add alias folder
+includes ${workspace_loc:/aslov/src/aslov}
+c++17 dialect
+
+for non gtk projects{
+NOGTK
+iconv library
+}
+
+
+all resources are in "appName" folder use getResourcePath()
+all images are in "appName/images" folder use getImagePath()
+
+
+uses for gtk project{
+imageviewer
+words
+calculator TODO
+bridge TODO
+stopwatch ?
+projectsize ?
+
+gtktest+
+tesC ?
+}

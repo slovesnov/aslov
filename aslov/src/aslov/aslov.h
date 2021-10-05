@@ -11,10 +11,12 @@
 #ifndef ASLOV_H_
 #define ASLOV_H_
 
+#include <cassert>
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include <initializer_list>
+#include <vector>
+#include <map>
 #ifndef NOGTK
 #include <gtk/gtk.h>
 #endif
@@ -31,32 +33,111 @@
 #define G_N_ELEMENTS(arr)		(sizeof (arr) / sizeof ((arr)[0]))
 #endif
 
-//workingDirectory - directory with G_DIR_SEPARATOR at the end
-extern std::string applicationName, applicationPath, workingDirectory;
+typedef std::vector<std::string> VString;
+typedef std::map<std::string, std::string> MapStringString;
+typedef std::pair<std::string,std::string> PairStringString;
 
 
-//BEGIN application functions
-void aslovInit(const char* argv0);
-int getApplicationFileSize();
-FILE* openApplicationConfig(const char *flags);
-FILE* openApplicationLog(const char *flags);
-//END application functions
+//format to string example format("%d %s",1234,"some")
+std::string format(const char *f, ...);
 
+//format to string example forma(1234,"some")
+template<typename Arg, typename ... Args>
+std::string forma(Arg const &arg, Args const &... args) {
+	std::stringstream c;
+	c << arg;
+	((c << ' ' << args), ...);
+	return c.str();
+}
+
+void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
+		const char *fu);
+
+//output info to screen example println("%d %s",1234,"some")
+#define println(f, ...)  aslovPrintHelp(0,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+
+//output info to screen example printl(1234,"some")
+#define printl(f, ...)  aslovPrintHelp(0,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+
+#define printinfo println("")
+
+//output info to log file printlog("%d %s",1234,"some")
+#define printlog(f, ...)  aslovPrintHelp(1,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+
+//output info  to log file printlo(1234,"some")
+#define printlo(f, ...)  aslovPrintHelp(1,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+
+#define printloginfo printlog("")
 
 //BEGIN file functions
 enum class FILEINFO {
 	NAME, EXTENSION, LOWER_EXTENSION, DIRECTORY, SHORT_NAME
 };
+#ifndef NOGTK
 bool isDir(const char *url);
 bool isDir(const std::string& s);
+#endif
 std::string getFileInfo(std::string filepath, FILEINFO fi);
 int getFileSize(const std::string &path);
 FILE* open(std::string filepath, const char *flags);
 //END file functions
 
+//BEGIN application functions
+void aslovInit(char const*const* argv);
+int getApplicationFileSize();
+FILE* openApplicationLog(const char *flags);
+std::string const& getApplicationName();
+std::string const& getApplicationPath();
+std::string const& getWorkingDirectory();
+std::string getResourcePath(std::string name);
+std::string getImagePath(std::string name);
+//END application functions
+
+//BEGIN config functions
+std::string getConfigPath();
+bool loadConfig(MapStringString&map);
+//#define WRITE_CONFIG(T,V) static_assert(SIZE(T)==SIZE(V));writeConfig(T,V,SIZE(T));
+//helper for writeConfigV
+std::string aslovToString(std::string const& a);
+//helper for writeConfigV
+std::string aslovToString(const char* a);
+
+//helper for writeConfigV
+template <typename T>
+std::string aslovToString(T t){
+	return std::to_string(t);
+}
+
+//https://stackoverflow.com/questions/7230621/how-can-i-iterate-over-a-packed-variadic-template-argument-list
+template <typename ... T>
+void writeConfig(const std::string tags[],T && ... p){
+	VString v;
+    ([&] (auto & a)
+    {
+        	v.push_back(aslovToString(a));
+    } (p), ...);
+
+	auto f = open(getConfigPath(), "w+");
+	if (!f) {
+		println("error");
+		assert(0);
+		return;
+	}
+
+	for(int i=0;i<int(v.size());i++){
+		fprintf(f,"%s = %s\n",tags[i].c_str(),v[i].c_str());
+	}
+	fclose(f);
+
+}
+
+PairStringString pairFromBuffer(const char*b);
+//END config functions
+
 
 //BEGIN string functions
 std::string intToString(int v, char separator);
+bool stringToInt(const std::string&d,int&v);
 bool stringToInt(const char*d,int&v);
 bool startsWith(const char *buff, const char *begin);
 bool startsWith(const char *buff, const std::string &begin);
@@ -95,44 +176,13 @@ template<class T>void delete2dArray(T **p, int dimension1){
 //END 2 dimensional array functions
 
 //BEGIN pixbuf functions
+#ifndef NOGTK
 void getPixbufWH(GdkPixbuf *p,int&w,int&h);
-void freePixbuf(GdkPixbuf*&p);
+void free(GdkPixbuf*&p);
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 		int height, int sourcex, int sourcey);
+#endif
 //END pixbuf functions
-
-void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
-		const char *fu);
-
-//output info to screen example println("%d %s",1234,"some")
-#define println(f, ...)  aslovPrintHelp(0,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
-
-//output info to screen example printl(1234,"some")
-#define printl(f, ...)  aslovPrintHelp(0,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
-
-#define printinfo println("")
-
-//output info to log file printlog("%d %s",1234,"some")
-#define printlog(f, ...)  aslovPrintHelp(1,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
-
-//output info  to log file printlo(1234,"some")
-#define printlo(f, ...)  aslovPrintHelp(1,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
-
-#define printloginfo printlog("")
-
-//format to string example format("%d %s",1234,"some")
-std::string format(const char *f, ...);
-
-//format to string example forma(1234,"some")
-template<typename Arg, typename ... Args>
-std::string forma(Arg const &arg, Args const &... args) {
-	std::stringstream c;
-	c << arg;
-	((c << ' ' << args), ...);
-	return c.str();
-}
-
-int getNumberOfCores();
 
 template <typename Arg, typename... Args>
 bool oneOf(Arg const& arg, Args const&... args){
@@ -157,5 +207,14 @@ template<class T> int indexOf(const T a[], const unsigned aSize,
 	unsigned i = std::find(a, a + aSize, e) - a;
 	return i == aSize ? -1 : i;
 }
+
+#ifndef NOGTK
+void addClass(GtkWidget *w, const gchar *s);
+void removeClass(GtkWidget *w, const gchar *s);
+void loadCSS();
+void openURL(std::string url);
+#endif
+int getNumberOfCores();
+
 
 #endif /* ASLOV_H_ */

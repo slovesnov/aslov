@@ -18,9 +18,19 @@ int main(int argc, char *argv[]) {
 	//aslovInit("C:\\slovesno\\eclipse\\gtktest\\Debu\\gtktest.exe");
 	aslovInit(argv[0]);
 
+	MapStringString m;
+	m.insert({"dictionary","en"});
+	m.insert({"language","ru"});
+	m.insert({"version","4.400000"});
 
-	printl("applicationName",applicationName)
-	printl("applicationPath",applicationPath)
-	printl("workingDirectory",workingDirectory)
+	//printl(m["language"]);
+
+	auto it=m.find("language");
+	if(it==m.end()){
+		printl("not found");
+	}
+	else{
+		printl(it->second);
+	}
 
 }
