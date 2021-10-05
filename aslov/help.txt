@@ -22,6 +22,6 @@ bridge TODO
 stopwatch ?
 projectsize ?
 
-gtktest+
-tesC ?
+gtktest
+test
 }
