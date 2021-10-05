@@ -11,7 +11,6 @@
 #include <cstring>
 #include <cassert>
 
-
 #ifdef NOGTK
 #include <iconv.h>
 #include <cstdarg>
@@ -20,10 +19,8 @@
 #include <glib/gstdio.h>
 #endif
 
-#include "aslov.h"
-
-//for getNumberOfCores() function, after "aslov.h" so G_OS_WIN32 will be defined
-#ifdef G_OS_WIN32
+//_WIN32 for win32 & win64 for getNumberOfCores() function, for gtk & notgtk options
+#ifdef _WIN32
 #include <windows.h>
 #elif G_OS_UNIX
 #include <unistd.h>
@@ -31,6 +28,9 @@
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #endif
+
+#include "aslov.h"
+
 
 std::string applicationName, applicationPath, workingDirectory;
 
@@ -228,7 +228,6 @@ std::string aslovToString(const char* a){
 	return a;
 }
 
-
 PairStringString pairFromBuffer(const char*b){
 	char*w=strchr(b, '=');
 	if(!w){
@@ -250,7 +249,6 @@ PairStringString pairFromBuffer(const char*b){
 	return {std::string(b,w-b),std::string(p)};
 }
 //END config functions
-
 
 
 //BEGIN string functions
@@ -282,7 +280,6 @@ bool stringToInt(const char*d,int&v){
 	}
 	return !*p;
 }
-
 
 bool startsWith(const char *s, const char *begin) {
 	return strncmp(s, begin, strlen(begin)) == 0;
@@ -336,22 +333,6 @@ int charIndex(const char *p, char c) {
 	return strchr(p, c) - p;
 }
 
-int indexOfNoCase(const char *a[], unsigned size, const char *item) {
-	unsigned i;
-	for (i = 0; i < size; i++) {
-		if (cmpnocase(a[i], item)) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-int indexOfNoCase(const char *a[], unsigned size, const std::string item) {
-	return indexOfNoCase(a, size, item.c_str());
-}
-
-//int countOccurence(const std::string& subject, const std::string& a);
-
 bool cmpnocase(const std::string& a, const char* b) {
 	return cmpnocase(a.c_str(), b);
 }
@@ -378,7 +359,7 @@ std::string encodeIconv(const std::string& s, bool toUtf8) {
 		printl("error iconv_open");
 		perror("iconv_open");
 		return r;
-	}::im
+	}
 
 	size_t inbytesleft = s.length();
 	char*in=new char[inbytesleft];
@@ -463,6 +444,18 @@ void getPixbufWH(GdkPixbuf *p,int&w,int&h){
 	h = gdk_pixbuf_get_height(p);
 }
 
+void getPixbufWH(const char*s,int&w,int&h){
+	GdkPixbuf* p = pixbuf(s);
+	assert(p);
+	getPixbufWH(p, w, h);
+	g_object_unref(p);
+}
+
+void getPixbufWH(std::string const& s,int&w,int&h){
+	getPixbufWH(s.c_str(),w,h);
+}
+
+
 void free(GdkPixbuf*&p){
 	if (p) {
 		g_object_unref(p);
@@ -509,6 +502,21 @@ GtkWidget* animatedImage(const char* s){
 
 //BEGIN 2 dimensional array functions
 //END 2 dimensional array functions
+
+
+int indexOfNoCase(const char *t,const char *v[], int size) {
+	for (int i = 0; i < size; i++) {
+		if (cmpnocase(v[i], t)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int indexOfNoCase(const std::string t,const char *v[], int size ) {
+	return indexOfNoCase(t.c_str(),v, size );
+}
+
 
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s) {
@@ -559,7 +567,7 @@ void destroy(cairo_surface_t * p) {
 #endif
 
 int getNumberOfCores() {
-#ifdef G_OS_WIN32
+#ifdef _WIN32
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	return sysinfo.dwNumberOfProcessors;

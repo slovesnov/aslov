@@ -18,6 +18,9 @@ int main(int argc, char *argv[]) {
 	//aslovInit("C:\\slovesno\\eclipse\\gtktest\\Debu\\gtktest.exe");
 	aslovInit(argv);
 
+	std::vector<int> v{5,8,13};
+	printl(oneOf(8,v),oneOf(-1,v),oneOf(13,v));
+/*
 	MapStringString m;
 	m.insert({"dictionary","en"});
 	m.insert({"language","ru"});
@@ -32,5 +35,6 @@ int main(int argc, char *argv[]) {
 	else{
 		printl(it->second);
 	}
+*/
 
 }

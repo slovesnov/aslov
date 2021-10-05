@@ -25,9 +25,9 @@
 #define GP2INT(a) int(int64_t(a))
 #define SIZE G_N_ELEMENTS
 #define SIZEI(a) int(G_N_ELEMENTS(a))
-#define INDEX_OF(a,id) indexOf(a,SIZEI(a),id)
-#define ONE_OF(a,id) oneOf(a,SIZE(a),id)
-#define INDEX_OF_NO_CASE(a,id) indexOfNoCase(a,SIZE(a),id)
+#define INDEX_OF(id,a) indexOf(id,a,SIZEI(a))
+#define ONE_OF(id,a) oneOf(id,a,SIZEI(a))
+#define INDEX_OF_NO_CASE(id,a) indexOfNoCase(id,a,SIZEI(a))
 
 #ifdef NOGTK
 #define g_print printf
@@ -127,8 +127,6 @@ void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
 		fprintf(f,"%s = %s\n",tags[i].c_str(),v[i].c_str());
 	}
 	fclose(f);
-
-
 }
 
 PairStringString pairFromBuffer(const char*b);
@@ -149,8 +147,6 @@ VString split(const std::string& subject, const std::string& separator);
 int countOccurence(const std::string& subject, const std::string& a);
 
 int charIndex(const char *p, char c);
-int indexOfNoCase(const char *a[], unsigned size, const char *item);
-int indexOfNoCase(const char *a[], unsigned size, const std::string item);
 
 bool cmpnocase(const std::string& a, const char* b);
 bool cmpnocase(const char* a, const char* b);
@@ -194,6 +190,8 @@ template<class T>void delete2dArray(T **p, int dimension1){
 //BEGIN pixbuf/image functions
 #ifndef NOGTK
 void getPixbufWH(GdkPixbuf *p,int&w,int&h);
+void getPixbufWH(const char*s,int&w,int&h);
+void getPixbufWH(std::string const&s,int&w,int&h);
 void free(GdkPixbuf*&p);
 
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
@@ -208,62 +206,46 @@ GtkWidget* animatedImage(const char* s);
 #endif
 //END pixbuf/image functions
 
-template<class T> typename std::vector<T>::const_iterator find(std::vector<T> const& v, const T& item) {
-	return std::find(v.begin(),v.end(),item);
+template<class T> typename std::vector<T>::const_iterator find(const T& t,std::vector<T> const& v) {
+	return std::find(v.begin(),v.end(),t);
 }
 
-template<class T> typename std::vector<T>::iterator find(std::vector<T>& v, const T& item) {
-	return std::find(v.begin(),v.end(),item);
-}
-
-template <typename Arg, typename... Args>
-bool oneOfV(Arg const& arg, Args const&... args){
-	return ((arg== args)|| ...);
-}
-
-template<class T>
-bool oneOf(T const& v,std::vector<T> const& t ) {
-	return std::find(begin(t), end(t), v) != end(t);
+template<class T> typename std::vector<T>::iterator find(const T& t,std::vector<T>& v) {
+	return std::find(v.begin(),v.end(),t);
 }
 
 //cann't use indexOf name because sometimes compiler cann't deduce
-template <typename Arg, typename... Args>
-int indexOfV(Arg const& t,Args const&... args) {
-	auto l = {args...};
+template <class T, class... V>
+int indexOfV(T const& t,V const&... v) {
+	auto l = {v...};
     auto i=std::find(std::begin(l),std::end(l),t);
     return i==std::end(l)?-1:i-std::begin(l);
 }
 
-template<class T> int indexOf(const T a[], const unsigned aSize,
-		const T e) {
-	unsigned i = std::find(a, a + aSize, e) - a;
-	return i == aSize ? -1 : i;
+template<class T> int indexOf(const T& t,const T v[], int size) {
+	int i = std::find(v, v + size, t)-v;
+	return i == size ? -1 : i;
 }
 
-template<class T> bool oneOf(T const a[], int size,
-		const T& item) {
-	return indexOf(a, size, item) != -1;
-}
-
-template<class T> int indexOf(T const a[], int size, const T& item) {
-	int i;
-	for (i = 0; i < size; i++) {
-		if (item == a[i]) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-template<class T> int indexOf(std::vector<T> const& v, const T& item) {
-	typename std::vector<T>::const_iterator it=find(v,item);
+template<class T> int indexOf(const T& t,std::vector<T> const& v) {
+	typename std::vector<T>::const_iterator it=find(t,v);
 	return it==v.end()?-1:it-v.begin();
 }
 
-template<class T> bool oneOf(std::vector<T> const& v, const T& item) {
-	return indexOf(v,item)!=-1;
+int indexOfNoCase(const char *t,const char *v[], int size );
+int indexOfNoCase(const std::string t,const char *v[], int size);
+
+template <class T, class... V>bool oneOfV(T const& t, V const&... v){
+	return ((t== v)|| ...);
 }
 
+template<class T> bool oneOf(const T &t, T const v[], int size) {
+	return indexOf(t,v, size) != -1;
+}
+
+template<class T> bool oneOf(const T& t,std::vector<T> const& v) {
+	return indexOf(t,v) != -1;
+}
 
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s);
