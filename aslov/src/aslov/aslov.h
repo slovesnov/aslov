@@ -96,7 +96,7 @@ std::string getImagePath(std::string name);
 //BEGIN config functions
 std::string getConfigPath();
 bool loadConfig(MapStringString&map);
-//#define WRITE_CONFIG(T,V) static_assert(SIZE(T)==SIZE(V));writeConfig(T,V,SIZE(T));
+#define WRITE_CONFIG(T,V, ...) aslovWriteConfig(T,SIZE(T),V,##__VA_ARGS__);
 //helper for writeConfigV
 std::string aslovToString(std::string const& a);
 //helper for writeConfigV
@@ -110,24 +110,22 @@ std::string aslovToString(T t){
 
 //https://stackoverflow.com/questions/7230621/how-can-i-iterate-over-a-packed-variadic-template-argument-list
 template <typename ... T>
-void writeConfig(const std::string tags[],T && ... p){
+void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
 	VString v;
     ([&] (auto & a)
     {
         	v.push_back(aslovToString(a));
     } (p), ...);
 
-	auto f = open(getConfigPath(), "w+");
-	if (!f) {
-		println("error");
-		assert(0);
-		return;
-	}
+    assert(size==sizeof...(T));
 
-	for(int i=0;i<int(v.size());i++){
+	auto f = open(getConfigPath(), "w+");
+	assert(f);
+	for(int i=0;i<size;i++){
 		fprintf(f,"%s = %s\n",tags[i].c_str(),v[i].c_str());
 	}
 	fclose(f);
+
 
 }
 
