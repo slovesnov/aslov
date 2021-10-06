@@ -12,7 +12,9 @@
 #include <cassert>
 
 #ifdef NOGTK
+#if NOGTK==0
 #include <iconv.h>
+#endif
 #include <cstdarg>
 #include <sys/stat.h>//getFileSize
 #else
@@ -69,29 +71,39 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 }
 
 //BEGIN file functions
-#ifndef NOGTK
-bool isDir(const char *url) {
+bool isDir(const char *path) {
+#ifdef NOGTK
+	struct stat s;
+	if( stat(path,&s) == 0 ){
+    	return s.st_mode & S_IFDIR;
+	}
+	else{
+	    assert(0);
+	    return false;
+	}
+#else
 	GStatBuf b;
-	if (g_stat(url, &b) != 0) {
+	if (g_stat(path, &b) != 0) {
 		//error get file stat
-		return false;
+	    assert(0);
+	    return false;
 	}
 
 	return S_ISDIR(b.st_mode);
-}
-
-bool isDir(const std::string& s) {
-	return isDir(s.c_str());
-}
 #endif
+}
 
-std::string getFileInfo(std::string filepath, FILEINFO fi) {
+bool isDir(const std::string& path) {
+	return isDir(path.c_str());
+}
+
+std::string getFileInfo(std::string path, FILEINFO fi) {
 	//"c:\\slove.sno\\1\\rr" -> extension = ""
-	std::size_t pos = filepath.rfind(G_DIR_SEPARATOR);
+	std::size_t pos = path.rfind(G_DIR_SEPARATOR);
 	if (fi == FILEINFO::DIRECTORY) {
-		return filepath.substr(0, pos);
+		return path.substr(0, pos);
 	}
-	std::string name = filepath.substr(pos + 1);
+	std::string name = path.substr(pos + 1);
 	if (fi == FILEINFO::NAME) {
 		return name;
 	}
@@ -128,15 +140,24 @@ int getFileSize(const std::string &path) {
 #endif
 }
 
-FILE* open(std::string filepath, const char *flags) {
-	auto s = utf8ToLocale(filepath);
+FILE* open(std::string path, const char *flags) {
+#if !defined(NOGTK) || NOGTK==0
+	auto s = utf8ToLocale(path);
+#else
+	auto s=path;
+#endif
 	return fopen(s.c_str(), flags);
 }
 //END file functions
 
 //BEGIN application functions
 void aslovInit(char const*const*argv) {
+#if !defined(NOGTK) || NOGTK==0
 	const std::string p = localeToUtf8(argv[0]);
+#else
+	const std::string p = argv[0];
+#endif
+
 	applicationPath = p;
 	applicationName = getFileInfo(p, FILEINFO::SHORT_NAME);
 
@@ -148,7 +169,6 @@ void aslovInit(char const*const*argv) {
 		}
 	}
 	workingDirectory = s;
-
 }
 
 int getApplicationFileSize() {
@@ -349,7 +369,7 @@ bool cmp(const std::string& a, const char* b) {
 	return cmp(a.c_str(), b);
 }
 
-#ifdef NOGTK //local function should be before localeToUtf8 & utf8ToLocale
+#if NOGTK==0 //local function should be before localeToUtf8 & utf8ToLocale
 std::string encodeIconv(const std::string& s, bool toUtf8) {
 	std::string r;
 	const char UTF8[]="UTF-8";
@@ -381,6 +401,8 @@ std::string encodeIconv(const std::string& s, bool toUtf8) {
 }
 #endif
 
+#if !defined(NOGTK) || NOGTK==0
+
 const std::string localeToUtf8(const std::string &s) {
 #ifdef NOGTK
 	return encodeIconv(s,true);
@@ -403,6 +425,19 @@ const std::string utf8ToLocale(const std::string &s) {
 #endif
 }
 
+std::string utf8ToLowerCase(const std::string &s,
+		bool onlyRussainChars/*=false*/) {
+#ifdef NOGTK
+	return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
+#else
+	gchar*a=g_utf8_strdown(s.c_str(), s.length());
+	std::string r(a);
+	g_free(a);
+	return r;
+#endif
+}
+#endif
+
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	typedef const unsigned char *cpuchar;
 	cpuchar p;
@@ -413,28 +448,6 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	}
 	return q;
 }
-
-std::string utf8ToLowerCase(const std::string &s,
-		bool onlyRussainChars/*=false*/) {
-	return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
-}
-
-#ifndef NOGTK
-std::string utfLowerCase(const std::string& s) {
-	std::string p = localeToUtf8(s);
-	gchar*a=g_utf8_strdown(p.c_str(), p.length());
-	std::string r(a);
-	g_free(a);
-	return r;
-}
-
-std::string utfLower(const std::string& s) {
-	gchar*a=g_utf8_strdown(s.c_str(), s.length());
-	std::string r(a);
-	g_free(a);
-	return r;
-}
-#endif
 //END string functions
 
 //BEGIN pixbuf functions

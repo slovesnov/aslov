@@ -4,10 +4,13 @@ add alias folder
 includes ${workspace_loc:/aslov/src/aslov}
 c++17 dialect
 
-for non gtk projects{
-NOGTK
-iconv library
-}
+Two options using library without GTK
+#define NOGTK=0 
+	need to add iconv library to linker for localeToUtf8...
+	
+#define NOGTK=1 
+	not need conversion functions and not need add iconv to linker
+	in this case wrong working with path with utf8 symbols
 
 
 all resources are in "appName" folder use getResourcePath()
@@ -17,8 +20,8 @@ all images are in "appName/images" folder use getImagePath()
 uses for gtk project{
 imageviewer
 words
-calculator TODO
-bridge TODO
+calculator
+bridge
 stopwatch ?
 projectsize ?
 

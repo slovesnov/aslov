@@ -75,13 +75,11 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 enum class FILEINFO {
 	NAME, EXTENSION, LOWER_EXTENSION, DIRECTORY, SHORT_NAME
 };
-#ifndef NOGTK
-bool isDir(const char *url);
-bool isDir(const std::string& s);
-#endif
-std::string getFileInfo(std::string filepath, FILEINFO fi);
+bool isDir(const char *path);
+bool isDir(const std::string& path);
+std::string getFileInfo(std::string path, FILEINFO fi);
 int getFileSize(const std::string &path);
-FILE* open(std::string filepath, const char *flags);
+FILE* open(std::string path, const char *flags);
 //END file functions
 
 //BEGIN application functions
@@ -153,20 +151,16 @@ bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
 bool cmp(const std::string& a, const char* b);
 
-
+#if NOGTK==0
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
 
+std::string utf8ToLowerCase(const std::string &s,
+		bool onlyRussainChars = false);
+#endif
 //convert localed "s" to lowercase in cp1251
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =
 		false);
-std::string utf8ToLowerCase(const std::string &s,
-		bool onlyRussainChars = false);
-#ifndef NOGTK
-//TODO
-std::string utfLowerCase(const std::string& s);
-std::string utfLower(const std::string& s);
-#endif
 //END string functions
 
 
@@ -237,6 +231,7 @@ int indexOfNoCase(const std::string t,const char *v[], int size);
 
 template <class T, class... V>bool oneOfV(T const& t, V const&... v){
 	return ((t== v)|| ...);
+	//return indexOfV(t,v...)!=-1;
 }
 
 template<class T> bool oneOf(const T &t, T const v[], int size) {
