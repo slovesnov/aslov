@@ -217,6 +217,7 @@ std::string getWritableFilePath(const std::string name){
 	return g_get_user_config_dir() + std::string(G_DIR_SEPARATOR_S) + name;
 }
 
+#ifndef NOGTK
 void writableFileSetContents(const std::string name,const std::string& s){
 #ifndef NDEBUG
 	gboolean b=
@@ -237,7 +238,7 @@ const std::string writableFileGetContents(const std::string name){
 	}
 	return s;
 }
-
+#endif
 //END application functions
 
 
@@ -319,17 +320,32 @@ std::string intToString(int v, char separator) { //format(1234567,3)="1 234 567"
 	return s;
 }
 
-bool stringToInt(const std::string&d,int&v){
-	return stringToInt(d.c_str(),v);
+bool stringToInt(const std::string&d,int&v,int radix/*=10*/){
+	return stringToInt(d.c_str(),v,radix);
 }
 
-bool stringToInt(const char*d,int&v){
+bool stringToInt(const char*d,int&v,int radix/*=10*/){
 	char* p;
-	long l = strtol(d, &p, 10);
-	if (!*p) {
-		v=l;
+	if(!isdigit(*d) && *d!='+' && *d!='-'){//"" or " 1" -> strtol is ok, but it's error
+		return false;
 	}
-	return !*p;
+	v = strtol(d, &p, radix);
+	//errno!=0 - out of range, *p!=0 - not full string recognized
+	return errno==0 && *p==0;
+}
+
+bool stringToLL(const std::string&d,long long&v,int radix/*=10*/){
+	return stringToLL(d.c_str(),v,radix);
+}
+
+bool stringToLL(const char*d,long long&v,int radix/*=10*/){
+	char* p;
+	if(!isdigit(*d) && *d!='+' && *d!='-'){//"" or " 1" -> strtol is ok, but it's error
+		return false;
+	}
+	v = strtoll(d, &p, radix);
+	//errno!=0 - out of range, *p!=0 - not full string recognized
+	return errno==0 && *p==0;
 }
 
 bool startsWith(const char *s, const char *begin) {

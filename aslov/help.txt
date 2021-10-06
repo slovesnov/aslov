@@ -15,8 +15,16 @@ Two options using library without GTK
 
 all resources (only for read) are in "appName" folder use getResourcePath() use{
 	std::ifstream openResourceFileAsStream()
-	TODO FILE* openResourceFile(),words
 }
+
+resources read/write{
+config, log
+
+//for example stopwathPredefined.txt file for stopwatch project
+void writableFileSetContents(const std::string name,const std::string& s);
+const std::string writableFileGetContents(const std::string name);
+}
+
 all images are in "appName/images" folder use getImagePath() use{
 	GdkPixbuf* pixbuf(const char* s);
 	GdkPixbuf* pixbuf(const std::string& s);

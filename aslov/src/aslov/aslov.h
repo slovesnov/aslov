@@ -33,6 +33,7 @@
 #ifdef NOGTK
 #define g_print printf
 #define G_DIR_SEPARATOR '\\'
+#define G_DIR_SEPARATOR_S "\\"
 #define G_N_ELEMENTS(arr)		(sizeof (arr) / sizeof ((arr)[0]))
 #endif
 
@@ -94,9 +95,11 @@ std::string getResourcePath(const std::string name);
 std::string getImagePath(const std::string name);
 std::ifstream openResourceFileAsStream(const std::string name);
 std::string getWritableFilePath(const std::string name);
+#ifndef NOGTK
 //writable resource+log+cfg files are places in same dir and should started with application name
 void writableFileSetContents(const std::string name,const std::string& s);
 const std::string writableFileGetContents(const std::string name);
+#endif
 //END application functions
 
 //BEGIN config functions
@@ -139,8 +142,10 @@ PairStringString pairFromBuffer(const char*b);
 
 //BEGIN string functions
 std::string intToString(int v, char separator);
-bool stringToInt(const std::string&d,int&v);
-bool stringToInt(const char*d,int&v);
+bool stringToInt(const std::string&d,int&v,int radix=10);
+bool stringToInt(const char*d,int&v,int radix=10);
+bool stringToLL(const std::string&d,long long&v,int radix=10);
+bool stringToLL(const char*d,long long&v,int radix=10);
 bool startsWith(const char *s, const char *begin);
 bool startsWith(const char *s, const std::string &begin);
 bool startsWith(const std::string& s, const char* begin);
