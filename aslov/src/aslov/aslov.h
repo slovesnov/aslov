@@ -14,6 +14,7 @@
 #include <cassert>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <vector>
 #include <map>
@@ -89,8 +90,13 @@ FILE* openApplicationLog(const char *flags);
 std::string const& getApplicationName();
 std::string const& getApplicationPath();
 std::string const& getWorkingDirectory();
-std::string getResourcePath(std::string name);
-std::string getImagePath(std::string name);
+std::string getResourcePath(const std::string name);
+std::string getImagePath(const std::string name);
+std::ifstream openResourceFileAsStream(const std::string name);
+std::string getWritableFilePath(const std::string name);
+//writable resource+log+cfg files are places in same dir and should started with application name
+void writableFileSetContents(const std::string name,const std::string& s);
+const std::string writableFileGetContents(const std::string name);
 //END application functions
 
 //BEGIN config functions
@@ -138,6 +144,7 @@ bool stringToInt(const char*d,int&v);
 bool startsWith(const char *s, const char *begin);
 bool startsWith(const char *s, const std::string &begin);
 bool startsWith(const std::string& s, const char* begin);
+bool startsWith(const std::string& s, const std::string & begin);
 bool endsWith(std::string const &s, std::string const &e);
 std::string replaceAll(std::string subject, const std::string &from,
 		const std::string &to);

@@ -199,12 +199,43 @@ std::string const& getWorkingDirectory(){
 	return workingDirectory;
 }
 
-std::string getResourcePath(std::string name){
+std::string getResourcePath(const std::string name){
 	return workingDirectory+G_DIR_SEPARATOR+applicationName+G_DIR_SEPARATOR+name;
 }
 
-std::string getImagePath(std::string name) {
+std::string getImagePath(const std::string name) {
 	return getResourcePath("images/" + name);
+}
+
+std::ifstream openResourceFileAsStream(const std::string name){
+	std::ifstream f(getResourcePath(name));
+	return f;
+}
+
+std::string getWritableFilePath(const std::string name){
+	assert(startsWith(name, getApplicationName()));
+	return g_get_user_config_dir() + std::string(G_DIR_SEPARATOR_S) + name;
+}
+
+void writableFileSetContents(const std::string name,const std::string& s){
+#ifndef NDEBUG
+	gboolean b=
+#endif
+			g_file_set_contents(getWritableFilePath(name).c_str(), s.c_str(), s.length(), 0);
+	assert(b);
+}
+
+const std::string writableFileGetContents(const std::string name){
+	gchar *contents = NULL;
+	gboolean b=g_file_get_contents(getWritableFilePath(name).c_str(), &contents, 0, 0);
+	assert(b);
+	std::string s;
+	if(b){
+		s=contents;
+		s=replaceAll(s,"\r\n","\n");
+		g_free(contents);
+	}
+	return s;
 }
 
 //END application functions
@@ -313,6 +344,10 @@ bool startsWith(const std::string& s, const char* begin){
 	return startsWith(s.c_str(), begin);
 }
 
+bool startsWith(const std::string& s, const std::string & begin){
+	return startsWith(s.c_str(), begin.c_str());
+}
+
 bool endsWith(std::string const &s, std::string const &e) {
 	auto i = e.length();
 	return s.compare(s.length() - i, i, e) == 0;
@@ -369,7 +404,7 @@ bool cmp(const std::string& a, const char* b) {
 	return cmp(a.c_str(), b);
 }
 
-#if NOGTK==0 //local function should be before localeToUtf8 & utf8ToLocale
+#if defined(NOGTK) && NOGTK==0 //local function should be before localeToUtf8 & utf8ToLocale
 std::string encodeIconv(const std::string& s, bool toUtf8) {
 	std::string r;
 	const char UTF8[]="UTF-8";

@@ -9,34 +9,11 @@
  */
 
 #include "aslov/aslov.h"
-//#include <fstream>
+#include <cstring>
 
-std::string getLowerFileExtension(std::string file) { //[in] full path file name, returns file extension
-	std::size_t pos = file.rfind('.');
-	//version 4.0 return pos==std::string::npos ? "" : file.substr(pos+1);
-
-	if (pos == std::string::npos) {
-		return "";
-	}
-	else {
-		std::string s = "";
-		for (const char*p = file.c_str() + pos + 1; *p != 0; p++) {
-			s += ::tolower(*p);
-		}
-		return s;
-	}
-}
-
-
-std::string getFileName(std::string filepath, bool withExtension) {
-	std::size_t pos = filepath.rfind(G_DIR_SEPARATOR);
-	std::string s =
-			pos == std::string::npos ? filepath : filepath.substr(pos + 1);
-	if (withExtension) {
-		return s;
-	}
-	pos = s.rfind('.');
-	return pos == std::string::npos ? s : s.substr(0, pos);
+std::string shortFileName(const char*file) {
+	const char*p = strrchr(file, G_DIR_SEPARATOR);
+	return p ? p + 1 : file;
 }
 
 int main(int argc, char *argv[]) {
@@ -47,11 +24,11 @@ int main(int argc, char *argv[]) {
 
 	std::string s;
 
-	s=getFileName(argv[0],true);
+	s=shortFileName(argv[0]);
 	printl(s)
 
-	s=getFileName(argv[0],false);
-	printl(s)
+//	s=getFileName(argv[0],false);
+//	printl(s)
 
 /*
 	MapStringString m;

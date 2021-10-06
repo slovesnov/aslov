@@ -13,8 +13,18 @@ Two options using library without GTK
 	in this case wrong working with path with utf8 symbols
 
 
-all resources are in "appName" folder use getResourcePath()
-all images are in "appName/images" folder use getImagePath()
+all resources (only for read) are in "appName" folder use getResourcePath() use{
+	std::ifstream openResourceFileAsStream()
+	TODO FILE* openResourceFile(),words
+}
+all images are in "appName/images" folder use getImagePath() use{
+	GdkPixbuf* pixbuf(const char* s);
+	GdkPixbuf* pixbuf(const std::string& s);
+	GdkPixbuf* pixbuf(std::string s, int x, int y, int width, int height);
+	GtkWidget* image(const char* s);
+	GtkWidget* image(const std::string& s);
+	GtkWidget* animatedImage(const char* s);
+}
 
 
 uses for gtk project{
