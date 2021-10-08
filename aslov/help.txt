@@ -40,8 +40,8 @@ imageviewer
 words
 calculator
 bridge
-stopwatch ?
-projectsize ?
+stopwatch
+projectsize
 
 gtktest
 test
