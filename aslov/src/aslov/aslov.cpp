@@ -272,14 +272,6 @@ bool loadConfig(MapStringString&map){
 
 }
 
-std::string aslovToString(std::string const& a){
-	return a;
-}
-
-std::string aslovToString(const char* a){
-	return a;
-}
-
 PairStringString pairFromBuffer(const char*b){
 	char*w=strchr(b, '=');
 	if(!w){
@@ -400,6 +392,10 @@ int countOccurence(const std::string &subject, const std::string &a) {
 	return i;
 }
 
+int countOccurence(const std::string& subject, const char c) {
+	return count_if(subject.begin(), subject.end(), [&c](char a) {return a==c;});
+}
+
 bool cmpnocase(const std::string& a, const char* b) {
 	return cmpnocase(a.c_str(), b);
 }
@@ -483,7 +479,7 @@ std::string utf8ToLowerCase(const std::string &s,
 	return r;
 #endif
 }
-#endif
+#endif //#if !defined(NOGTK) || NOGTK==0
 
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	typedef const unsigned char *cpuchar;
@@ -495,6 +491,22 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	}
 	return q;
 }
+
+std::string join(VString const &v, const char separator){
+	std::string s;
+	bool f=true;
+	for(auto&a:v){
+		if(!f){
+			s+=separator;
+		}
+		else{
+			f=false;
+		}
+		s+=a;
+	}
+	return s;
+}
+
 //END string functions
 
 //BEGIN pixbuf functions

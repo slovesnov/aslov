@@ -106,34 +106,16 @@ const std::string writableFileGetContents(const std::string name);
 std::string getConfigPath();
 bool loadConfig(MapStringString&map);
 #define WRITE_CONFIG(T,V, ...) aslovWriteConfig(T,SIZE(T),V,##__VA_ARGS__);
-//helper for writeConfigV
-std::string aslovToString(std::string const& a);
-//helper for writeConfigV
-std::string aslovToString(const char* a);
 
-//helper for writeConfigV
-template <typename T>
-std::string aslovToString(T t){
-	return std::to_string(t);
-}
-
-//https://stackoverflow.com/questions/7230621/how-can-i-iterate-over-a-packed-variadic-template-argument-list
 template <typename ... T>
 void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
-	VString v;
-    ([&] (auto & a)
-    {
-        	v.push_back(aslovToString(a));
-    } (p), ...);
-
     assert(size==sizeof...(T));
-
-	auto f = open(getConfigPath(), "w+");
-	assert(f);
-	for(int i=0;i<size;i++){
-		fprintf(f,"%s = %s\n",tags[i].c_str(),v[i].c_str());
-	}
-	fclose(f);
+	std::ofstream f(getConfigPath());
+	assert(f.is_open());
+    int i=0;
+    ([&] (auto & a){
+		f<<tags[i++]<<" = "<<a<<"\n";
+    } (p), ...);
 }
 
 PairStringString pairFromBuffer(const char*b);
@@ -155,13 +137,17 @@ std::string replaceAll(std::string subject, const std::string &from,
 		const std::string &to);
 VString split(const std::string& subject, const std::string& separator);
 int countOccurence(const std::string& subject, const std::string& a);
+int countOccurence(const std::string& subject, const char c);
 
 bool cmpnocase(const std::string& a, const char* b);
 bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
 bool cmp(const std::string& a, const char* b);
 
-#if NOGTK==0
+//#ifndef NOGTK => #if NOGTK==0 is true
+//#if NOGTK==0 ~ #if !defined(NOGTK) || NOGTK==0 don't know why
+#if !defined(NOGTK) || NOGTK==0
+
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
 
@@ -171,6 +157,28 @@ std::string utf8ToLowerCase(const std::string &s,
 //convert localed "s" to lowercase in cp1251
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =
 		false);
+
+template <typename T,typename ...P>
+std::string joinS(const std::string separator,T&& t,P&& ... p){
+	std::stringstream c;
+	c << t;
+	((c << separator << p), ...);
+	return c.str();
+}
+
+template <typename T,typename ...P>
+std::string joinS(const char separator,T&& t,P&& ... p){
+	return joinS(std::string(1,separator),t,p...);
+}
+
+std::string join(VString const &v, const char separator=' ');
+
+//(T&& t,P&& ... p) two ampersands conflict with std::string join(VString const &v, const char separator=' ');
+template <typename T,typename ...P>
+std::string join(T& t,P& ... p){
+	return joinS(" ",t,p...);
+}
+
 //END string functions
 
 

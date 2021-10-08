@@ -18,9 +18,24 @@ int main(int argc, char *argv[]) {
 
 	aslovInit(argv);
 
-	checkParser();
+	VString v{"1","2","3"};
 
+	std::string s;
+	s=joinV(v);
+	printl("["+s+']')
+
+//	s=join('#', "dictionary","language","version");
+//	printl("["+s+']')
+
+#if ASNOGTK>=0
 	printinfo
+#else
+	printinfo
+#endif
+
+	auto q=localeToUtf8("24");
+	printl("["+q+']')
+	//checkParser();
 
 /*
 	auto d=g_date_time_new_now_local();
