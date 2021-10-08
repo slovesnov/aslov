@@ -227,8 +227,15 @@ template<class T> typename std::vector<T>::iterator find(const T& t,std::vector<
 }
 
 //cann't use indexOf name because sometimes compiler cann't deduce
+//template <class T, class... V>
+//int indexOfV(T const& t,V const&... v) {
+//	auto l = {v...};
+//    auto i=std::find(std::begin(l),std::end(l),t);
+//    return i==std::end(l)?-1:i-std::begin(l);
+//}
+
 template <class T, class... V>
-int indexOfV(T const& t,V const&... v) {
+int indexOf(T const& t,V const&... v) {
 	auto l = {v...};
     auto i=std::find(std::begin(l),std::end(l),t);
     return i==std::end(l)?-1:i-std::begin(l);
@@ -248,7 +255,11 @@ int indexOfNoCase(const char *t,const char *v[], int size );
 int indexOfNoCase(const std::string t,const char *v[], int size);
 int indexOf(const char t,const std::string& v);
 
-template <class T, class... V>bool oneOfV(T const& t, V const&... v){
+//template <class T, class... V>bool oneOfV(T const& t, V const&... v){
+//	return ((t== v)|| ...);
+//	//return indexOfV(t,v...)!=-1;
+//}
+template <class T, class... V>bool oneOf(T const& t, V const&... v){
 	return ((t== v)|| ...);
 	//return indexOfV(t,v...)!=-1;
 }
