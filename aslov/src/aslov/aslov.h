@@ -141,7 +141,7 @@ PairStringString pairFromBuffer(const char*b);
 
 
 //BEGIN string functions
-std::string intToString(int v, char separator);
+std::string intToString(int v, char separator=' ');
 bool stringToInt(const std::string&d,int&v,int radix=10);
 bool stringToInt(const char*d,int&v,int radix=10);
 bool stringToLL(const std::string&d,long long&v,int radix=10);

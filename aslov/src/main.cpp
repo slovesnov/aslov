@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
 
 	checkParser();
 
+	printinfo
+
 /*
 	auto d=g_date_time_new_now_local();
 	printl( g_date_time_is_daylight_savings(d));

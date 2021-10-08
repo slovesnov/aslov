@@ -304,7 +304,7 @@ PairStringString pairFromBuffer(const char*b){
 
 
 //BEGIN string functions
-std::string intToString(int v, char separator) { //format(1234567,3)="1 234 567"
+std::string intToString(int v, char separator/*=' '*/) { //format(1234567,3)="1 234 567"
 	const int digits = 3;
 	char b[16];
 	std::string s;
