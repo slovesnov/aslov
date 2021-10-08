@@ -156,8 +156,6 @@ std::string replaceAll(std::string subject, const std::string &from,
 VString split(const std::string& subject, const std::string& separator);
 int countOccurence(const std::string& subject, const std::string& a);
 
-int charIndex(const char *p, char c);
-
 bool cmpnocase(const std::string& a, const char* b);
 bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
@@ -240,6 +238,7 @@ template<class T> int indexOf(const T& t,std::vector<T> const& v) {
 
 int indexOfNoCase(const char *t,const char *v[], int size );
 int indexOfNoCase(const std::string t,const char *v[], int size);
+int indexOf(const char t,const std::string& v);
 
 template <class T, class... V>bool oneOfV(T const& t, V const&... v){
 	return ((t== v)|| ...);

@@ -400,10 +400,6 @@ int countOccurence(const std::string &subject, const std::string &a) {
 	return i;
 }
 
-int charIndex(const char *p, char c) {
-	return strchr(p, c) - p;
-}
-
 bool cmpnocase(const std::string& a, const char* b) {
 	return cmpnocase(a.c_str(), b);
 }
@@ -581,6 +577,10 @@ int indexOfNoCase(const std::string t,const char *v[], int size ) {
 	return indexOfNoCase(t.c_str(),v, size );
 }
 
+int indexOf(const char t,const std::string& v){
+	auto i=v.find(t);
+	return i==std::string::npos ? -1 : i;
+}
 
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s) {
