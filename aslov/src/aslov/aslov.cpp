@@ -9,16 +9,18 @@
  */
 
 #include <cstring>
-#include <cassert>
+#include "aslov.h"
 
 #ifdef NOGTK
-#if NOGTK==0
-#include <iconv.h>
-#endif
 #include <cstdarg>
 #include <sys/stat.h>//getFileSize
 #else
 #include <glib/gstdio.h>
+#endif
+
+//after #include "aslov.h"
+#ifdef NOTGK_WITH_ICONV
+#include <iconv.h> //ciconv - error
 #endif
 
 //_WIN32 for win32 & win64 for getNumberOfCores() function, for gtk & notgtk options
@@ -31,10 +33,8 @@
 #include <sys/sysctl.h>
 #endif
 
-#include "aslov.h"
 
-
-std::string applicationName, applicationPath, workingDirectory;
+std::string applicationName, workingDirectory, applicationPath;
 
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...) {
@@ -191,9 +191,9 @@ std::string const& getApplicationName(){
 	return applicationName;
 }
 
-std::string const& getApplicationPath(){
-	return applicationPath;
-}
+//std::string const& getApplicationPath(){
+//	return applicationPath;
+//}
 
 std::string const& getWorkingDirectory(){
 	return workingDirectory;
@@ -312,33 +312,70 @@ std::string intToString(int v, char separator/*=' '*/) { //format(1234567,3)="1 
 	return s;
 }
 
-bool stringToInt(const std::string&d,int&v,int radix/*=10*/){
-	return stringToInt(d.c_str(),v,radix);
+enum class AslovParseType{
+	ASLOV_SIGNED,ASLOV_UNSIGNED
+};
+
+#define ASLOV_MACRO(e,f) \
+	if (!d || *d==0) {/*strtol("") is ok so check whether empty string*/\
+		return false;\
+	}\
+	/*strtoul("-1") is ok*/\
+	if(e==AslovParseType::ASLOV_UNSIGNED && *d=='-'){\
+		return false;\
+	}\
+	char *p;\
+	auto a = f(d, &p, radix);\
+	/*errno!=0 - out of range, *p!=0 - not full string recognized*/\
+	bool b = errno == 0 && *p == 0;\
+	if (b) {\
+		v = a;\
+	}\
+	return b;
+
+bool stringToInt(const char *d, int &v, int radix/*=10*/) {
+	ASLOV_MACRO(AslovParseType::ASLOV_SIGNED,strtol)
 }
 
-bool stringToInt(const char*d,int&v,int radix/*=10*/){
-	char* p;
-	if(!isdigit(*d) && *d!='+' && *d!='-'){//"" or " 1" -> strtol is ok, but it's error
-		return false;
-	}
-	v = strtol(d, &p, radix);
-	//errno!=0 - out of range, *p!=0 - not full string recognized
-	return errno==0 && *p==0;
-}
-
-bool stringToLL(const std::string&d,long long&v,int radix/*=10*/){
-	return stringToLL(d.c_str(),v,radix);
+bool stringToUnsigned(const char *d, unsigned &v, int radix /*= 10*/){
+	ASLOV_MACRO(AslovParseType::ASLOV_UNSIGNED,strtoul)
 }
 
 bool stringToLL(const char*d,long long&v,int radix/*=10*/){
-	char* p;
-	if(!isdigit(*d) && *d!='+' && *d!='-'){//"" or " 1" -> strtol is ok, but it's error
-		return false;
-	}
-	v = strtoll(d, &p, radix);
-	//errno!=0 - out of range, *p!=0 - not full string recognized
-	return errno==0 && *p==0;
+	ASLOV_MACRO(AslovParseType::ASLOV_SIGNED,strtoll)
 }
+#undef ASLOV_MACRO
+
+#define ASLOV_MACRO(f,type) bool f(const std::string &d, type &v, int radix) {return f(d.c_str(), v, radix);}
+ASLOV_MACRO(stringToInt,int)ASLOV_MACRO(stringToUnsigned,unsigned)ASLOV_MACRO(stringToLL,long long)
+#undef ASLOV_MACRO
+
+
+bool stringParse(const std::string &d, int &v, int radix /* = 10 */) {
+	return stringParse(d.c_str(), v, radix);
+}
+
+bool stringParse(const char *d, int &v, int radix /* = 10 */) {
+	return stringToInt(d,v,radix);
+}
+
+bool stringParse(const std::string &d, unsigned &v, int radix /* = 10 */) {
+	return stringParse(d.c_str(), v, radix);
+}
+
+bool stringParse(const char *d, unsigned &v, int radix /* = 10 */) {
+	return stringToUnsigned(d,v,radix);
+}
+
+bool stringParse(const std::string &d, long long &v, int radix /* = 10 */) {
+	return stringParse(d.c_str(), v, radix);
+}
+
+bool stringParse(const char *d, long long &v, int radix /* = 10 */) {
+	return stringToLL(d,v,radix);
+}
+
+
 
 bool startsWith(const char *s, const char *begin) {
 	return strncmp(s, begin, strlen(begin)) == 0;
@@ -412,12 +449,16 @@ bool cmp(const std::string& a, const char* b) {
 	return cmp(a.c_str(), b);
 }
 
-#if defined(NOGTK) && NOGTK==0 //local function should be before localeToUtf8 & utf8ToLocale
+#ifdef NOTGK_WITH_ICONV //local function should be before localeToUtf8 & utf8ToLocale
 std::string encodeIconv(const std::string& s, bool toUtf8) {
 	std::string r;
 	const char UTF8[]="UTF-8";
-	const char CP1251[]="cp1251";
-	iconv_t cd = toUtf8 ? iconv_open( UTF8, CP1251 ) : iconv_open( CP1251, UTF8 );
+	/* use "iconv --list" under msys2 to view supported encodings
+	 * empty string means current locale https://rdrr.io/r/base/iconv.html
+	 */
+	const char LOCAL[]="";
+	//const char LOCAL[]="cp1251";
+	iconv_t cd = toUtf8 ? iconv_open( UTF8, LOCAL ) : iconv_open( LOCAL, UTF8 );
 	if ((iconv_t) -1 == cd) {
 		printl("error iconv_open");
 		perror("iconv_open");
@@ -432,7 +473,7 @@ std::string encodeIconv(const std::string& s, bool toUtf8) {
 	char*outbuf=out;
 	size_t ret = iconv(cd, &in, &inbytesleft, &outbuf, &outbytesleft);
 	if ((size_t) -1 == ret) {
-		printl("error iconv");
+		printl("error iconv ",s);
 		perror("iconv");
 		return r;
 	}
@@ -444,7 +485,7 @@ std::string encodeIconv(const std::string& s, bool toUtf8) {
 }
 #endif
 
-#if !defined(NOGTK) || NOGTK==0
+#ifndef NOTGK_WITHOUT_ICONV
 
 const std::string localeToUtf8(const std::string &s) {
 #ifdef NOGTK
@@ -479,7 +520,7 @@ std::string utf8ToLowerCase(const std::string &s,
 	return r;
 #endif
 }
-#endif //#if !defined(NOGTK) || NOGTK==0
+#endif //#ifndef NOTGK_WITHOUT_ICONV
 
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	typedef const unsigned char *cpuchar;
@@ -492,21 +533,20 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	return q;
 }
 
-std::string join(VString const &v, const char separator){
+std::string joinV(VString const &v, const char separator){
 	std::string s;
 	bool f=true;
 	for(auto&a:v){
-		if(!f){
-			s+=separator;
+		if(f){
+			f=false;
 		}
 		else{
-			f=false;
+			s+=separator;
 		}
 		s+=a;
 	}
 	return s;
 }
-
 //END string functions
 
 //BEGIN pixbuf functions
@@ -607,10 +647,11 @@ void removeClass(GtkWidget *w, const gchar *s) {
 	gtk_style_context_remove_class(context, s);
 }
 
-void loadCSS(){
+void loadCSS(std::string const &additionalData /*= ""*/){
 	GtkCssProvider *provider;
 	GdkDisplay *display;
 	GdkScreen *screen;
+	std::string s;
 
 	provider = gtk_css_provider_new();
 	display = gdk_display_get_default();
@@ -619,9 +660,14 @@ void loadCSS(){
 			GTK_STYLE_PROVIDER(provider),
 			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-	std::string h = workingDirectory+G_DIR_SEPARATOR+applicationName+".css";
-	gtk_css_provider_load_from_path(provider,h.c_str(), NULL);
+	std::ifstream t(workingDirectory+G_DIR_SEPARATOR+applicationName+".css");
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	s=buffer.str()+additionalData;
+	gtk_css_provider_load_from_data(provider, s.c_str(), -1, NULL);
+	//gtk_css_provider_load_from_path(provider,h.c_str(), NULL);
 	g_object_unref(provider);
+
 }
 
 void openURL(std::string url) {
@@ -666,4 +712,8 @@ int getNumberOfCores() {
 	}
 	return count;
 #endif
+}
+
+double timeElapse(clock_t begin){
+	return double(clock() - begin) / CLOCKS_PER_SEC;
 }

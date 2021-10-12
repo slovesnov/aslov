@@ -12,6 +12,7 @@
 #define ASLOV_H_
 
 #include <cassert>
+#include <ctime>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -20,6 +21,19 @@
 #include <map>
 #ifndef NOGTK
 #include <gtk/gtk.h>
+#endif
+
+/* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
+ * default macro value is 0 so
+ * #ifndef NOGTK => #if NOGTK==0 is true
+ * #if NOGTK==0 ~ #if !defined(NOGTK) || NOGTK==0
+ */
+#ifdef NOGTK
+	#if NOGTK==0
+		#define NOTGK_WITH_ICONV
+	#else
+		#define NOTGK_WITHOUT_ICONV
+	#endif
 #endif
 
 #define GP(a) gpointer(int64_t(a))
@@ -65,6 +79,9 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 
 #define printinfo println("")
 
+//output without file, line, function
+#define printz(f, ...)  g_print("%s\n",forma(f,##__VA_ARGS__).c_str());
+
 //output info to log file printlog("%d %s",1234,"some")
 #define printlog(f, ...)  aslovPrintHelp(1,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
 
@@ -89,7 +106,7 @@ void aslovInit(char const*const* argv);
 int getApplicationFileSize();
 FILE* openApplicationLog(const char *flags);
 std::string const& getApplicationName();
-std::string const& getApplicationPath();
+//std::string const& getApplicationPath();
 std::string const& getWorkingDirectory();
 std::string getResourcePath(const std::string name);
 std::string getImagePath(const std::string name);
@@ -121,13 +138,25 @@ void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
 PairStringString pairFromBuffer(const char*b);
 //END config functions
 
-
 //BEGIN string functions
 std::string intToString(int v, char separator=' ');
-bool stringToInt(const std::string&d,int&v,int radix=10);
-bool stringToInt(const char*d,int&v,int radix=10);
-bool stringToLL(const std::string&d,long long&v,int radix=10);
-bool stringToLL(const char*d,long long&v,int radix=10);
+
+//v is changed only if parse is valid for all functions
+bool stringToInt(const std::string &d, int &v, int radix = 10);
+bool stringToInt(const char *d, int &v, int radix = 10);
+bool stringToUnsigned(const std::string &d, unsigned &v, int radix = 10);
+bool stringToUnsigned(const char *d, unsigned &v, int radix = 10);
+bool stringToLL(const std::string &d, long long &v, int radix = 10);
+bool stringToLL(const char *d, long long &v, int radix = 10);
+
+//stringParse("0xff",i,16), stringParse("ff",i,16), stringParse("+0xff",i,16) ok
+bool stringParse(const std::string &d, int &v, int radix = 10);
+bool stringParse(const char *d, int &v, int radix = 10);
+bool stringParse(const std::string &d, unsigned &v, int radix = 10);
+bool stringParse(const char *d, unsigned &v, int radix = 10);
+bool stringParse(const std::string &d, long long &v, int radix = 10);
+bool stringParse(const char *d, long long &v, int radix = 10);
+
 bool startsWith(const char *s, const char *begin);
 bool startsWith(const char *s, const std::string &begin);
 bool startsWith(const std::string& s, const char* begin);
@@ -144,17 +173,14 @@ bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
 bool cmp(const std::string& a, const char* b);
 
-//#ifndef NOGTK => #if NOGTK==0 is true
-//#if NOGTK==0 ~ #if !defined(NOGTK) || NOGTK==0 don't know why
-#if !defined(NOGTK) || NOGTK==0
-
+#ifndef NOTGK_WITHOUT_ICONV
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
 
 std::string utf8ToLowerCase(const std::string &s,
 		bool onlyRussainChars = false);
 #endif
-//convert localed "s" to lowercase in cp1251
+//convert localed string to lowercase
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =
 		false);
 
@@ -171,7 +197,8 @@ std::string joinS(const char separator,T&& t,P&& ... p){
 	return joinS(std::string(1,separator),t,p...);
 }
 
-std::string join(VString const &v, const char separator=' ');
+std::string joinV(VString const &v, const char separator=' ');
+//std::string join(VString const &v, const char separator=' ');
 
 //(T&& t,P&& ... p) two ampersands conflict with std::string join(VString const &v, const char separator=' ');
 template <typename T,typename ...P>
@@ -180,7 +207,6 @@ std::string join(T& t,P& ... p){
 }
 
 //END string functions
-
 
 //BEGIN 2 dimensional array functions
 template<class T>T** create2dArray(int dimension1, int dimension2){
@@ -227,19 +253,19 @@ template<class T> typename std::vector<T>::iterator find(const T& t,std::vector<
 }
 
 //cann't use indexOf name because sometimes compiler cann't deduce
-//template <class T, class... V>
-//int indexOfV(T const& t,V const&... v) {
-//	auto l = {v...};
-//    auto i=std::find(std::begin(l),std::end(l),t);
-//    return i==std::end(l)?-1:i-std::begin(l);
-//}
-
 template <class T, class... V>
-int indexOf(T const& t,V const&... v) {
+int indexOfV(T const& t,V const&... v) {
 	auto l = {v...};
     auto i=std::find(std::begin(l),std::end(l),t);
     return i==std::end(l)?-1:i-std::begin(l);
 }
+
+//template <class T, class... V>
+//int indexOf(T const& t,V const&... v) {
+//	auto l = {v...};
+//    auto i=std::find(std::begin(l),std::end(l),t);
+//    return i==std::end(l)?-1:i-std::begin(l);
+//}
 
 template<class T> int indexOf(const T& t,const T v[], int size) {
 	int i = std::find(v, v + size, t)-v;
@@ -275,13 +301,13 @@ template<class T> bool oneOf(const T& t,std::vector<T> const& v) {
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s);
 void removeClass(GtkWidget *w, const gchar *s);
-void loadCSS();
+void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
 void destroy(cairo_t* p);
 void destroy(cairo_surface_t * p);
 #endif
 int getNumberOfCores();
-
+double timeElapse(clock_t begin);
 
 
 #endif /* ASLOV_H_ */
