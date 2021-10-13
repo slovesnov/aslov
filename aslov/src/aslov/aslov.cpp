@@ -34,7 +34,7 @@
 #endif
 
 
-std::string applicationName, workingDirectory, applicationPath;
+std::string applicationName, applicationPath;
 
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...) {
@@ -164,27 +164,24 @@ void aslovInit(char const*const*argv) {
 	std::string s = getFileInfo(p, FILEINFO::DIRECTORY);
 	for (std::string r : { "Release", "Debug" }) {
 		if (endsWith(s, r)) {
-			workingDirectory = s.substr(0, s.length() - r.length()-1);
-			return;
+			s = s.substr(0, s.length() - r.length()-1);
 		}
 	}
-	workingDirectory = s;
+	//workingDirectory = s;
+#ifndef NOGTK
+	g_chdir(s.c_str());
+	s=getWritableFilePath("");
+	//2nd parameter. The mode argument is ignored on Windows
+	g_mkdir(s.c_str(), 0);
+#endif
 }
 
 int getApplicationFileSize() {
 	return getFileSize(applicationPath);
 }
 
-#ifdef NOGTK
-const char* g_get_user_config_dir(){
-	return workingDirectory.c_str();
-}
-#endif
-
 FILE* openApplicationLog(const char *flags) {
-	std::string p = g_get_user_config_dir()
-			+ (G_DIR_SEPARATOR + applicationName) + ".log.txt";
-	return open(p, flags);
+	return open(getWritableFilePath("log.txt"), flags);
 }
 
 std::string const& getApplicationName(){
@@ -195,12 +192,12 @@ std::string const& getApplicationName(){
 //	return applicationPath;
 //}
 
-std::string const& getWorkingDirectory(){
-	return workingDirectory;
-}
+//std::string const& getWorkingDirectory(){
+//	return workingDirectory;
+//}
 
 std::string getResourcePath(const std::string name){
-	return workingDirectory+G_DIR_SEPARATOR+applicationName+G_DIR_SEPARATOR+name;
+	return applicationName+G_DIR_SEPARATOR+name;
 }
 
 std::string getImagePath(const std::string name) {
@@ -213,8 +210,11 @@ std::ifstream openResourceFileAsStream(const std::string name){
 }
 
 std::string getWritableFilePath(const std::string name){
-	assert(startsWith(name, getApplicationName()));
-	return g_get_user_config_dir() + std::string(G_DIR_SEPARATOR_S) + name;
+#ifdef NOGTK
+	return name;
+#else
+	return g_get_user_config_dir() +(G_DIR_SEPARATOR + applicationName)+G_DIR_SEPARATOR+ name;
+#endif
 }
 
 #ifndef NOGTK
@@ -244,8 +244,7 @@ const std::string writableFileGetContents(const std::string name){
 
 //BEGIN config functions
 std::string getConfigPath() {
-	return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName)
-			+ ".cfg";
+	return getWritableFilePath("config.txt");
 }
 
 bool loadConfig(MapStringString&map){
@@ -312,8 +311,8 @@ std::string intToString(int v, char separator/*=' '*/) { //format(1234567,3)="1 
 	return s;
 }
 
-enum class AslovParseType{
-	ASLOV_SIGNED,ASLOV_UNSIGNED
+enum class AslovParseType {
+	ASLOV_SIGNED, ASLOV_UNSIGNED
 };
 
 #define ASLOV_MACRO(e,f) \
@@ -595,6 +594,15 @@ GdkPixbuf* pixbuf(std::string s, int x, int y, int width,
 	return gdk_pixbuf_new_subpixbuf(pixbuf(s), x, y, width, height);
 }
 
+GdkPixbuf* writablePixbuf(const char* s){
+	std::string q=getWritableFilePath(s);
+	return gdk_pixbuf_new_from_file(q.c_str(), NULL);
+}
+
+GdkPixbuf* writablePixbuf(const std::string& s){
+	return writablePixbuf(s.c_str());
+}
+
 GtkWidget* image(const char* s){
 	return gtk_image_new_from_file(getImagePath(s).c_str());
 }
@@ -660,14 +668,12 @@ void loadCSS(std::string const &additionalData /*= ""*/){
 			GTK_STYLE_PROVIDER(provider),
 			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-	std::ifstream t(workingDirectory+G_DIR_SEPARATOR+applicationName+".css");
+	std::ifstream t(applicationName+".css");
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	s=buffer.str()+additionalData;
 	gtk_css_provider_load_from_data(provider, s.c_str(), -1, NULL);
-	//gtk_css_provider_load_from_path(provider,h.c_str(), NULL);
 	g_object_unref(provider);
-
 }
 
 void openURL(std::string url) {

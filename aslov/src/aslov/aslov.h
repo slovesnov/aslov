@@ -107,7 +107,7 @@ int getApplicationFileSize();
 FILE* openApplicationLog(const char *flags);
 std::string const& getApplicationName();
 //std::string const& getApplicationPath();
-std::string const& getWorkingDirectory();
+//std::string const& getWorkingDirectory();
 std::string getResourcePath(const std::string name);
 std::string getImagePath(const std::string name);
 std::ifstream openResourceFileAsStream(const std::string name);
@@ -238,6 +238,9 @@ void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 GdkPixbuf* pixbuf(const char* s);
 GdkPixbuf* pixbuf(const std::string& s);
 GdkPixbuf* pixbuf(std::string s, int x, int y, int width, int height);
+GdkPixbuf* writablePixbuf(const char* s);
+GdkPixbuf* writablePixbuf(const std::string& s);
+
 GtkWidget* image(const char* s);
 GtkWidget* image(const std::string& s);
 GtkWidget* animatedImage(const char* s);
