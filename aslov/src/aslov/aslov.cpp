@@ -532,20 +532,6 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	return q;
 }
 
-std::string joinV(VString const &v, const char separator){
-	std::string s;
-	bool f=true;
-	for(auto&a:v){
-		if(f){
-			f=false;
-		}
-		else{
-			s+=separator;
-		}
-		s+=a;
-	}
-	return s;
-}
 //END string functions
 
 //BEGIN pixbuf functions

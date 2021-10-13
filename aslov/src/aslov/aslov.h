@@ -43,6 +43,8 @@
 #define INDEX_OF(id,a) indexOf(id,a,SIZEI(a))
 #define ONE_OF(id,a) oneOf(id,a,SIZEI(a))
 #define INDEX_OF_NO_CASE(id,a) indexOfNoCase(id,a,SIZEI(a))
+#define JOIN(a) join(a,SIZEI(a))
+#define JOINS(a,separator) join(a,SIZEI(a),separator)
 
 #ifdef NOGTK
 #define g_print printf
@@ -197,8 +199,36 @@ std::string joinS(const char separator,T&& t,P&& ... p){
 	return joinS(std::string(1,separator),t,p...);
 }
 
-std::string joinV(VString const &v, const char separator=' ');
-//std::string join(VString const &v, const char separator=' ');
+//separator can be default so use as 2nd parameter. It differs from other functions arguments order.
+template<typename T>
+std::string joinV(std::vector<T> const &v, const char separator=' '){
+	std::stringstream c;
+	bool f=true;
+	for(auto&a:v){
+		if(f){
+			f=false;
+		}
+		else{
+			c<<separator;
+		}
+		c<<a;
+	}
+	return c.str();
+}
+
+//separator can be default so use as 2nd parameter. It differs from other functions arguments order.
+template<typename T>
+std::string join(T const v[], int size,const char separator=' ') {
+	std::stringstream c;
+	for(int i=0;i<size;i++){
+		if(i){
+			c<<separator;
+		}
+		c<<v[i];
+	}
+	return c.str();
+}
+
 
 //(T&& t,P&& ... p) two ampersands conflict with std::string join(VString const &v, const char separator=' ');
 template <typename T,typename ...P>
