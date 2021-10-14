@@ -188,14 +188,6 @@ std::string const& getApplicationName(){
 	return applicationName;
 }
 
-//std::string const& getApplicationPath(){
-//	return applicationPath;
-//}
-
-//std::string const& getWorkingDirectory(){
-//	return workingDirectory;
-//}
-
 std::string getResourcePath(const std::string name){
 	return applicationName+G_DIR_SEPARATOR+name;
 }
@@ -226,39 +218,36 @@ void writableFileSetContents(const std::string name,const std::string& s){
 	assert(b);
 }
 
-const std::string writableFileGetContents(const std::string name){
-	gchar *contents = NULL;
-	gboolean b=g_file_get_contents(getWritableFilePath(name).c_str(), &contents, 0, 0);
-	assert(b);
-	std::string s;
-	if(b){
-		s=contents;
-		s=replaceAll(s,"\r\n","\n");
-		g_free(contents);
-	}
-	return s;
+const std::string writableFileGetContents(const std::string& name){
+	return fileGetContent(getWritableFilePath(name));
 }
 #endif
+
+const std::string fileGetContent(const std::string& path){
+	std::ifstream t(path);
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	return buffer.str();
+}
 //END application functions
 
 
 //BEGIN config functions
+#ifndef NOGTK
 std::string getConfigPath() {
 	return getWritableFilePath("config.txt");
 }
 
 bool loadConfig(MapStringString&map){
-	const int MAX_BUFF=4096;
-	char b[MAX_BUFF];
-
-	auto f = open(getConfigPath(), "r");
-	if (!f) {//it's ok first time loading
+	std::string s=utf8ToLocale(getConfigPath());
+	std::ifstream f(s);
+	if(!f.is_open()){//it's ok first time loading
 		return false;
 	}
 
 	//order of strings in file is not important
-	while (fgets(b, MAX_BUFF, f) ) {
-		auto p=pairFromBuffer(b);
+	while( std::getline( f, s ) ){
+		auto p=pairFromBuffer(s);
 #ifndef NDEBUG
 		if(map.find(p.first)!=map.end()){
 			printl("warning duplicate key",p.first)
@@ -266,9 +255,12 @@ bool loadConfig(MapStringString&map){
 #endif
 		map.insert(p);
 	}
-	fclose(f);
 	return true;
 
+}
+
+PairStringString pairFromBuffer(const std::string&s){
+	return pairFromBuffer(s.c_str());
 }
 
 PairStringString pairFromBuffer(const char*b){
@@ -291,6 +283,7 @@ PairStringString pairFromBuffer(const char*b){
 	}
 	return {std::string(b,w-b),std::string(p)};
 }
+#endif
 //END config functions
 
 
@@ -416,6 +409,10 @@ VString split(const std::string& subject, const std::string& separator) {
 	}
 	r.push_back(subject.substr(prev, subject.length()));
 	return r;
+}
+
+VString split(const std::string& subject, const char separator){
+	return split(subject, std::string(1,separator));
 }
 
 int countOccurence(const std::string &subject, const std::string &a) {

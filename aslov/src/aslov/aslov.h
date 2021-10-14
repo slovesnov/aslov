@@ -117,11 +117,14 @@ std::string getWritableFilePath(const std::string name);
 #ifndef NOGTK
 //writable resource+log+cfg files are places in same dir and should started with application name
 void writableFileSetContents(const std::string name,const std::string& s);
-const std::string writableFileGetContents(const std::string name);
+const std::string writableFileGetContents(const std::string& name);
 #endif
+const std::string fileGetContent(const std::string& path);
+
 //END application functions
 
 //BEGIN config functions
+#ifndef NOGTK
 std::string getConfigPath();
 bool loadConfig(MapStringString&map);
 #define WRITE_CONFIG(T,V, ...) aslovWriteConfig(T,SIZE(T),V,##__VA_ARGS__);
@@ -137,7 +140,9 @@ void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
     } (p), ...);
 }
 
+PairStringString pairFromBuffer(const std::string&s);
 PairStringString pairFromBuffer(const char*b);
+#endif
 //END config functions
 
 //BEGIN string functions
@@ -167,6 +172,7 @@ bool endsWith(std::string const &s, std::string const &e);
 std::string replaceAll(std::string subject, const std::string &from,
 		const std::string &to);
 VString split(const std::string& subject, const std::string& separator);
+VString split(const std::string& subject, const char separator=' ');
 int countOccurence(const std::string& subject, const std::string& a);
 int countOccurence(const std::string& subject, const char c);
 
