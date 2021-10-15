@@ -29,7 +29,7 @@
 </head>
 <body>
 	<h4>Format functions.</h4>
-	<p>Function <b>format, formats, forma, formatz</b>. All format functions return std::string</p>
+	<p>Function <b>format, formats, formata, formatz</b>. All format functions return std::string. Function <b>forma</b> is alias for <b>formata</b>.</p>
 	<p>Function <b>format</b> - format like printf function
 		<br><span class="code">format("%s %d %c","ab",12,'*') &rarr; "ab 12 *"</span>
 	</p>
@@ -37,15 +37,15 @@
 		<br><span class="code">formats('#',"ab",12,'*') &rarr; "ab#12#*"
 		<br>formats("##","ab",12,'*') &rarr; "ab##12##*"</span>
 	</p>
-	<p>Function <b>forma</b> - format using space as separator
-		<br><span class="code">forma("ab",12,'*') &rarr; "ab 12 *"</span>
+	<p>Function <b>formata</b> - format using space as separator
+		<br><span class="code">formata("ab",12,'*') &rarr; "ab 12 *"</span>
 	</p>
 	<p>Function <b>formatz</b> - format without separator
 		<br><span class="code">formatz("ab",12,'*') &rarr; "ab12*"</span>
 	</p>
 
 	<h4>Print functions.</h4>
-	<p>All print functions are macros. It is not necessary to use a semicolon after them. Function <b>printl</b> is alias for <b>printai</b> function.</p>
+	<p>All print functions are macros. It is not necessary to use a semicolon after them. Function <b>printl</b> is alias for <b>printai</b>.</p>
 	<p>Function <b>println</b> - output format string with file, line and function info and "\n" at the end
 		<br><span class="code">println("%s %d %c","ab",12,'*')</span>
 		<br>Possible output
@@ -56,8 +56,8 @@
 		<br>Possible output
 		<br><span class="output">ab 12 *                                  main.cpp:8 main()</span>
 	</p>
-	<p>Function <b>printinfo</b> - output file, line and function info
-		<br><span class="code">printinfo</span>
+	<p>Function <b>printi</b> - output file, line and function info
+		<br><span class="code">printi</span>
 		<br>Possible output
 		<br><span class="output">                                         main.cpp:8 main()</span>
 	</p>

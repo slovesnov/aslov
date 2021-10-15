@@ -27,12 +27,6 @@ int main(int argc, char *argv[]) {
 //	s=join('#', "dictionary","language","version");
 //	printl("["+s+']')
 
-#if ASNOGTK>=0
-	printinfo
-#else
-	printinfo
-#endif
-
 	auto q=localeToUtf8("24");
 	printl("["+q+']')
 	//checkParser();

@@ -81,20 +81,23 @@ std::string formatz(A const &a, B const &... b) {
 
 //format to string example forma(1234,"some")
 template<typename A, typename ... B>
-std::string forma(A const &a, B const &... b) {
+std::string formata(A const &a, B const &... b) {
 	return formats(" ",a,b...);
 }
 
-void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
-		const char *fu);
+#define forma formata
+
+//output info to screen example printl(1234,"some")
+#define printl printai
 
 //output info to screen example println("%d %s",1234,"some")
 #define println(...)  aslovPrintHelp(0,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
-//output info to screen example printl(1234,"some")
-#define printl(...)  aslovPrintHelp(0,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printi println("")
 
-#define printinfo println("")
+void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
+		const char *fu);
+
 
 template<typename A, typename ... B>
 void aslovPrints(const std::string& separator,A const &a, B const &... b) {
@@ -121,7 +124,7 @@ void aslovPrints(const char separator,A const &a, B const &... b) {
 //adding to prints, printa, printz 'i' ah the end gives file, line, function info and '\n'
 //printai ~ printl
 #define printsi(...) aslovPrintHelp(0,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
-#define printai(...) aslovPrintHelp(0,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printai(...) aslovPrintHelp(0,formata(__VA_ARGS__),__FILE__,__LINE__,__func__);
 #define printzi(...) aslovPrintHelp(0,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 
