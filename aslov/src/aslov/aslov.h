@@ -96,9 +96,6 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 
 #define printinfo println("")
 
-//output without file, line, function analog printf(...)printf("\n")
-//#define printn(f, ...)  g_print(f,##__VA_ARGS__);g_print("\n");
-
 template<typename A, typename ... B>
 void aslovPrints(const std::string& separator,A const &a, B const &... b) {
 	g_print("%s",formats(separator,a,b...).c_str());

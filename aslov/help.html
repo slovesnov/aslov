@@ -1,0 +1,106 @@
+<html>
+<head>
+	<style>
+		body{
+			font-size: 12pt;
+		}
+		span.code, span.output{
+			font-size: 11pt;
+			width:600px;
+		}
+		span.code{
+			display: inline-block;/*for width became works*/
+			font-family: "Consolas";
+			font-style: normal;
+			font-weight: normal;
+			background-color: Beige;
+		}
+		span.output{
+			font-family: "Consolas";
+			font-style: normal;
+			font-weight: normal;
+			background-color: palegreen;
+			display: block;
+			unicode-bidi: embed;
+			font-family: monospace;
+			white-space: pre;
+		}
+	</style>
+</head>
+<body>
+	<h4>Format functions.</h4>
+	<p>Function <b>format, formats, forma, formatz</b>. All format functions return std::string</p>
+	<p>Function <b>format</b> - format like printf function
+		<br><span class="code">format("%s %d %c","ab",12,'*') &rarr; "ab 12 *"</span>
+	</p>
+	<p>Function <b>formats</b> - format with separator which can be char or std::string
+		<br><span class="code">formats('#',"ab",12,'*') &rarr; "ab#12#*"
+		<br>formats("##","ab",12,'*') &rarr; "ab##12##*"</span>
+	</p>
+	<p>Function <b>forma</b> - format using space as separator
+		<br><span class="code">forma("ab",12,'*') &rarr; "ab 12 *"</span>
+	</p>
+	<p>Function <b>formatz</b> - format without separator
+		<br><span class="code">formatz("ab",12,'*') &rarr; "ab12*"</span>
+	</p>
+
+	<h4>Print functions.</h4>
+	<p>Function <b>println</b> - output format string with file, line and function info and "\n" at the end
+		<br><span class="code">println("%s %d %c","ab",12,'*')</span>
+		<br>Possible output
+		<br><span class="output">ab 12 *                                  main.cpp:8 main()</span>
+	</p>
+	<p>Function <b>printl</b> - output arguments separated with space with file, line and function info and "\n" at the end
+		<br><span class="code">printl("ab",12,'*')</span>
+		<br>Possible output
+		<br><span class="output">ab 12 *                                  main.cpp:8 main()</span>
+	</p>
+	<p>Function <b>printinfo</b> - output file, line and function info
+		<br><span class="code">printinfo</span>
+		<br>Possible output
+		<br><span class="output">                                         main.cpp:8 main()</span>
+	</p>
+
+	<p>Function <b>prints</b> - output arguments with separator which can be char or std::string
+		<br><span class="code">prints("@@","ab",12,'*') //like printf("ab@@12@@*")</span>
+		<br>Output
+		<br><span class="output">ab@@12@@*</span>
+	</p>
+
+	<p>Function <b>printa</b> - output arguments with space separator
+		<br><span class="code">printa("ab",12,'*') //like printf("ab 12 *")</span>
+		<br>Output
+		<br><span class="output">ab 12 *</span>
+	</p>
+
+	<p>Function <b>printz</b> - output arguments without separator
+		<br><span class="code">printz("ab",12,'*') //like printf("ab12*")</span>
+		<br>Output
+		<br><span class="output">ab12*</span>
+	</p>
+
+	<p>Functions <b>printsn, printan, printzn</b>. Add n char to functions <b>prints, printa, printz</b> to  add "\n" to output
+		<br><span class="code">printsn("@@","ab",12,'*') //like printf("ab@@12@@*\n")
+		<br>printan("ab",12,'*') //like printf("ab 12 *\n")
+		<br>printzn("ab",12,'*') //like printf("ab12*\n")</span>
+	</p>
+
+	<p>Functions <b>printsi, printai, printzi</b>. Add i char to functions <b>prints, printa, printz</b> to add file, line, function and "\n" to output
+		<br><span class="code">printsi("@@","ab",12,'*')
+		<br>printai("ab",12,'*')
+		<br>printzi("ab",12,'*')
+	</span>
+	<br>Possible output
+		<!--use like pre so don't need tabs before "ab 12 *" & "ab12*" -->
+	<br><span class="output">ab@@12@@*                                main.cpp:8 main()
+ab 12 *                                  main.cpp:9 main()
+ab12*                                    main.cpp:10 main()</span>
+	</p>
+
+	<h4>Print to log file functions.</h4>
+	<p>Function <b>printlog</b>.</p>
+	<p>Function <b>printlo</b>.</p>
+	<p>Function <b>printloginfo</b>.</p>
+</body>
+
+</html>
