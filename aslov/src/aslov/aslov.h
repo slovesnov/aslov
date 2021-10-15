@@ -388,6 +388,9 @@ void destroy(cairo_surface_t * p);
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);
+std::string trim(const std::string& s);
+std::string ltrim(const std::string& s);
+std::string rtrim(const std::string& s);
 
 
 #endif /* ASLOV_H_ */
