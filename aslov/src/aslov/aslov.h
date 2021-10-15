@@ -61,34 +61,78 @@ typedef std::pair<std::string,std::string> PairStringString;
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...);
 
-//format to string example forma(1234,"some")
-template<typename Arg, typename ... Args>
-std::string forma(Arg const &arg, Args const &... args) {
+template<typename A, typename ... B>
+std::string formats(const std::string& separator,A const &a, B const &... b) {
 	std::stringstream c;
-	c << arg;
-	((c << ' ' << args), ...);
+	c << a;
+	((c << separator << b), ...);
 	return c.str();
+}
+
+template<typename A, typename ... B>
+std::string formats(const char separator,A const &a, B const &... b) {
+	return formats(std::string(1,separator),a,b...);
+}
+
+template<typename A, typename ... B>
+std::string formatz(A const &a, B const &... b) {
+	return formats("",a,b...);
+}
+
+//format to string example forma(1234,"some")
+template<typename A, typename ... B>
+std::string forma(A const &a, B const &... b) {
+	return formats(" ",a,b...);
 }
 
 void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
 		const char *fu);
 
 //output info to screen example println("%d %s",1234,"some")
-#define println(f, ...)  aslovPrintHelp(0,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define println(...)  aslovPrintHelp(0,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 //output info to screen example printl(1234,"some")
-#define printl(f, ...)  aslovPrintHelp(0,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printl(...)  aslovPrintHelp(0,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 #define printinfo println("")
 
-//output without file, line, function
-#define printz(f, ...)  g_print("%s\n",forma(f,##__VA_ARGS__).c_str());
+//output without file, line, function analog printf(...)printf("\n")
+//#define printn(f, ...)  g_print(f,##__VA_ARGS__);g_print("\n");
+
+template<typename A, typename ... B>
+void aslovPrints(const std::string& separator,A const &a, B const &... b) {
+	g_print("%s",formats(separator,a,b...).c_str());
+}
+
+template<typename A, typename ... B>
+void aslovPrints(const char separator,A const &a, B const &... b) {
+	aslovPrints(std::string(1,separator),a,b...);
+}
+
+//prints('#',1,2,"ab") -> printf("1#2#ab") or prints("@@",1,2,"ab") -> printf("1@@2@@ab")
+#define prints(...) aslovPrints(__VA_ARGS__);
+//printa(1,2,"ab") -> printf("1 2 ab")
+#define printa(...) aslovPrints(" ",__VA_ARGS__);
+//printz(1,2,"ab") -> printf("12ab")
+#define printz(...) aslovPrints("",__VA_ARGS__);
+
+//adding to prints, printa, printz 'n' at the end gives additional "\n"
+#define printsn(...) prints(__VA_ARGS__,"\n");
+#define printan(...) printa(__VA_ARGS__,"\n");
+#define printzn(...) printz(__VA_ARGS__,"\n");
+
+//adding to prints, printa, printz 'i' ah the end gives file, line, function info and '\n'
+//printai ~ prinl
+#define printsi(...) aslovPrintHelp(0,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printai(...) aslovPrintHelp(0,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printzi(...) aslovPrintHelp(0,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
+
 
 //output info to log file printlog("%d %s",1234,"some")
-#define printlog(f, ...)  aslovPrintHelp(1,format(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printlog(...)  aslovPrintHelp(1,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 //output info  to log file printlo(1234,"some")
-#define printlo(f, ...)  aslovPrintHelp(1,forma(f,##__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printlo(...)  aslovPrintHelp(1,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 #define printloginfo printlog("")
 
