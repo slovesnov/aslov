@@ -119,7 +119,7 @@ void aslovPrints(const char separator,A const &a, B const &... b) {
 #define printzn(...) printz(__VA_ARGS__,"\n");
 
 //adding to prints, printa, printz 'i' ah the end gives file, line, function info and '\n'
-//printai ~ prinl
+//printai ~ printl
 #define printsi(...) aslovPrintHelp(0,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
 #define printai(...) aslovPrintHelp(0,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
 #define printzi(...) aslovPrintHelp(0,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
