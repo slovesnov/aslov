@@ -288,20 +288,8 @@ PairStringString pairFromBuffer(const char*b){
 
 
 //BEGIN string functions
-std::string intToString(int v, char separator/*=' '*/) { //format(1234567,3)="1 234 567"
-	const int digits = 3;
-	char b[16];
-	std::string s;
-	sprintf(b, "%d", v);
-	int i;
-	char *p;
-	for (p = b, i = strlen(b) - 1; *p != 0; p++, i--) {
-		s += *p;
-		if (i % digits == 0 && i != 0) {
-			s += separator;
-		}
-	}
-	return s;
+std::string intToString(int v, char separator/*=' '*/,int digits/*=3*/) { //intToString(1234567,' ')="1 234 567"
+	return toString(v, separator, digits);
 }
 
 enum class AslovParseType {

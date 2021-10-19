@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <memory>//for type name
+#include <cxxabi.h>//for type name
 #ifndef NOGTK
 #include <gtk/gtk.h>
 #endif
@@ -134,7 +136,7 @@ void aslovPrints(const char separator,A const &a, B const &... b) {
 //output info  to log file printlo(1234,"some")
 #define printlo(...)  aslovPrintHelp(1,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
-#define printloginfo printlog("")
+#define printlogi printlog("")
 
 //BEGIN file functions
 enum class FILEINFO {
@@ -190,7 +192,22 @@ PairStringString pairFromBuffer(const char*b);
 //END config functions
 
 //BEGIN string functions
-std::string intToString(int v, char separator=' ');
+template <typename T>
+std::string toString(T t, char separator = ' ', int digits = 3) {
+	std::stringstream c;
+	c << t;
+	std::string s, b = c.str();
+	int i = b.length() - 1;
+	for (char a : b) {
+		s += a;
+		if (i % digits == 0 && i != 0) {
+			s += separator;
+		}
+		i--;
+	}
+	return s;
+}
+std::string intToString(int v, char separator=' ',int digits=3);
 
 //v is changed only if parse is valid for all functions
 bool stringToInt(const std::string &d, int &v, int radix = 10);
@@ -395,5 +412,27 @@ std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
 
+template <class T>std::string aslovTypeName(){
+  typedef typename std::remove_reference<T>::type TR;
+  std::unique_ptr<char, void(*)(void*)> own(
+    abi::__cxa_demangle(typeid(TR).name(), nullptr, nullptr, nullptr),
+    std::free
+  );
+  std::string r = own != nullptr ? own.get() : typeid(TR).name();
+  if (std::is_const<TR>::value)
+    r += " const";
+  if (std::is_volatile<TR>::value)
+    r += " volatile";
+  if (std::is_lvalue_reference<T>::value)
+    r += "&";
+  else if (std::is_rvalue_reference<T>::value)
+    r += "&&";
+  return r;
+}
+
+/* int i;
+ * std::string s=OBJECT_TYPE(i); //s="int"
+ * */
+#define OBJECT_TYPE(v)   aslovTypeName<decltype(v)>()
 
 #endif /* ASLOV_H_ */
