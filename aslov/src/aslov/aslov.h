@@ -194,9 +194,19 @@ PairStringString pairFromBuffer(const char*b);
 //BEGIN string functions
 template <typename T>
 std::string toString(T t, char separator = ' ', int digits = 3) {
+	//std::fixed to prevents scientific notation t=1234567.890123 b=1.23457e +06
 	std::stringstream c;
-	c << t;
-	std::string s, b = c.str();
+	c << std::fixed << t;
+	std::string s, e, b = c.str();
+	std::string::size_type p,p1;
+	p = b.find('.');
+	if (p != std::string::npos) {
+		for(p1=b.length()-1;p1>p && b[p1]=='0';p1--);//"3.875000"->"3.875"
+		if(p!=p1){//"1.000" -> "1"
+			e = b.substr(p,p1-p+1);
+		}
+		b = b.substr(0, p);
+	}
 	int i = b.length() - 1;
 	for (char a : b) {
 		s += a;
@@ -205,8 +215,9 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 		}
 		i--;
 	}
-	return s;
+	return s + e;
 }
+
 std::string intToString(int v, char separator=' ',int digits=3);
 
 //v is changed only if parse is valid for all functions
