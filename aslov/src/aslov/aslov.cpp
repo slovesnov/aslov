@@ -713,3 +713,7 @@ std::string rtrim(const std::string& s) {
 		;
 	return s.substr(0, s.length() - (it - s.rbegin()));
 }
+
+void setLocale(){
+	setlocale(LC_NUMERIC, "C");
+}

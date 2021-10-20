@@ -19,8 +19,10 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#ifdef __GNUC__
 #include <memory>//for type name
-#include <cxxabi.h>//for type name
+#include <cxxabi.h>//for type name this include file exists not for all compilers
+#endif
 #ifndef NOGTK
 #include <gtk/gtk.h>
 #endif
@@ -422,7 +424,9 @@ double timeElapse(clock_t begin);
 std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
+void setLocale();
 
+#ifdef __GNUC__
 template <class T>std::string aslovTypeName(){
   typedef typename std::remove_reference<T>::type TR;
   std::unique_ptr<char, void(*)(void*)> own(
@@ -445,5 +449,6 @@ template <class T>std::string aslovTypeName(){
  * std::string s=OBJECT_TYPE(i); //s="int"
  * */
 #define OBJECT_TYPE(v)   aslovTypeName<decltype(v)>()
+#endif /* __GNUC__ */
 
 #endif /* ASLOV_H_ */
