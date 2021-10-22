@@ -245,15 +245,13 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 	return s + e;
 }
 
-void setLocale();
-
 /* parseString("0xff",i,16), parseString("ff",i,16), parseString("+0xff",i,16) ok
  * t is changed only if parse is valid
  */
 template <class T>
 bool parseString(const char *d, T &t, int radix = 10) {
 	/* strtol("") is ok so check whether empty string
-	 * strtol(" 4") "\r4", "\n4", "\t4" is ok so check is space
+	 * strtol(" 4") "\r4", "\n4", "\t4" is ok so check for space
 	 * */
 	if (!d || *d==0 || isspace(*d)) {
 		return false;
@@ -265,6 +263,10 @@ bool parseString(const char *d, T &t, int radix = 10) {
 	char *p;
 	T a;
 
+	/* if correct parse then errno is not changed
+	 * so set errno=0
+	 */
+	errno=0;
 	if(std::is_same_v<T, long> || (std::is_same_v<T, int> && sizeof(int)==sizeof(long))){
 		a = strtol(d, &p, radix);
 	}
@@ -278,13 +280,9 @@ bool parseString(const char *d, T &t, int radix = 10) {
 		a = strtoull(d, &p, radix);
 	}
 	else if(std::is_same_v<T, float>){
-		setLocale();
-		errno=0;//somehow errno=17 before & after for correct d value
 		a = strtof(d, &p);
 	}
 	else if(std::is_same_v<T, double>){
-		setLocale();
-		errno=0;//somehow errno=17 before & after for correct d value
 		a = strtod(d, &p);
 	}
 	else{
@@ -293,7 +291,6 @@ bool parseString(const char *d, T &t, int radix = 10) {
 	}
 	/*errno!=0 - out of range, *p!=0 - not full string recognized*/
 	bool b = errno == 0 && *p == 0;
-	//printl(errno,*p==0)
 	if (b) {
 		t = a;
 	}
@@ -485,6 +482,9 @@ void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
 void destroy(cairo_t* p);
 void destroy(cairo_surface_t * p);
+std::string getBuildVersionString(bool _long);
+std::string getBuildString(bool _long);
+std::string getVersionString(bool _long);
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);
@@ -492,6 +492,7 @@ std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
 void setLocale();
+
 
 #ifdef __GNUC__
 template <class T>std::string aslovTypeName(){

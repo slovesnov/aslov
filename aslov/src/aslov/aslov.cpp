@@ -594,6 +594,41 @@ void destroy(cairo_surface_t * p) {
 	}
 }
 
+std::string getBuildVersionString(bool _long){
+	return getBuildString(_long)+", "+getVersionString(_long);
+}
+
+std::string getBuildString(bool _long) {
+	/* Note date&time will be when compiler compile file which
+	 * calls getBuildString, so it's time no last compilation time
+	 */
+	//__DATE__="Dec 15 2016" one needs "15 Dec 2016" or "15 December 2016"
+	int i = _long ? 0 : __DATE__[4] == ' '; //day<10, avoid two spaces after 'build'
+	const char *b = 0;
+	if (_long) {
+		const char *MONTH[] = { "January", "February", "March", "April", "May",
+				"June", "July", "August", "September", "October", "November",
+				"December" };
+
+		for (auto a : MONTH) {
+			if (strncasecmp(__DATE__, a, 3) == 0) {
+				b = a;
+				break;
+			}
+		}
+	}
+	return format("build %.*s %.*s %s %s", 2 - i,
+	__DATE__ + 4 + i, _long ? strlen(b) : 3, _long ? b : __DATE__, __DATE__ + 7,
+			__TIME__);
+}
+
+std::string getVersionString(bool _long) {
+	return format("gcc%s %s, gtk%s %d.%d.%d", _long ? " version" : "",
+	__VERSION__, _long ? " version" : "", GTK_MAJOR_VERSION,
+	GTK_MINOR_VERSION,
+	GTK_MICRO_VERSION);
+}
+
 #endif
 
 int getNumberOfCores() {
