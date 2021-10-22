@@ -121,9 +121,9 @@ void aslovPrints(const char separator,A const &a, B const &... b) {
 #define printz(...) aslovPrints("",__VA_ARGS__);
 
 //adding to prints, printa, printz 'n' at the end gives additional "\n"
-#define printsn(...) prints(__VA_ARGS__,"\n");
-#define printan(...) printa(__VA_ARGS__,"\n");
-#define printzn(...) printz(__VA_ARGS__,"\n");
+#define printsn(...) prints(__VA_ARGS__,"\n")
+#define printan(...) printa(__VA_ARGS__,"\n")
+#define printzn(...) printz(__VA_ARGS__,"\n")
 
 //adding to prints, printa, printz 'i' ah the end gives file, line, function info and '\n'
 //printai ~ printl
@@ -133,24 +133,27 @@ void aslovPrints(const char separator,A const &a, B const &... b) {
 
 /* https://stackoverflow.com/questions/1872220/is-it-possible-to-iterate-over-arguments-in-variadic-macros
  * many modifications aslov
+ * up to 8 variables printv(a1,a2,a3,a4,a5,a6,a7,a8)
+ *
  */
 #define ASLOV_PRINT_VARIABLE(a) printan(formatz(#a," = ",a))
 #define ASLOV_PRINT_VARIABLE_I(a) printai(formatz(#a," = ",a))
 #define ASLOV_CONCATENATE(a, b)   a##b
 #define ASLOV_FOR_EACH_NARG(...) ASLOV_FOR_EACH_NARG_(__VA_ARGS__, ASLOV_FOR_EACH_RSEQ_N())
 #define ASLOV_FOR_EACH_NARG_(...) ASLOV_FOR_EACH_ARG_N(__VA_ARGS__)
+
 #define ASLOV_FOR_EACH_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
 #define ASLOV_FOR_EACH_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
-#define ASLOV_FOR_EACH_1(f,f1,x,...) f1(x)
-#define ASLOV_FOR_EACH_2(f,f1,x,...) f(x)ASLOV_FOR_EACH_1(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_3(f,f1,x,...) f(x)ASLOV_FOR_EACH_2(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_4(f,f1,x,...) f(x)ASLOV_FOR_EACH_3(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_5(f,f1,x,...) f(x)ASLOV_FOR_EACH_4(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_6(f,f1,x,...) f(x)ASLOV_FOR_EACH_5(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_7(f,f1,x,...) f(x)ASLOV_FOR_EACH_6(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH_8(f,f1,x,...) f(x)ASLOV_FOR_EACH_7(f,f1,__VA_ARGS__)
-#define ASLOV_FOR_EACH(N,f,f1,x,...) ASLOV_CONCATENATE(ASLOV_FOR_EACH_,N)(f,f1, x, __VA_ARGS__)
-#define ASLOV_PRINTV(f1,...) ASLOV_FOR_EACH(ASLOV_FOR_EACH_NARG(__VA_ARGS__), ASLOV_PRINT_VARIABLE, f1, __VA_ARGS__)
+#define ASLOV_FOR_EACH_1(f,x,...) f(x)
+#define ASLOV_FOR_EACH_2(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_1(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_3(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_2(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_4(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_3(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_5(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_4(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_6(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_5(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_7(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_6(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_8(f,x,...) ASLOV_PRINT_VARIABLE(x)ASLOV_FOR_EACH_7(f,__VA_ARGS__)
+#define ASLOV_FOR_EACH(N,f,x,...) ASLOV_CONCATENATE(ASLOV_FOR_EACH_,N)(f, x, __VA_ARGS__)
+#define ASLOV_PRINTV(f,...) ASLOV_FOR_EACH(ASLOV_FOR_EACH_NARG(__VA_ARGS__), f, __VA_ARGS__)
 #define printv(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE,__VA_ARGS__)
 #define printvi(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE_I,__VA_ARGS__)
 
@@ -242,23 +245,65 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 	return s + e;
 }
 
-std::string intToString(int v, char separator=' ',int digits=3);
+void setLocale();
 
-//v is changed only if parse is valid for all functions
-bool stringToInt(const std::string &d, int &v, int radix = 10);
-bool stringToInt(const char *d, int &v, int radix = 10);
-bool stringToUnsigned(const std::string &d, unsigned &v, int radix = 10);
-bool stringToUnsigned(const char *d, unsigned &v, int radix = 10);
-bool stringToLL(const std::string &d, long long &v, int radix = 10);
-bool stringToLL(const char *d, long long &v, int radix = 10);
+/* parseString("0xff",i,16), parseString("ff",i,16), parseString("+0xff",i,16) ok
+ * t is changed only if parse is valid
+ */
+template <class T>
+bool parseString(const char *d, T &t, int radix = 10) {
+	/* strtol("") is ok so check whether empty string
+	 * strtol(" 4") "\r4", "\n4", "\t4" is ok so check is space
+	 * */
+	if (!d || *d==0 || isspace(*d)) {
+		return false;
+	}
+	/*strtoul("-1") is ok*/
+	if(std::is_unsigned<T>::value && *d=='-'){
+		return false;
+	}
+	char *p;
+	T a;
 
-//stringParse("0xff",i,16), stringParse("ff",i,16), stringParse("+0xff",i,16) ok
-bool stringParse(const std::string &d, int &v, int radix = 10);
-bool stringParse(const char *d, int &v, int radix = 10);
-bool stringParse(const std::string &d, unsigned &v, int radix = 10);
-bool stringParse(const char *d, unsigned &v, int radix = 10);
-bool stringParse(const std::string &d, long long &v, int radix = 10);
-bool stringParse(const char *d, long long &v, int radix = 10);
+	if(std::is_same_v<T, long> || (std::is_same_v<T, int> && sizeof(int)==sizeof(long))){
+		a = strtol(d, &p, radix);
+	}
+	else if(std::is_same_v<T, unsigned long> || (std::is_same_v<T, unsigned> && sizeof(int)==sizeof(long))){
+		a = strtoul(d, &p, radix);
+	}
+	else if(std::is_same_v<T, int64_t> || (std::is_same_v<T, int> && sizeof(int)==sizeof(int64_t))){
+		a = strtoll(d, &p, radix);
+	}
+	else if(std::is_same_v<T, uint64_t> || (std::is_same_v<T, unsigned> && sizeof(int)==sizeof(int64_t))){
+		a = strtoull(d, &p, radix);
+	}
+	else if(std::is_same_v<T, float>){
+		setLocale();
+		errno=0;//somehow errno=17 before & after for correct d value
+		a = strtof(d, &p);
+	}
+	else if(std::is_same_v<T, double>){
+		setLocale();
+		errno=0;//somehow errno=17 before & after for correct d value
+		a = strtod(d, &p);
+	}
+	else{
+		assert(0);
+		return false;
+	}
+	/*errno!=0 - out of range, *p!=0 - not full string recognized*/
+	bool b = errno == 0 && *p == 0;
+	//printl(errno,*p==0)
+	if (b) {
+		t = a;
+	}
+	return b;
+}
+
+template<class T>
+bool parseString(std::string const &s, T &t, int radix = 10) {
+	return parseString(s.c_str(), t, radix);
+}
 
 bool startsWith(const char *s, const char *begin);
 bool startsWith(const char *s, const std::string &begin);
