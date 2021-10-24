@@ -683,3 +683,16 @@ std::string rtrim(const std::string& s) {
 void setLocale(){
 	setlocale(LC_NUMERIC, "C");
 }
+
+std::string normalize(std::string const& s){
+	std::string::size_type p,p1=0;
+	if ((p= s.find('.')) == std::string::npos) {
+		return s;
+	}
+	for(p1=s.length()-1;p1>p && s[p1]=='0';p1--);
+		//"3.875000"->"3.875"
+	if(s[p1]=='.'){
+		p1--;
+	}
+	return s.substr(0,p1+1);
+}

@@ -492,6 +492,8 @@ std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
 void setLocale();
+//"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
+std::string normalize(std::string const& s);
 
 
 #ifdef __GNUC__
