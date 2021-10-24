@@ -485,6 +485,7 @@ void destroy(cairo_surface_t * p);
 std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
+void showHideWidget(GtkWidget *w,bool show);
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);

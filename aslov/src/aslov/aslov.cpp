@@ -629,6 +629,14 @@ std::string getVersionString(bool _long) {
 	GTK_MICRO_VERSION);
 }
 
+void showHideWidget(GtkWidget *w,bool show){
+	if(show){
+		gtk_widget_show(w);
+	}
+	else{
+		gtk_widget_hide(w);
+	}
+}
 #endif
 
 int getNumberOfCores() {
