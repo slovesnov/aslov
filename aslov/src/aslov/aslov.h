@@ -319,12 +319,21 @@ bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
 bool cmp(const std::string& a, const char* b);
 
+
 #ifndef NOTGK_WITHOUT_ICONV
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
 
-std::string utf8ToLowerCase(const std::string &s,
-		bool onlyRussainChars = false);
+std::string utf8ToLowerCase(const std::string &s
+#ifdef NOGTK
+		,bool onlyRussainChars = false
+#endif
+		);
+std::string utf8ToUpperCase(const std::string &
+#ifdef NOGTK
+		,bool onlyRussainChars = false
+#endif
+		);
 #endif
 //convert localed string to lowercase
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =

@@ -424,8 +424,11 @@ const std::string utf8ToLocale(const std::string &s) {
 #endif
 }
 
-std::string utf8ToLowerCase(const std::string &s,
-		bool onlyRussainChars/*=false*/) {
+std::string utf8ToLowerCase(const std::string &s
+#ifdef NOGTK
+		,bool onlyRussainChars/*=false*/
+#endif
+		) {
 #ifdef NOGTK
 	return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
 #else
@@ -435,6 +438,25 @@ std::string utf8ToLowerCase(const std::string &s,
 	return r;
 #endif
 }
+
+std::string utf8ToUpperCase(const std::string &s
+#ifdef NOGTK
+		,bool onlyRussainChars/*=false*/
+#endif
+		){
+#ifdef NOGTK
+	assert(0);//TODO
+	return "";
+#else
+	gchar*a=g_utf8_strup(s.c_str(), s.length());
+	std::string r(a);
+	g_free(a);
+	return r;
+#endif
+
+}
+
+
 #endif //#ifndef NOTGK_WITHOUT_ICONV
 
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
