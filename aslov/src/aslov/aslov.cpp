@@ -455,15 +455,16 @@ std::string utf8ToUpperCase(const std::string &s
 #endif
 
 }
+#endif //#ifndef NOTGK_WITHOUT_ICONV
 
+#ifndef NOGTK
 std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos){
 	gchar *p = g_utf8_substring(s.c_str(), start_pos, end_pos);
 	std::string r=p;
 	g_free(p);
 	return r;
 }
-
-#endif //#ifndef NOTGK_WITHOUT_ICONV
+#endif
 
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 	typedef const unsigned char *cpuchar;
