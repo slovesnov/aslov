@@ -329,11 +329,14 @@ std::string utf8ToLowerCase(const std::string &s
 		,bool onlyRussainChars = false
 #endif
 		);
-std::string utf8ToUpperCase(const std::string &
+std::string utf8ToUpperCase(const std::string &s
 #ifdef NOGTK
 		,bool onlyRussainChars = false
 #endif
 		);
+
+std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos);
+
 #endif
 //convert localed string to lowercase
 std::string localeToLowerCase(const std::string &s, bool onlyRussainChars =
