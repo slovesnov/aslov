@@ -234,10 +234,11 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 		}
 		b = b.substr(0, p);
 	}
-	int i = b.length() - 1;
+	bool negative=std::is_signed<T>::value && t<0;
+	unsigned i = b.length() - 1;
 	for (char a : b) {
 		s += a;
-		if (i % digits == 0 && i != 0) {
+		if (i % digits == 0 && i != 0 && (!negative || i!=b.length() - 1) ) {
 			s += separator;
 		}
 		i--;
