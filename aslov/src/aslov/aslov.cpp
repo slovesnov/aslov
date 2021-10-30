@@ -666,6 +666,44 @@ void showHideWidget(GtkWidget *w,bool show){
 		gtk_widget_hide(w);
 	}
 }
+
+double getVerticalDPI() {
+	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
+	GdkRectangle r;
+	gdk_monitor_get_geometry(monitor, &r);
+	auto h = gdk_monitor_get_height_mm(monitor);
+	return r.height * 25.4 / h;
+}
+
+void drawTextToCairo(cairo_t *cr, std::string const &s, double x, double y,
+		DRAW_TEXT optionx, DRAW_TEXT optiony) {
+	const char *p = s.c_str();
+	cairo_text_extents_t e;
+	cairo_text_extents(cr, p, &e);
+
+	//x_bearing && y_bearing<0
+	x -= e.x_bearing;
+	if (optionx != DRAW_TEXT_BEGIN) {
+		x -= e.width * (optionx == DRAW_TEXT_END ? 1 : .5);
+	}
+
+	y -= e.y_bearing;
+	if (optiony != DRAW_TEXT_BEGIN) {
+		y -= e.height * (optiony == DRAW_TEXT_END ? 1 : .5);
+	}
+	cairo_move_to(cr, x, y);
+	cairo_show_text(cr, p);
+}
+
+//cairo_show_text (pixels) & pango_cairo_show_layout (logical units)
+double convertFontSize(double fontSize,bool layoutToText){
+	double k=getVerticalDPI() / 72;
+	if(!layoutToText){
+		k=1/k;
+	}
+	return fontSize * k;
+}
+
 #endif
 
 int getNumberOfCores() {

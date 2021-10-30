@@ -500,6 +500,15 @@ std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w,bool show);
+double getVerticalDPI();
+enum DRAW_TEXT{
+	DRAW_TEXT_BEGIN,DRAW_TEXT_CENTER,DRAW_TEXT_END
+};
+void drawTextToCairo(cairo_t* cr, std::string const& s, double x,double y,
+		DRAW_TEXT optionx, DRAW_TEXT optiony);
+//cairo_show_text (pixels) & pango_cairo_show_layout (logical units)
+double convertFontSize(double fontSize,bool layoutToText);
+
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);
