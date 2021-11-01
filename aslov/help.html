@@ -76,6 +76,68 @@ all images are in "appName/images" folder use getImagePath() use{
 	GtkWidget* image(const std::string& s);
 	GtkWidget* animatedImage(const char* s);
 }
+
+<h4>Example of using OBJECT_TYPE macro</h4>
+<pre class="cpp" style="font-family:monospace;"><span style="color: #339900;">#include &quot;aslov.h&quot;</span>
+	&nbsp;
+<span style="color: #0000ff;">struct</span> CSize <span style="color: #008000;">&#123;</span>
+	<span style="color: #0000ff;">int</span> cx, cy<span style="color: #008080;">;</span>
+<span style="color: #008000;">&#125;</span><span style="color: #008080;">;</span>
+&nbsp;
+<span style="color: #0000ff;">int</span> main<span style="color: #008000;">&#40;</span><span style="color: #0000ff;">int</span> argc, <span style="color: #0000ff;">char</span> <span style="color: #000040;">*</span>argv<span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#41;</span> <span style="color: #008000;">&#123;</span>
+	<span style="color: #0000ff;">const</span> CSize RASTER_DECK_CARD_SIZE<span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #008000;">&#123;</span> <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">71</span>, <span style="color: #0000dd;">96</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">54</span>, <span style="color: #0000dd;">72</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">54</span>, <span style="color: #0000dd;">72</span> <span style="color: #008000;">&#125;</span>,
+			<span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">72</span>, <span style="color: #0000dd;">96</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">71</span>, <span style="color: #0000dd;">96</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">75</span>, <span style="color: #0000dd;">107</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">95</span>, <span style="color: #0000dd;">125</span> <span style="color: #008000;">&#125;</span>, <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">96</span>, <span style="color: #0000dd;">126</span> <span style="color: #008000;">&#125;</span> <span style="color: #008000;">&#125;</span><span style="color: #008080;">;</span>
+	<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> N_RASTER_DECKS <span style="color: #000080;">=</span> SIZEI<span style="color: #008000;">&#40;</span>RASTER_DECK_CARD_SIZE<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;
+	<span style="color: #0000ff;">auto</span> minmax <span style="color: #000080;">=</span> std<span style="color: #008080;">::</span><span style="color: #007788;">minmax_element</span><span style="color: #008000;">&#40;</span>RASTER_DECK_CARD_SIZE,
+			RASTER_DECK_CARD_SIZE <span style="color: #000040;">+</span> N_RASTER_DECKS,
+			<span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span><span style="color: #008000;">&#40;</span>CSize <span style="color: #0000ff;">const</span> <span style="color: #000040;">&amp;</span>a, CSize <span style="color: #0000ff;">const</span> <span style="color: #000040;">&amp;</span>b<span style="color: #008000;">&#41;</span> <span style="color: #008000;">&#123;</span>
+				<span style="color: #0000ff;">return</span> a.<span style="color: #007788;">cx</span> <span style="color: #000080;">&lt;</span> b.<span style="color: #007788;">cx</span><span style="color: #008080;">;</span>
+			<span style="color: #008000;">&#125;</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+	printl<span style="color: #008000;">&#40;</span>OBJECT_TYPE<span style="color: #008000;">&#40;</span>minmax<span style="color: #008000;">&#41;</span> <span style="color: #008000;">&#41;</span>
+<span style="color: #008000;">&#125;</span></pre>
+<br><span class="output">std::pair&lt;CSize const*, CSize const*&gt;    main.cpp:13 main()</span>
+<h4>Example of using setFont, drawText, drawMarkup</h4>
+<pre class="cpp" style="font-family:monospace;"><span style="color: #0000ff;">double</span> x, y<span style="color: #008080;">;</span>
+<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">char</span> string<span style="color: #008000;">&#91;</span><span style="color: #008000;">&#93;</span> <span style="color: #000080;">=</span> <span style="color: #FF0000;">&quot;j6()J&quot;</span><span style="color: #008080;">;</span>
+std<span style="color: #008080;">::</span><span style="color: #007788;">string</span> s <span style="color: #000080;">=</span> string <span style="color: #000040;">+</span> std<span style="color: #008080;">::</span><span style="color: #007788;">string</span><span style="color: #008000;">&#40;</span><span style="color: #FF0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&lt;i&gt;abc123&lt;/i&gt;&quot;</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> fontSize <span style="color: #000080;">=</span> <span style="color: #0000dd;">40</span><span style="color: #008080;">;</span>
+<span style="color: #0000ff;">const</span> GdkRGBA BLACK_COLOR <span style="color: #000080;">=</span> <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">0</span>., <span style="color: #0000dd;">0</span>., <span style="color: #0000dd;">0</span>., <span style="color: #0000dd;">1</span>. <span style="color: #008000;">&#125;</span><span style="color: #008080;">;</span>
+<span style="color: #0000ff;">const</span> GdkRGBA LINE_COLOR <span style="color: #000080;">=</span> <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">1</span>, <span style="color:#800080;">0.2</span>, <span style="color:#800080;">0.2</span>, <span style="color:#800080;">0.6</span> <span style="color: #008000;">&#125;</span><span style="color: #008080;">;</span>
+&nbsp;
+<span style="color: #666666;">//set for both drawMarkup &amp; drawText</span>
+setFont<span style="color: #008000;">&#40;</span>cr, <span style="color: #FF0000;">&quot;Times New Roman&quot;</span>, fontSize, CAIRO_FONT_SLANT_NORMAL,
+		CAIRO_FONT_WEIGHT_NORMAL<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;
+cairo_rectangle_int_t rect <span style="color: #000080;">=</span> <span style="color: #008000;">&#123;</span> <span style="color: #0000dd;">30</span>, <span style="color: #0000dd;">30</span>, <span style="color: #0000dd;">200</span>, <span style="color: #0000dd;">200</span> <span style="color: #008000;">&#125;</span><span style="color: #008080;">;</span>
+x <span style="color: #000080;">=</span> rect.<span style="color: #007788;">x</span><span style="color: #008080;">;</span>
+y <span style="color: #000080;">=</span> rect.<span style="color: #007788;">y</span><span style="color: #008080;">;</span>
+gdk_cairo_set_source_rgba<span style="color: #008000;">&#40;</span>cr, <span style="color: #000040;">&amp;</span>LINE_COLOR<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_set_line_width<span style="color: #008000;">&#40;</span>cr, <span style="color:#800080;">6.0</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_arc<span style="color: #008000;">&#40;</span>cr, x, y, <span style="color:#800080;">10.0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> G_PI<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_fill<span style="color: #008000;">&#40;</span>cr<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_rectangle<span style="color: #008000;">&#40;</span>cr, x, y, rect.<span style="color: #007788;">width</span>, rect.<span style="color: #007788;">height</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_stroke<span style="color: #008000;">&#40;</span>cr<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;
+gdk_cairo_set_source_rgba<span style="color: #008000;">&#40;</span>cr, <span style="color: #000040;">&amp;</span>BLACK_COLOR<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+drawMarkup<span style="color: #008000;">&#40;</span>cr, s, rect, DRAW_TEXT_BEGIN, DRAW_TEXT_CENTER<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;
+<span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> len <span style="color: #000080;">=</span> <span style="color: #0000dd;">100</span><span style="color: #008080;">;</span>
+x <span style="color: #000080;">=</span> <span style="color: #0000dd;">350</span><span style="color: #008080;">;</span>
+y <span style="color: #000080;">=</span> rect.<span style="color: #007788;">y</span><span style="color: #000040;">+</span>rect.<span style="color: #007788;">height</span><span style="color: #000040;">/</span><span style="color: #0000dd;">2</span><span style="color: #008080;">;</span>
+gdk_cairo_set_source_rgba<span style="color: #008000;">&#40;</span>cr, <span style="color: #000040;">&amp;</span>LINE_COLOR<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_set_line_width<span style="color: #008000;">&#40;</span>cr, <span style="color:#800080;">6.0</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_arc<span style="color: #008000;">&#40;</span>cr, x, y, <span style="color:#800080;">10.0</span>, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> G_PI<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_fill<span style="color: #008000;">&#40;</span>cr<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_move_to<span style="color: #008000;">&#40;</span>cr, x <span style="color: #000040;">-</span> len, y<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_rel_line_to<span style="color: #008000;">&#40;</span>cr, <span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> len, <span style="color: #0000dd;">0</span><span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_move_to<span style="color: #008000;">&#40;</span>cr, x, y <span style="color: #000040;">-</span> len<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_rel_line_to<span style="color: #008000;">&#40;</span>cr, <span style="color: #0000dd;">0</span>, <span style="color: #0000dd;">2</span> <span style="color: #000040;">*</span> len<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+cairo_stroke<span style="color: #008000;">&#40;</span>cr<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;
+gdk_cairo_set_source_rgba<span style="color: #008000;">&#40;</span>cr, <span style="color: #000040;">&amp;</span>BLACK_COLOR<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+drawText<span style="color: #008000;">&#40;</span>cr, string, x, y, DRAW_TEXT_CENTER, DRAW_TEXT_CENTER<span style="color: #008000;">&#41;</span><span style="color: #008080;">;</span>
+&nbsp;</pre>
 </p>
 	<h4>Format functions.</h4>
 	<p>Function <b>format, formats, formata, formatz</b>. All format functions return std::string. Function <b>forma</b> is alias for <b>formata</b>.

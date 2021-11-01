@@ -35,6 +35,12 @@
 
 
 std::string applicationName, applicationPath;
+std::string fontFamily;
+int fontHeight;
+#ifndef NOGTK
+cairo_font_slant_t fontSlant;
+cairo_font_weight_t fontWeight;
+#endif
 
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...) {
@@ -675,7 +681,17 @@ double getVerticalDPI() {
 	return r.height * 25.4 / h;
 }
 
-void drawTextToCairo(cairo_t *cr, std::string const &s, double x, double y,
+void setFont(cairo_t *cr, const char *family, int height,
+		cairo_font_slant_t slant, cairo_font_weight_t weight) {
+	fontFamily=family;
+	fontHeight=height;
+	fontSlant=slant;
+	fontWeight=weight;
+	cairo_select_font_face(cr, family, slant, weight);
+	cairo_set_font_size(cr, height);
+}
+
+void drawText(cairo_t *cr, std::string const &s, double x, double y,
 		DRAW_TEXT optionx, DRAW_TEXT optiony) {
 	const char *p = s.c_str();
 	cairo_text_extents_t e;
@@ -695,13 +711,54 @@ void drawTextToCairo(cairo_t *cr, std::string const &s, double x, double y,
 	cairo_show_text(cr, p);
 }
 
-//cairo_show_text (pixels) & pango_cairo_show_layout (logical units)
-double convertFontSize(double fontSize,bool layoutToText){
-	double k=getVerticalDPI() / 72;
-	if(!layoutToText){
-		k=1/k;
+void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
+		DRAW_TEXT optionx, DRAW_TEXT optiony) {
+	int w, h;
+	PangoLayout *layout = createPangoLayout(cr,text);
+	pango_layout_get_pixel_size(layout, &w, &h);
+
+	double px = rect.x;
+	double py = rect.y;
+	if (optionx!=DRAW_TEXT_BEGIN) {
+		px += (rect.width - w) / (optionx==DRAW_TEXT_END?1:2);
 	}
-	return fontSize * k;
+	if (optiony!=DRAW_TEXT_BEGIN) {
+		py += (rect.height - h) /  (optiony==DRAW_TEXT_END?1:2);
+	}
+
+	cairo_move_to(cr, px, py);
+	pango_cairo_update_layout(cr, layout);
+	pango_cairo_show_layout(cr, layout);
+	g_object_unref(layout);
+}
+
+PangoFontDescription* createPangoFontDescription(PangoFontDescription*f,int height){
+	int h=pango_font_description_get_size(f) / PANGO_SCALE;
+	PangoFontDescription* d=pango_font_description_copy(f);
+	if(h!=height){
+		//https://www.cairographics.org/FAQ/
+		pango_font_description_set_absolute_size (d, height * PANGO_SCALE);
+	}
+	return d;
+}
+
+PangoFontDescription* createPangoFontDescription(){
+	std::string s=fontFamily+","+std::to_string(fontHeight);
+	//do not call createPangoFontDescription(PangoFontDescription*f,int height) because it checks height
+	PangoFontDescription* d=pango_font_description_from_string(s.c_str());
+	//https://www.cairographics.org/FAQ/
+	pango_font_description_set_absolute_size (d, fontHeight * PANGO_SCALE);
+	return d;
+}
+
+PangoLayout* createPangoLayout(cairo_t *cr,std::string text){
+	PangoLayout *layout = pango_cairo_create_layout(cr);
+	PangoFontDescription*desc = createPangoFontDescription();
+	pango_layout_set_font_description(layout, desc);
+
+	pango_layout_set_markup(layout, text.c_str(), -1);
+	pango_font_description_free(desc);
+	return layout;
 }
 
 #endif

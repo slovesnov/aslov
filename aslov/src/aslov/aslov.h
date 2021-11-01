@@ -501,13 +501,20 @@ std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w,bool show);
 double getVerticalDPI();
+
 enum DRAW_TEXT{
 	DRAW_TEXT_BEGIN,DRAW_TEXT_CENTER,DRAW_TEXT_END
 };
-void drawTextToCairo(cairo_t* cr, std::string const& s, double x,double y,
+void setFont(cairo_t *cr, const char *family, int height,
+		cairo_font_slant_t slant, cairo_font_weight_t weight);
+void drawText(cairo_t *cr, std::string const &s, double x, double y,
 		DRAW_TEXT optionx, DRAW_TEXT optiony);
-//cairo_show_text (pixels) & pango_cairo_show_layout (logical units)
-double convertFontSize(double fontSize,bool layoutToText);
+void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
+		DRAW_TEXT optionx, DRAW_TEXT optiony);
+PangoFontDescription* createPangoFontDescription(PangoFontDescription *f,
+		int height);
+PangoFontDescription* createPangoFontDescription();
+PangoLayout* createPangoLayout(cairo_t *cr,std::string text);
 
 #endif
 int getNumberOfCores();
