@@ -9,6 +9,7 @@
  */
 
 #include <cstring>
+#include <cmath>
 #include "aslov.h"
 
 #ifdef NOGTK
@@ -681,6 +682,10 @@ double getVerticalDPI() {
 	return r.height * 25.4 / h;
 }
 
+int ptToPx(double pt){
+	return lround(pt*getVerticalDPI()/72);
+}
+
 void setFont(cairo_t *cr, const char *family, int height,
 		cairo_font_slant_t slant, cairo_font_weight_t weight) {
 	fontFamily=family;
@@ -690,6 +695,13 @@ void setFont(cairo_t *cr, const char *family, int height,
 	cairo_select_font_face(cr, family, slant, weight);
 	cairo_set_font_size(cr, height);
 }
+
+void setFont(cairo_t *cr, int height){
+	//if fontFamily="" need to call setFont(cairo_t *, const char *, int ,cairo_font_slant_t, cairo_font_weight_t ) at first
+	fontHeight=height;
+	cairo_set_font_size(cr, height);
+}
+
 
 void drawText(cairo_t *cr, std::string const &s, double x, double y,
 		DRAW_TEXT optionx, DRAW_TEXT optiony) {
@@ -732,19 +744,14 @@ void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
 	g_object_unref(layout);
 }
 
-PangoFontDescription* createPangoFontDescription(PangoFontDescription*f,int height){
-	int h=pango_font_description_get_size(f) / PANGO_SCALE;
+PangoFontDescription* createPangoFontDescription(const PangoFontDescription*f,int height){
 	PangoFontDescription* d=pango_font_description_copy(f);
-	if(h!=height){
-		//https://www.cairographics.org/FAQ/
-		pango_font_description_set_absolute_size (d, height * PANGO_SCALE);
-	}
+	pango_font_description_set_absolute_size (d, height * PANGO_SCALE);
 	return d;
 }
 
 PangoFontDescription* createPangoFontDescription(){
 	std::string s=fontFamily+","+std::to_string(fontHeight);
-	//do not call createPangoFontDescription(PangoFontDescription*f,int height) because it checks height
 	PangoFontDescription* d=pango_font_description_from_string(s.c_str());
 	//https://www.cairographics.org/FAQ/
 	pango_font_description_set_absolute_size (d, fontHeight * PANGO_SCALE);
