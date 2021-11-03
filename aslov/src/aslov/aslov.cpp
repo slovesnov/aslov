@@ -615,7 +615,24 @@ void loadCSS(std::string const &additionalData /*= ""*/){
 }
 
 void openURL(std::string url) {
+	/* gtk_show_uri_on_window works
+	 * works differ on my old notebook with windows7
+	 * and new notebook with windows10
+	 * it concerns urls and local files
+	 * so use ShellExecute all variants works correctly
+	 * ShellExecute(0, 0, "http://www.google.com", 0, 0 , SW_SHOW );
+	 * ShellExecute(0, 0, "file:///C:\\slovesno\\a.txt", 0, 0 , SW_SHOW );
+	 * ShellExecute(0, 0, "file:///C:/slovesno/a.txt", 0, 0 , SW_SHOW );
+	 * ShellExecute(0, 0, "C:/slovesno/a.txt", 0, 0 , SW_SHOW );
+	 * ShellExecute(0, 0, "C:\\slovesno\\a.txt", 0, 0 , SW_SHOW );
+	 * ShellExecute(0, 0, "C:\\slovesno\\a.html", 0, 0 , SW_SHOW );
+	 */
+#ifdef _WIN32
+	printv(url)
+	ShellExecute(0, 0, url.c_str(), 0, 0 , SW_SHOW );
+#else
 	gtk_show_uri_on_window(0, url.c_str(), gtk_get_current_event_time(), NULL);
+#endif
 }
 
 void destroy(cairo_t* p) {
