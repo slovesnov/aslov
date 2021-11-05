@@ -35,12 +35,15 @@
 #endif
 
 
-std::string applicationName, applicationPath;
-std::string fontFamily;
-int fontHeight;
+static std::string applicationName, applicationPath;
+static std::string fontFamily;
+static int fontHeight;
 #ifndef NOGTK
-cairo_font_slant_t fontSlant;
-cairo_font_weight_t fontWeight;
+static cairo_font_slant_t fontSlant;
+static cairo_font_weight_t fontWeight;
+#endif
+#ifdef _WIN32
+static PairDoubleDouble scale;
 #endif
 
 //format to string example format("%d %s",1234,"some")
@@ -158,7 +161,13 @@ FILE* open(std::string path, const char *flags) {
 //END file functions
 
 //BEGIN application functions
-void aslovInit(char const*const*argv) {
+void aslovInit(char const*const*argv,bool storeScaleFactor/*=false*/) {
+#ifdef _WIN32
+	if(storeScaleFactor){
+		scale=aslovGetScaleFactor();
+	}
+#endif
+
 #if !defined(NOGTK) || NOGTK==0
 	const std::string p = localeToUtf8(argv[0]);
 #else
@@ -580,6 +589,36 @@ int indexOf(const char t,const std::string& v){
 	return i==std::string::npos ? -1 : i;
 }
 
+#ifdef _WIN32
+//Note this function should be called before gtk_init
+PairDoubleDouble aslovGetScaleFactor(){
+    auto activeWindow = GetActiveWindow();
+    HMONITOR monitor = MonitorFromWindow(activeWindow, MONITOR_DEFAULTTONEAREST);
+
+    // Get the logical width and height of the monitor
+    MONITORINFOEX monitorInfoEx;
+    monitorInfoEx.cbSize = sizeof(monitorInfoEx);
+    GetMonitorInfo(monitor, &monitorInfoEx);
+    auto cxLogical = monitorInfoEx.rcMonitor.right - monitorInfoEx.rcMonitor.left;
+    auto cyLogical = monitorInfoEx.rcMonitor.bottom - monitorInfoEx.rcMonitor.top;
+
+    // Get the physical width and height of the monitor
+    DEVMODE devMode;
+    devMode.dmSize = sizeof(devMode);
+    devMode.dmDriverExtra = 0;
+    EnumDisplaySettings(monitorInfoEx.szDevice, ENUM_CURRENT_SETTINGS, &devMode);
+    auto cxPhysical = devMode.dmPelsWidth;
+    auto cyPhysical = devMode.dmPelsHeight;
+
+    // Calculate the scaling factor
+    return  {(double) cxPhysical / (double)cxLogical, ((double) cyPhysical / (double)cyLogical)};
+}
+
+PairDoubleDouble getScaleFactor(){
+	return scale;
+}
+#endif
+
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s) {
 	GtkStyleContext *context;
@@ -691,16 +730,40 @@ void showHideWidget(GtkWidget *w,bool show){
 	}
 }
 
-double getVerticalDPI() {
+std::pair<double,double> getMonitorSize(bool millimeters/*=true*/){
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
 	gdk_monitor_get_geometry(monitor, &r);
-	auto h = gdk_monitor_get_height_mm(monitor);
-	return r.height * 25.4 / h;
+	//not auto!
+	double w = gdk_monitor_get_width_mm(monitor);
+	double h = gdk_monitor_get_height_mm(monitor);
+	if(!millimeters){
+		w/=25.4;
+		h/=25.4;
+	}
+	return {w,h};
 }
 
-int ptToPx(double pt){
-	return lround(pt*getVerticalDPI()/72);
+double getMonitorDiagonal(bool millimeters/*=true*/){
+	auto a=getMonitorSize(millimeters);
+	return sqrt(a.first*a.first+a.second*a.second);
+}
+
+std::pair<double,double> getDPI(){
+	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
+	GdkRectangle r;
+	gdk_monitor_get_geometry(monitor, &r);
+	auto w = gdk_monitor_get_width_mm(monitor);
+	auto h = gdk_monitor_get_height_mm(monitor);
+	return {r.width * 25.4 / w, r.height * 25.4 / h};
+}
+
+double getHorizontalDPI() {
+	return getDPI().second;
+}
+
+double getVerticalDPI() {
+	return getDPI().first;
 }
 
 void setFont(cairo_t *cr, const char *family, int height,
@@ -738,6 +801,12 @@ void drawText(cairo_t *cr, std::string const &s, double x, double y,
 	}
 	cairo_move_to(cr, x, y);
 	cairo_show_text(cr, p);
+}
+
+void drawMarkup(cairo_t *cr, std::string text, double x, double y,
+		DRAW_TEXT optionx, DRAW_TEXT optiony){
+	cairo_rectangle_int_t rect={int(x),int(y),0,0};
+	drawMarkup(cr, text, rect, optionx, optiony);
 }
 
 void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
@@ -836,7 +905,7 @@ std::string rtrim(const std::string& s) {
 	return s.substr(0, s.length() - (it - s.rbegin()));
 }
 
-void setLocale(){
+void setNumericLocale(){
 	setlocale(LC_NUMERIC, "C");
 }
 

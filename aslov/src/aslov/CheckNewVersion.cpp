@@ -27,7 +27,7 @@ void CheckNewVersion::routine() {
 	char *content = NULL;
 	if (g_file_load_contents(f, NULL, &content, &length, NULL, NULL)) {
 		std::string s(content, length); //content is not null terminated so create std::string
-		setLocale();//dot interpret as decimal separator
+		setNumericLocale();//dot interpret as decimal separator
 		if (std::stod(s) > m_version) {
 			m_message = localeToUtf8(s);
 			gdk_threads_add_idle(m_callback, NULL);

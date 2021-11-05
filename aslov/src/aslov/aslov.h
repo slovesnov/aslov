@@ -60,6 +60,7 @@
 typedef std::vector<std::string> VString;
 typedef std::map<std::string, std::string> MapStringString;
 typedef std::pair<std::string,std::string> PairStringString;
+typedef std::pair<double,double> PairDoubleDouble;
 
 
 //format to string example format("%d %s",1234,"some")
@@ -177,7 +178,8 @@ FILE* open(std::string path, const char *flags);
 //END file functions
 
 //BEGIN application functions
-void aslovInit(char const*const* argv);
+//call aslovInit before gtk_init just first in main() function if you need to use ScaleFactor
+void aslovInit(char const*const* argv,bool storeScaleFactor=false);
 int getApplicationFileSize();
 FILE* openApplicationLog(const char *flags);
 std::string const& getApplicationName();
@@ -489,6 +491,15 @@ template<class T> bool oneOf(const T& t,std::vector<T> const& v) {
 	return indexOf(t,v) != -1;
 }
 
+#ifdef _WIN32
+/* this function counts scale factor immediately
+ * gtk_init spoil this function so to use stored scale factor call
+ * aslovInit(argv0,true) first in main and later call getScaleFactor();
+ */
+PairDoubleDouble aslovGetScaleFactor();
+PairDoubleDouble getScaleFactor();
+#endif
+
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s);
 void removeClass(GtkWidget *w, const gchar *s);
@@ -500,16 +511,24 @@ std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w,bool show);
+//millimeters or inches
+PairDoubleDouble getMonitorSize(bool millimeters=true);
+double getMonitorDiagonal(bool millimeters=true);
+PairDoubleDouble getDPI();
+double getHorizontalDPI();
 double getVerticalDPI();
-int ptToPx(double pt);
 
 enum DRAW_TEXT{
 	DRAW_TEXT_BEGIN,DRAW_TEXT_CENTER,DRAW_TEXT_END
 };
+//setFont(cr, "Times New Roman", 22,CAIRO_FONT_SLANT_NORMAL,
+//		CAIRO_FONT_WEIGHT_NORMAL);
 void setFont(cairo_t *cr, const char *family, int height,
 		cairo_font_slant_t slant, cairo_font_weight_t weight);
 void setFont(cairo_t *cr, int height);
 void drawText(cairo_t *cr, std::string const &s, double x, double y,
+		DRAW_TEXT optionx, DRAW_TEXT optiony);
+void drawMarkup(cairo_t *cr, std::string text, double x, double y,
 		DRAW_TEXT optionx, DRAW_TEXT optiony);
 void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
 		DRAW_TEXT optionx, DRAW_TEXT optiony);
@@ -524,7 +543,7 @@ double timeElapse(clock_t begin);
 std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
-void setLocale();
+void setNumericLocale();
 //"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
 std::string normalize(std::string const& s);
 
