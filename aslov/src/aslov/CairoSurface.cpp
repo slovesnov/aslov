@@ -68,6 +68,7 @@ void CairoSurface::create(const std::string &path) {
 	//should be utf8 path
 	free();
 	m_surface=cairo_image_surface_create_from_png(path.c_str());
+	m_cairo = cairo_create(m_surface);
 }
 
 int CairoSurface::width() const {
