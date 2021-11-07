@@ -36,9 +36,9 @@
 
 
 static std::string applicationName, applicationPath;
+#ifndef NOGTK
 static std::string fontFamily;
 static int fontHeight;
-#ifndef NOGTK
 static cairo_font_slant_t fontSlant;
 static cairo_font_weight_t fontWeight;
 #endif
