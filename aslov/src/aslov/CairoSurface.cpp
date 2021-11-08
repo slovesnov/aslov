@@ -83,4 +83,27 @@ CSize CairoSurface::size() const {
 	return {width(),height()};
 }
 
+void CairoSurface::copy(CairoSurface &dest) {
+	auto d=dest.cairo();
+	cairo_set_source_surface(d, surface(), 0, 0);
+	cairo_paint(d);
+}
+
+void CairoSurface::copy(CairoSurface &dest, const CRect &r) {
+	copy(dest, r.left, r.top, r.width(), r.height(), r.left, r.top);
+}
+
+void CairoSurface::copy(CairoSurface &dest, int destx, int desty, int width,
+		int height)  {
+	copy(dest, destx, desty, width, height, destx, desty);
+}
+
+void CairoSurface::copy(CairoSurface &dest, int destx, int desty,
+		int width, int height, int sourcex, int sourcey)  {
+	auto d=dest.cairo();
+	cairo_set_source_surface(d, surface(), destx - sourcex, desty - sourcey);
+	cairo_rectangle(d, destx, desty, width, height);
+	cairo_fill(d);
+}
+
 #endif //NOGTK

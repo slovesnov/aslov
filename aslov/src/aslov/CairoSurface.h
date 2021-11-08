@@ -13,7 +13,7 @@
 
 #ifndef NOGTK
 #include <gtk/gtk.h>
-#include "CSize.h"
+#include "CRect.h"
 
 class CairoSurface {
 	cairo_t *m_cairo;
@@ -34,6 +34,13 @@ public:
 	int width()const;
 	int height()const;
 	CSize size()const;
+
+	void copy(CairoSurface &dest);
+	void copy(CairoSurface &dest, CRect const &r);
+	void copy(CairoSurface &dest, int destx, int desty, int width, int height);
+	void copy(CairoSurface &dest, int destx, int desty, int width, int height,
+			int sourcex, int sourcey);
+
 /*
 	cairo_t*& cairo1(){
 		return m_cairo;
