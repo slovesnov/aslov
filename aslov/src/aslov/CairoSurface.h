@@ -24,6 +24,9 @@ public:
 	CairoSurface();
 	CairoSurface(int width, int height);
 	CairoSurface(CSize const &size);
+	CairoSurface & operator=(const CairoSurface&) = delete;
+	CairoSurface(const CairoSurface&) = delete;
+
 	void create(int width, int height);
 	void create(CSize const &size);
 	void create(std::string const &path);
