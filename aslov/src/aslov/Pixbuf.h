@@ -26,6 +26,13 @@ public:
 	Pixbuf(std::string const &path);
 	void set(const char* path);
 	void set(std::string const &path);
+	void set(GdkPixbuf* pb);
+
+	void operator=(const char* path);
+	void operator=(std::string const &path);
+	void operator=(GdkPixbuf* pb);
+
+	operator GdkPixbuf*();
 
 	virtual ~Pixbuf();
 

@@ -53,12 +53,35 @@ CSize Pixbuf::size() const {
 }
 
 void Pixbuf::set(const char *path) {
+	free();
 	p=gdk_pixbuf_new_from_file(path, NULL);
 	assert(p);
 }
 
 void Pixbuf::set(const std::string &path) {
 	set(path.c_str());
+}
+
+void Pixbuf::set(GdkPixbuf* pb){
+	free();
+	p=pb;
+}
+
+
+void Pixbuf::operator =(const char *path) {
+	set(path);
+}
+
+void Pixbuf::operator =(const std::string &path) {
+	set(path);
+}
+
+Pixbuf::operator GdkPixbuf*() {
+	return p;
+}
+
+void Pixbuf::operator =(GdkPixbuf *pb) {
+	set(pb);
 }
 
 #endif

@@ -56,6 +56,7 @@ void CairoSurface::create(const CSize &size) {
 	create(size.cx, size.cy);
 }
 
+/*
 cairo_t* CairoSurface::cairo() {
 	return m_cairo;
 }
@@ -63,6 +64,7 @@ cairo_t* CairoSurface::cairo() {
 cairo_surface_t* CairoSurface::surface() {
 	return m_surface;
 }
+*/
 
 void CairoSurface::create(const std::string &path) {
 	//from https://www.cairographics.org/manual/cairo-PNG-Support.html
@@ -85,8 +87,8 @@ CSize CairoSurface::size() const {
 }
 
 void CairoSurface::copy(CairoSurface &dest) {
-	auto d=dest.cairo();
-	cairo_set_source_surface(d, surface(), 0, 0);
+	cairo_t* d=dest;
+	cairo_set_source_surface(d, m_surface, 0, 0);
 	cairo_paint(d);
 }
 
@@ -101,10 +103,18 @@ void CairoSurface::copy(CairoSurface &dest, int destx, int desty, int width,
 
 void CairoSurface::copy(CairoSurface &dest, int destx, int desty,
 		int width, int height, int sourcex, int sourcey)  {
-	auto d=dest.cairo();
-	cairo_set_source_surface(d, surface(), destx - sourcex, desty - sourcey);
+	cairo_t* d=dest;
+	cairo_set_source_surface(d, m_surface, destx - sourcex, desty - sourcey);
 	cairo_rectangle(d, destx, desty, width, height);
 	cairo_fill(d);
+}
+
+CairoSurface::operator cairo_t*() {
+	return m_cairo;
+}
+
+CairoSurface::operator cairo_surface_t*() {
+	return m_surface;
 }
 
 #endif //NOGTK

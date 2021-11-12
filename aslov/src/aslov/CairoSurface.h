@@ -32,8 +32,8 @@ public:
 	void create(CSize const &size);
 	void create(std::string const &path);
 	virtual ~CairoSurface();
-	cairo_t* cairo();
-	cairo_surface_t* surface();
+//	cairo_t* cairo();
+//	cairo_surface_t* surface();
 
 	int width()const;
 	int height()const;
@@ -44,6 +44,9 @@ public:
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height);
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height,
 			int sourcex, int sourcey);
+
+	operator cairo_t *();
+	operator cairo_surface_t *();
 
 /*
 	cairo_t*& cairo1(){
