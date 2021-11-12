@@ -501,29 +501,6 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 
 //BEGIN pixbuf functions
 #ifndef NOGTK
-void getPixbufWH(GdkPixbuf *p,int&w,int&h){
-	w = gdk_pixbuf_get_width(p);
-	h = gdk_pixbuf_get_height(p);
-}
-
-void getPixbufWH(const char*s,int&w,int&h){
-	GdkPixbuf* p = pixbuf(s);
-	assert(p);
-	getPixbufWH(p, w, h);
-	g_object_unref(p);
-}
-
-void getPixbufWH(std::string const& s,int&w,int&h){
-	getPixbufWH(s.c_str(),w,h);
-}
-
-
-void free(GdkPixbuf*&p){
-	if (p) {
-		g_object_unref(p);
-		p = nullptr;
-	}
-}
 
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 		int height, int sourcex, int sourcey) {

@@ -420,10 +420,6 @@ template<class T>void delete2dArray(T **p, int dimension1){
 
 //BEGIN pixbuf/image functions
 #ifndef NOGTK
-void getPixbufWH(GdkPixbuf *p,int&w,int&h);
-void getPixbufWH(const char*s,int&w,int&h);
-void getPixbufWH(std::string const&s,int&w,int&h);
-void free(GdkPixbuf*&p);
 
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 		int height, int sourcex, int sourcey);

@@ -24,6 +24,7 @@ public:
 	Pixbuf();
 	Pixbuf(const char* path);
 	Pixbuf(std::string const &path);
+	Pixbuf(GdkPixbuf* pb);
 	void set(const char* path);
 	void set(std::string const &path);
 	void set(GdkPixbuf* pb);
@@ -42,6 +43,8 @@ public:
 	int width()const;
 	int height()const;
 	CSize size()const;
+
+	void createRGB(int width,int height);
 };
 
 #endif /* ASLOV_PIXBUF_H_ */

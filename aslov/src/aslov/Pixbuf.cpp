@@ -33,6 +33,10 @@ Pixbuf::Pixbuf(const std::string &path) {
 	set(path);
 }
 
+Pixbuf::Pixbuf(GdkPixbuf* pb){
+	p=pb;
+}
+
 void Pixbuf::free() {
 	if (p) {
 		g_object_unref(p);
@@ -82,6 +86,11 @@ Pixbuf::operator GdkPixbuf*() {
 
 void Pixbuf::operator =(GdkPixbuf *pb) {
 	set(pb);
+}
+
+void Pixbuf::createRGB(int width, int height) {
+	free();
+	p=gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
 }
 
 #endif
