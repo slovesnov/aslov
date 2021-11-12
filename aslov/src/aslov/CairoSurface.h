@@ -8,10 +8,11 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #ifndef ASLOV_CAIROSURFACE_H_
 #define ASLOV_CAIROSURFACE_H_
 
-#ifndef NOGTK
 #include <gtk/gtk.h>
 #include "CRect.h"
 
@@ -55,6 +56,6 @@ public:
 */
 
 };
-#endif //NOGTK
 
 #endif /* ASLOV_CAIROSURFACE_H_ */
+#endif

@@ -7,6 +7,7 @@
  *           E-mail: slovesnov@yandex.ru
  *         homepage: slovesnov.users.sourceforge.net
  */
+#ifndef NOGTK
 
 #ifndef CRECT_H_
 #define CRECT_H_
@@ -100,3 +101,4 @@ public:
 std::ostream& operator<<(std::ostream& os, const CRect& a);
 
 #endif /* CRECT_H_ */
+#endif

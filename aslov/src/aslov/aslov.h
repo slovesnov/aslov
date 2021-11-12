@@ -25,7 +25,10 @@
 #endif
 #ifndef NOGTK
 #include <gtk/gtk.h>
+#include "CairoSurface.h" //CRect,CSize,CPoint
+#include "Pixbuf.h"
 #endif
+
 
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
  * default macro value is 0 so

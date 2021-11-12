@@ -8,14 +8,57 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
+#include <cassert>
+
+#include "aslov.h"
 #include "Pixbuf.h"
 
 Pixbuf::Pixbuf() {
-	// TODO Auto-generated constructor stub
-
+	p=nullptr;
 }
 
 Pixbuf::~Pixbuf() {
-	// TODO Auto-generated destructor stub
+	free();
 }
 
+Pixbuf::Pixbuf(const char *path) {
+	p=nullptr;
+	set(path);
+}
+
+Pixbuf::Pixbuf(const std::string &path) {
+	p=nullptr;
+	set(path);
+}
+
+void Pixbuf::free() {
+	if (p) {
+		g_object_unref(p);
+		p = nullptr;
+	}
+}
+
+int Pixbuf::width() const {
+	return gdk_pixbuf_get_width(p);
+}
+
+int Pixbuf::height() const {
+	return gdk_pixbuf_get_height(p);
+}
+
+CSize Pixbuf::size() const {
+	return {width(),height()};
+}
+
+void Pixbuf::set(const char *path) {
+	p=gdk_pixbuf_new_from_file(path, NULL);
+	assert(p);
+}
+
+void Pixbuf::set(const std::string &path) {
+	set(path.c_str());
+}
+
+#endif

@@ -8,6 +8,8 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #include "CRect.h"
 
 std::string CRect::toString() const {
@@ -21,3 +23,4 @@ std::ostream& operator<<(std::ostream& os, const CRect& a){
     return os;
 }
 
+#endif

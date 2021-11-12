@@ -8,8 +8,11 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #ifndef CPOINT_H_
 #define CPOINT_H_
+
 
 #include <gtk/gtk.h>
 #include <ostream>
@@ -48,3 +51,4 @@ public:
 std::ostream& operator<<(std::ostream& os, const CPoint& a);
 
 #endif /* CPOINT_H_ */
+#endif

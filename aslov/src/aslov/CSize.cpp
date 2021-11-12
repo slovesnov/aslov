@@ -8,6 +8,8 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #include "CSize.h"
 
 std::string CSize::toString()const{
@@ -19,3 +21,4 @@ std::ostream& operator<<(std::ostream& os, const CSize& a){
     return os;
 }
 
+#endif

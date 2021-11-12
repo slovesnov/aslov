@@ -517,7 +517,7 @@ void getPixbufWH(std::string const& s,int&w,int&h){
 void free(GdkPixbuf*&p){
 	if (p) {
 		g_object_unref(p);
-		p = 0;
+		p = nullptr;
 	}
 }
 

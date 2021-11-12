@@ -8,6 +8,8 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #include "CPoint.h"
 
 std::string CPoint::toString() const {
@@ -19,3 +21,4 @@ std::ostream& operator<<(std::ostream& os, const CPoint& a){
     return os;
 }
 
+#endif

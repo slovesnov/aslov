@@ -8,10 +8,11 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #include <cassert>
 #include "CairoSurface.h"
 
-#ifndef NOGTK
 void CairoSurface::init() {
 	m_cairo = nullptr;
 	m_surface = nullptr;

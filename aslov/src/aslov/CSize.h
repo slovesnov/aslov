@@ -8,6 +8,8 @@
  *         homepage: slovesnov.users.sourceforge.net
  */
 
+#ifndef NOGTK
+
 #ifndef CSIZE_H_
 #define CSIZE_H_
 
@@ -41,3 +43,4 @@ std::ostream& operator<<(std::ostream& os, const CSize& a);
 
 
 #endif /* CSIZE_H_ */
+#endif
