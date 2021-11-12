@@ -322,6 +322,10 @@ bool startsWith(const std::string& s, const std::string & begin){
 
 bool endsWith(std::string const &s, std::string const &e) {
 	auto i = e.length();
+	auto l= s.length();
+	if(l<i){
+		return false;
+	}
 	return s.compare(s.length() - i, i, e) == 0;
 }
 
