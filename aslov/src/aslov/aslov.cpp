@@ -10,6 +10,7 @@
 
 #include <cstring>
 #include <cmath>
+#include <random>
 #include "aslov.h"
 
 #ifdef NOGTK
@@ -867,6 +868,25 @@ double timeElapse(clock_t begin){
 	return double(clock() - begin) / CLOCKS_PER_SEC;
 }
 
+std::string secondsToString(double seconds){
+	int h,m,s,t=int(seconds);
+	h = t/3600;
+	t = t%3600;
+	m = t/60;
+	t = t%60;
+	s = t;
+	if(h>0){
+		return format("%d:%02d:%02d",h,m,s);
+	}
+	else{
+		return format("%d:%02d",m,s);
+	}
+}
+
+std::string secondsToString(clock_t end,clock_t begin){
+	return secondsToString(double(end - begin) / CLOCKS_PER_SEC);
+}
+
 std::string trim(const std::string& s) {
 	std::string q = ltrim(s);
 	return rtrim(q);
@@ -901,4 +921,20 @@ std::string normalize(std::string const& s){
 		p1--;
 	}
 	return s.substr(0,p1+1);
+}
+
+//https://stackoverflow.com/questions/2704521/generate-random-double-numbers-in-c/9324796
+double randomDouble(double from, double to) {
+	thread_local static std::mt19937 gen(std::random_device { }());
+
+	using dist_type = typename std::conditional
+	<
+	std::is_integral<double>::value
+	, std::uniform_int_distribution<double>
+	, std::uniform_real_distribution<double>
+	>::type;
+
+	thread_local static dist_type dist;
+
+	return dist(gen, typename dist_type::param_type { from, to });
 }

@@ -471,6 +471,10 @@ template<class T> int indexOf(const T& t,std::vector<T> const& v) {
 
 int indexOfNoCase(const char *t,const char *v[], int size );
 int indexOfNoCase(const std::string t,const char *v[], int size);
+/* also works with int indexOf(const char t,const char* p);
+ * in this case lase \0 symbols isn't matched because const char* -> string
+ * and string hasn't terminal zero symbol. This is good.
+ */
 int indexOf(const char t,const std::string& v);
 
 //template <class T, class... V>bool oneOfV(T const& t, V const&... v){
@@ -539,12 +543,15 @@ PangoLayout* createPangoLayout(cairo_t *cr,std::string text);
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);
+std::string secondsToString(double seconds);
+std::string secondsToString(clock_t end,clock_t begin);
 std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
 void setNumericLocale();
 //"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
 std::string normalize(std::string const& s);
+double randomDouble(double from, double to);
 
 
 #ifdef __GNUC__
