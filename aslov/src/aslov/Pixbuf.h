@@ -45,6 +45,8 @@ public:
 	CSize size()const;
 
 	void createRGB(int width,int height);
+	void savePng(std::string const &path);
+	void saveJpg(std::string const &path,int quality=100);
 };
 
 #endif /* ASLOV_PIXBUF_H_ */

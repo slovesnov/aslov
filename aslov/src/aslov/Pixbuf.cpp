@@ -93,4 +93,13 @@ void Pixbuf::createRGB(int width, int height) {
 	p=gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
 }
 
+void Pixbuf::savePng(const std::string &path) {
+	gdk_pixbuf_save(p, path.c_str(), "png", NULL, NULL);
+}
+
+void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/) {
+	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality",
+			"100", NULL);
+}
+
 #endif
