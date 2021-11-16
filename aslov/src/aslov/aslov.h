@@ -77,20 +77,20 @@ std::string formats(const std::string& separator,A const &a, B const &... b) {
 	return c.str();
 }
 
-template<typename A, typename ... B>
-std::string formats(const char separator,A const &a, B const &... b) {
-	return formats(std::string(1,separator),a,b...);
+template<typename ... A>
+std::string formats(const char separator,A const &...a) {
+	return formats(std::string(1,separator),a...);
 }
 
-template<typename A, typename ... B>
-std::string formatz(A const &a, B const &... b) {
-	return formats("",a,b...);
+template<typename ... A>
+std::string formatz(A const &...a) {
+	return formats("",a...);
 }
 
 //format to string example forma(1234,"some")
-template<typename A, typename ... B>
-std::string formata(A const &a, B const &... b) {
-	return formats(" ",a,b...);
+template<typename ... A>
+std::string formata(A const &...a) {
+	return formats(" ",a...);
 }
 
 #define forma formata
@@ -107,14 +107,14 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 		const char *fu);
 
 
-template<typename A, typename ... B>
-void aslovPrints(const std::string& separator,A const &a, B const &... b) {
-	g_print("%s",formats(separator,a,b...).c_str());
+template<typename ... A>
+void aslovPrints(const std::string& separator, A const &... a) {
+	g_print("%s",formats(separator,a...).c_str());
 }
 
-template<typename A, typename ... B>
-void aslovPrints(const char separator,A const &a, B const &... b) {
-	aslovPrints(std::string(1,separator),a,b...);
+template<typename ... A>
+void aslovPrints(const char separator,A const &...a) {
+	aslovPrints(std::string(1,separator),a...);
 }
 
 //prints('#',1,2,"ab") -> printf("1#2#ab") or prints("@@",1,2,"ab") -> printf("1@@2@@ab")
