@@ -93,13 +93,20 @@ void Pixbuf::createRGB(int width, int height) {
 	p=gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
 }
 
-void Pixbuf::savePng(const std::string &path) {
+void Pixbuf::savePng(const std::string &path)const {
 	gdk_pixbuf_save(p, path.c_str(), "png", NULL, NULL);
 }
 
-void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/) {
+void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/)const {
 	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality",
 			"100", NULL);
+}
+
+GdkPixbuf* Pixbuf::saturate(float f) const {
+	GdkPixbuf*pb= gdk_pixbuf_copy(p);
+	//desaturate image
+	gdk_pixbuf_saturate_and_pixelate(p, pb, f, false);
+	return pb;
 }
 
 #endif

@@ -364,7 +364,7 @@ std::string joinS(const char separator,T&& t,P&& ... p){
 
 //separator can be default so use as 2nd parameter. It differs from other functions arguments order.
 template<typename T>
-std::string joinV(std::vector<T> const &v, const char separator=' '){
+std::string joinV(std::vector<T> const &v, std::string const& separator=" "){
 	std::stringstream c;
 	bool f=true;
 	for(auto&a:v){
@@ -377,6 +377,11 @@ std::string joinV(std::vector<T> const &v, const char separator=' '){
 		c<<a;
 	}
 	return c.str();
+}
+
+template<typename T>
+std::string joinV(std::vector<T> const &v, const char separator){
+	return joinV(v,std::string(1, separator));
 }
 
 //separator can be default so use as 2nd parameter. It differs from other functions arguments order.

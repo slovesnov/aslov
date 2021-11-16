@@ -45,8 +45,9 @@ public:
 	CSize size()const;
 
 	void createRGB(int width,int height);
-	void savePng(std::string const &path);
-	void saveJpg(std::string const &path,int quality=100);
+	void savePng(std::string const &path)const;
+	void saveJpg(std::string const &path,int quality=100)const;
+	GdkPixbuf* saturate(float f)const;
 };
 
 #endif /* ASLOV_PIXBUF_H_ */
