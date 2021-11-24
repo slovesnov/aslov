@@ -938,3 +938,11 @@ double randomDouble(double from, double to) {
 
 	return dist(gen, typename dist_type::param_type { from, to });
 }
+
+void preventThreadSleep(){
+#ifdef _WIN32
+	//prevents windows 10 threads sleep
+	//stackoverflow.com/questions/34836406/how-to-prevent-windows-from-going-to-sleep-when-my-c-application-is-running
+	SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
+#endif
+}

@@ -557,7 +557,7 @@ void setNumericLocale();
 //"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
 std::string normalize(std::string const& s);
 double randomDouble(double from, double to);
-
+void preventThreadSleep();
 
 #ifdef __GNUC__
 template <class T>std::string aslovTypeName(){
