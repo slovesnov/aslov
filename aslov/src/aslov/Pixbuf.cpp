@@ -98,8 +98,9 @@ void Pixbuf::savePng(const std::string &path)const {
 }
 
 void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/)const {
+	auto s=std::to_string(quality);
 	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality",
-			"100", NULL);
+			s.c_str(), NULL);
 }
 
 GdkPixbuf* Pixbuf::saturate(float f) const {
