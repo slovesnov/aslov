@@ -44,6 +44,8 @@ public:
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height);
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height,
 			int sourcex, int sourcey);
+	void copyToCairo(cairo_t * cr, int destx, int desty, int width, int height,
+			int sourcex, int sourcey);
 
 	operator cairo_t *();
 	operator cairo_surface_t *();

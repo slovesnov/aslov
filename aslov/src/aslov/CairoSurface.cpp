@@ -104,10 +104,19 @@ void CairoSurface::copy(CairoSurface &dest, int destx, int desty, int width,
 void CairoSurface::copy(CairoSurface &dest, int destx, int desty,
 		int width, int height, int sourcex, int sourcey)  {
 	cairo_t* d=dest;
-	cairo_set_source_surface(d, m_surface, destx - sourcex, desty - sourcey);
-	cairo_rectangle(d, destx, desty, width, height);
-	cairo_fill(d);
+	copyToCairo(d, destx, desty, width, height, sourcex, sourcey);
+//	cairo_set_source_surface(d, m_surface, destx - sourcex, desty - sourcey);
+//	cairo_rectangle(d, destx, desty, width, height);
+//	cairo_fill(d);
 }
+
+void CairoSurface::copyToCairo(cairo_t * cr, int destx, int desty, int width, int height,
+		int sourcex, int sourcey){
+	cairo_set_source_surface(cr, m_surface, destx - sourcex, desty - sourcey);
+	cairo_rectangle(cr, destx, desty, width, height);
+	cairo_fill(cr);
+}
+
 
 CairoSurface::operator cairo_t*() {
 	return m_cairo;
