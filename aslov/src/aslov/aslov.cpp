@@ -839,6 +839,7 @@ PangoLayout* createPangoLayout(cairo_t *cr,std::string text){
 #endif
 
 int getNumberOfCores() {
+	//g_get_num_processors()
 #ifdef _WIN32 //sometimes this function is uses without using gtk library so use _WIN32 instead of G_OS_WIN32
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
