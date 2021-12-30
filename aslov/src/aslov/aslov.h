@@ -204,13 +204,14 @@ const std::string fileGetContent(const std::string& path);
 //BEGIN config functions
 #ifndef NOGTK
 std::string getConfigPath();
+std::string getConfigPathLocaled();
 bool loadConfig(MapStringString&map);
 #define WRITE_CONFIG(T,V, ...) aslovWriteConfig(T,SIZE(T),V,##__VA_ARGS__);
 
 template <typename ... T>
 void aslovWriteConfig(const std::string tags[],const int size,T && ... p){
     assert(size==sizeof...(T));
-	std::ofstream f(getConfigPath());
+	std::ofstream f(getConfigPathLocaled());
 	assert(f.is_open());
     int i=0;
     ([&] (auto & a){

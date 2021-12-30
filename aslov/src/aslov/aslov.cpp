@@ -241,7 +241,7 @@ const std::string writableFileGetContents(const std::string& name){
 #endif
 
 const std::string fileGetContent(const std::string& path){
-	std::ifstream t(path);
+	std::ifstream t(utf8ToLocale(path));
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	return buffer.str();
@@ -255,8 +255,12 @@ std::string getConfigPath() {
 	return getWritableFilePath("config.txt");
 }
 
+std::string getConfigPathLocaled() {
+	return utf8ToLocale(getConfigPath());
+}
+
 bool loadConfig(MapStringString&map){
-	std::string s=utf8ToLocale(getConfigPath());
+	std::string s=getConfigPathLocaled();
 	std::ifstream f(s);
 	if(!f.is_open()){//it's ok first time loading
 		return false;
