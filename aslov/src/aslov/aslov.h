@@ -125,7 +125,8 @@ void aslovPrints(const char separator,A const &...a) {
 #define printz(...) aslovPrints("",__VA_ARGS__);
 
 //adding to prints, printa, printz 'n' at the end gives additional "\n"
-#define printsn(...) prints(__VA_ARGS__,"\n")
+//cann't pass "\n" to prints because of separator
+#define printsn(...) prints(__VA_ARGS__)g_print("\n");
 #define printan(...) printa(__VA_ARGS__,"\n")
 #define printzn(...) printz(__VA_ARGS__,"\n")
 
