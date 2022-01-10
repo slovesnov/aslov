@@ -241,7 +241,11 @@ const std::string writableFileGetContents(const std::string& name){
 #endif
 
 const std::string fileGetContent(const std::string& path){
+	#ifdef NOTGK_WITHOUT_ICONV
+	std::ifstream t(path);
+	#else
 	std::ifstream t(utf8ToLocale(path));
+	#endif
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	return buffer.str();
