@@ -198,7 +198,7 @@ std::string getWritableFilePath(const std::string name);
 void writableFileSetContents(const std::string name,const std::string& s);
 const std::string writableFileGetContents(const std::string& name);
 #endif
-const std::string fileGetContent(const std::string& path);
+const std::string fileGetContent(const std::string& path,bool binary=false);
 
 //END application functions
 

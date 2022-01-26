@@ -240,11 +240,13 @@ const std::string writableFileGetContents(const std::string& name){
 }
 #endif
 
-const std::string fileGetContent(const std::string& path){
+const std::string fileGetContent(const std::string& path,bool binary/*=false*/){
+	//in non binary mode change "\r\n" to "\n"
+	auto m=binary ? std::ios::binary : std::ios::in;
 	#ifdef NOTGK_WITHOUT_ICONV
-	std::ifstream t(path);
+	std::ifstream t(path,m);
 	#else
-	std::ifstream t(utf8ToLocale(path));
+	std::ifstream t(utf8ToLocale(path),m);
 	#endif
 	std::stringstream buffer;
 	buffer << t.rdbuf();
