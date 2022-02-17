@@ -14,6 +14,7 @@
 #include "aslov.h"
 
 #ifdef NOGTK
+#include <thread> //std::thread::hardware_concurrency()
 #include <cstdarg>
 #include <sys/stat.h>//getFileSize
 #else
@@ -25,14 +26,9 @@
 #include <iconv.h> //ciconv - error
 #endif
 
-//_WIN32 for win32 & win64 for getNumberOfCores() function, for gtk & notgtk options
+//_WIN32 for win32 & win64 for openURL
 #ifdef _WIN32
 #include <windows.h>
-#elif G_OS_UNIX
-#include <unistd.h>
-#else
-#include <sys/param.h>
-#include <sys/sysctl.h>
 #endif
 
 
@@ -849,29 +845,10 @@ PangoLayout* createPangoLayout(cairo_t *cr,std::string text){
 #endif
 
 int getNumberOfCores() {
-	//g_get_num_processors()
-#ifdef _WIN32 //sometimes this function is uses without using gtk library so use _WIN32 instead of G_OS_WIN32
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo(&sysinfo);
-	return sysinfo.dwNumberOfProcessors;
-#elif G_OS_UNIX
-	//tested ok
-	return sysconf(_SC_NPROCESSORS_ONLN);
+#ifdef NOGTK
+	return std::thread::hardware_concurrency();
 #else
-	//Did not tested
-	int nm[2];
-	size_t len = 4;
-	uint32_t count;
-
-	nm[0] = CTL_HW; nm[1] = HW_AVAILCPU;
-	sysctl(nm, 2, &count, &len, NULL, 0);
-
-	if(count < 1) {
-		nm[1] = HW_NCPU;
-		sysctl(nm, 2, &count, &len, NULL, 0);
-		if(count < 1) {count = 1;}
-	}
-	return count;
+	return g_get_num_processors();
 #endif
 }
 
