@@ -60,11 +60,11 @@ std::string format(const char *f, ...) {
 	return s;
 }
 
-void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
-		const char *fu) {
+void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f, const int l,
+		const char *fu ) {
 	const char *p = strrchr(f, G_DIR_SEPARATOR);
 	p = p ? p + 1 : f;
-	if (toFile) {
+	if (t==ASLOV_OUTPUT_TYPE::FILE) {
 		time_t t = time(NULL);
 		tm *q = localtime(&t);
 		FILE *w = openApplicationLog("a");
@@ -72,7 +72,9 @@ void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int 
 				l, fu, q->tm_hour, q->tm_min, q->tm_sec, q->tm_mday,
 				q->tm_mon + 1, q->tm_year + 1900);
 		fclose(w);
-	} else {
+	} else if(t==ASLOV_OUTPUT_TYPE::STDERR){
+		g_printerr("%-40s %s:%d %s()\n", s.c_str(), p, l, fu);
+	} else{
 		g_print("%-40s %s:%d %s()\n", s.c_str(), p, l, fu);
 	}
 }
@@ -873,6 +875,10 @@ std::string secondsToString(double seconds){
 
 std::string secondsToString(clock_t end,clock_t begin){
 	return secondsToString(double(end - begin) / CLOCKS_PER_SEC);
+}
+
+std::string secondsToString(clock_t begin){
+	return secondsToString(timeElapse(begin));
 }
 
 std::string trim(const std::string& s) {

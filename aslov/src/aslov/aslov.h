@@ -55,6 +55,7 @@
 
 #ifdef NOGTK
 #define g_print printf
+#define g_printerr(...) fprintf(stderr,__VA_ARGS__)
 #define G_DIR_SEPARATOR '\\'
 #define G_DIR_SEPARATOR_S "\\"
 #define G_N_ELEMENTS(arr)		(sizeof (arr) / sizeof ((arr)[0]))
@@ -97,52 +98,101 @@ std::string formata(A const &...a) {
 
 //output info to screen example printl(1234,"some")
 #define printl printai
+#define printel printeai
 
 //output info to screen example println("%d %s",1234,"some")
-#define println(...)  aslovPrintHelp(0,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define println(...)  aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDOUT,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printeln(...)  aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDERR,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 #define printi println("")
+#define printei printeln("")
 
-void aslovPrintHelp(bool toFile, const std::string &s, const char *f, const int l,
+
+enum class ASLOV_OUTPUT_TYPE {
+	STDOUT,STDERR,FILE
+};
+
+void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f, const int l,
 		const char *fu);
 
-
 template<typename ... A>
-void aslovPrints(const std::string& separator, A const &... a) {
-	g_print("%s",formats(separator,a...).c_str());
+void aslovPrints(ASLOV_OUTPUT_TYPE t,const std::string& separator, A const &... a) {
+	if(t==ASLOV_OUTPUT_TYPE::STDERR){
+		g_printerr("%s",formats(separator,a...).c_str());
+	} else{
+		g_print("%s",formats(separator,a...).c_str());
+	}
 }
 
 template<typename ... A>
-void aslovPrints(const char separator,A const &...a) {
-	aslovPrints(std::string(1,separator),a...);
+void aslovPrints(ASLOV_OUTPUT_TYPE t,const char separator,A const &...a) {
+	aslovPrints(t,std::string(1,separator),a...);
 }
 
 //prints('#',1,2,"ab") -> printf("1#2#ab") or prints("@@",1,2,"ab") -> printf("1@@2@@ab")
-#define prints(...) aslovPrints(__VA_ARGS__);
+#define prints(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDOUT,__VA_ARGS__);
 //printa(1,2,"ab") -> printf("1 2 ab")
-#define printa(...) aslovPrints(" ",__VA_ARGS__);
+#define printa(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDOUT," ",__VA_ARGS__);
 //printz(1,2,"ab") -> printf("12ab")
-#define printz(...) aslovPrints("",__VA_ARGS__);
+#define printz(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDOUT,"",__VA_ARGS__);
 
-//adding to prints, printa, printz 'n' at the end gives additional "\n"
-//cann't pass "\n" to prints because of separator
-#define printsn(...) prints(__VA_ARGS__)g_print("\n");
+#define printes(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDERR,__VA_ARGS__);
+#define printea(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDERR," ",__VA_ARGS__);
+#define printez(...) aslovPrints(ASLOV_OUTPUT_TYPE::STDERR,"",__VA_ARGS__);
+
+#define printsn(...) prints(__VA_ARGS__,"\n")
 #define printan(...) printa(__VA_ARGS__,"\n")
 #define printzn(...) printz(__VA_ARGS__,"\n")
 
+#define printesn(...) printes(__VA_ARGS__,"\n")
+#define printean(...) printea(__VA_ARGS__,"\n")
+#define printezn(...) printez(__VA_ARGS__,"\n")
+
 //adding to prints, printa, printz 'i' ah the end gives file, line, function info and '\n'
 //printai ~ printl
-#define printsi(...) aslovPrintHelp(0,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
-#define printai(...) aslovPrintHelp(0,formata(__VA_ARGS__),__FILE__,__LINE__,__func__);
-#define printzi(...) aslovPrintHelp(0,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printsi(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDOUT,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printai(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDOUT,formata(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printzi(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDOUT,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
+
+#define printesi(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDERR,formats(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printeai(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDERR,formata(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printezi(...) aslovPrintHelp(ASLOV_OUTPUT_TYPE::STDERR,formatz(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 /* https://stackoverflow.com/questions/1872220/is-it-possible-to-iterate-over-arguments-in-variadic-macros
  * many modifications aslov
  * up to 8 variables printv(a1,a2,a3,a4,a5,a6,a7,a8)
- *
  */
+
 #define ASLOV_PRINT_VARIABLE(a) printan(formatz(#a," = ",a))
 #define ASLOV_PRINT_VARIABLE_I(a) printai(formatz(#a," = ",a))
+#define ASLOV_PRINTE_VARIABLE(a) printean(formatz(#a," = ",a))
+#define ASLOV_PRINTE_VARIABLE_I(a) printeai(formatz(#a," = ",a))
+
+#define ASLOV_CONCATENATE(a, b)   a##b
+#define ASLOV_FOR_EACH_NARG(...) ASLOV_FOR_EACH_NARG_(__VA_ARGS__, ASLOV_FOR_EACH_RSEQ_N())
+#define ASLOV_FOR_EACH_NARG_(...) ASLOV_FOR_EACH_ARG_N(__VA_ARGS__)
+
+#define ASLOV_FOR_EACH_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
+#define ASLOV_FOR_EACH_RSEQ_N() 8, 7, 6, 5, 4, 3, 2, 1, 0
+#define ASLOV_FOR_EACH_1(g,f,x,...) f(x)
+#define ASLOV_FOR_EACH_2(g,f,x,...) g(x)ASLOV_FOR_EACH_1(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_3(g,f,x,...) g(x)ASLOV_FOR_EACH_2(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_4(g,f,x,...) g(x)ASLOV_FOR_EACH_3(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_5(g,f,x,...) g(x)ASLOV_FOR_EACH_4(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_6(g,f,x,...) g(x)ASLOV_FOR_EACH_5(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_7(g,f,x,...) g(x)ASLOV_FOR_EACH_6(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH_8(g,f,x,...) g(x)ASLOV_FOR_EACH_7(g,f,__VA_ARGS__)
+#define ASLOV_FOR_EACH(N,g,f,x,...) ASLOV_CONCATENATE(ASLOV_FOR_EACH_,N)(g,f, x, __VA_ARGS__)
+#define ASLOV_PRINTV(g,f,...) ASLOV_FOR_EACH(ASLOV_FOR_EACH_NARG(__VA_ARGS__),g, f, __VA_ARGS__)
+#define printv(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE,ASLOV_PRINT_VARIABLE,__VA_ARGS__)
+#define printvi(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE,ASLOV_PRINT_VARIABLE_I,__VA_ARGS__)
+#define printev(...) ASLOV_PRINTV(ASLOV_PRINTE_VARIABLE,ASLOV_PRINTE_VARIABLE,__VA_ARGS__)
+#define printevi(...) ASLOV_PRINTV(ASLOV_PRINTE_VARIABLE,ASLOV_PRINTE_VARIABLE_I,__VA_ARGS__)
+
+/*
+#define ASLOV_PRINT_VARIABLE(a) printan(formatz(#a," = ",a))
+#define ASLOV_PRINT_VARIABLE_I(a) printai(formatz(#a," = ",a))
+
 #define ASLOV_CONCATENATE(a, b)   a##b
 #define ASLOV_FOR_EACH_NARG(...) ASLOV_FOR_EACH_NARG_(__VA_ARGS__, ASLOV_FOR_EACH_RSEQ_N())
 #define ASLOV_FOR_EACH_NARG_(...) ASLOV_FOR_EACH_ARG_N(__VA_ARGS__)
@@ -161,12 +211,12 @@ void aslovPrints(const char separator,A const &...a) {
 #define ASLOV_PRINTV(f,...) ASLOV_FOR_EACH(ASLOV_FOR_EACH_NARG(__VA_ARGS__), f, __VA_ARGS__)
 #define printv(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE,__VA_ARGS__)
 #define printvi(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE_I,__VA_ARGS__)
-
+*/
 //output info to log file printlog("%d %s",1234,"some")
-#define printlog(...)  aslovPrintHelp(1,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printlog(...)  aslovPrintHelp(ASLOV_OUTPUT_TYPE::FILE,format(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 //output info  to log file printlo(1234,"some")
-#define printlo(...)  aslovPrintHelp(1,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
+#define printlo(...)  aslovPrintHelp(ASLOV_OUTPUT_TYPE::FILE,forma(__VA_ARGS__),__FILE__,__LINE__,__func__);
 
 #define printlogi printlog("")
 
@@ -552,6 +602,7 @@ int getNumberOfCores();
 double timeElapse(clock_t begin);
 std::string secondsToString(double seconds);
 std::string secondsToString(clock_t end,clock_t begin);
+std::string secondsToString(clock_t begin);
 std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
