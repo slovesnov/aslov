@@ -393,6 +393,19 @@ bool cmp(const std::string& a, const char* b) {
 	return cmp(a.c_str(), b);
 }
 
+bool contains(const std::string& a, const char b){
+	return a.find(b)!=std::string::npos;
+}
+
+bool contains(const std::string& a, const char* b){
+	return a.find(b)!=std::string::npos;
+}
+
+bool contains(const std::string& a, const std::string& b){
+	return a.find(b)!=std::string::npos;
+}
+
+
 #ifdef NOTGK_WITH_ICONV //local function should be before localeToUtf8 & utf8ToLocale
 std::string encodeIconv(const std::string& s, bool toUtf8) {
 	std::string r;

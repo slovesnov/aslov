@@ -376,6 +376,9 @@ bool cmpnocase(const std::string& a, const char* b);
 bool cmpnocase(const char* a, const char* b);
 bool cmp(const char* a, const char* b);
 bool cmp(const std::string& a, const char* b);
+bool contains(const std::string& a, const char b);
+bool contains(const std::string& a, const char* b);
+bool contains(const std::string& a, const std::string& b);
 
 
 #ifndef NOTGK_WITHOUT_ICONV
@@ -419,7 +422,7 @@ template<typename T>
 std::string joinV(std::vector<T> const &v, std::string const& separator=" "){
 	std::stringstream c;
 	bool f=true;
-	for(auto&a:v){
+	for(auto const&a:v){
 		if(f){
 			f=false;
 		}
