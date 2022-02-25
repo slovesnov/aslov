@@ -610,6 +610,7 @@ std::string trim(const std::string& s);
 std::string ltrim(const std::string& s);
 std::string rtrim(const std::string& s);
 void setNumericLocale();
+void setAllLocales();
 //"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
 std::string normalize(std::string const& s);
 double randomDouble(double from, double to);

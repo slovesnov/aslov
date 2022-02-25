@@ -917,6 +917,10 @@ void setNumericLocale(){
 	setlocale(LC_NUMERIC, "C");
 }
 
+void setAllLocales(){
+	setlocale(LC_ALL, "C");
+}
+
 std::string normalize(std::string const& s){
 	std::string::size_type p,p1=0;
 	if ((p= s.find('.')) == std::string::npos) {
