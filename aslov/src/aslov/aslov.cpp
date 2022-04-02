@@ -592,6 +592,10 @@ int indexOf(const char t,const std::string& v){
 	return i==std::string::npos ? -1 : i;
 }
 
+bool oneOfChar(char const& t, const std::string& v){
+	return indexOf(t,v)!=-1;
+}
+
 #ifdef _WIN32
 //Note this function should be called before gtk_init
 PairDoubleDouble aslovGetScaleFactor(){

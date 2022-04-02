@@ -532,10 +532,12 @@ template<class T> int indexOf(const T& t,std::vector<T> const& v) {
 int indexOfNoCase(const char *t,const char *v[], int size );
 int indexOfNoCase(const std::string t,const char *v[], int size);
 /* also works with int indexOf(const char t,const char* p);
- * in this case lase \0 symbols isn't matched because const char* -> string
+ * in this case last \0 symbols isn't matched because const char* -> string
  * and string hasn't terminal zero symbol. This is good.
  */
 int indexOf(const char t,const std::string& v);
+
+bool oneOfChar(char const& t, const std::string& v);
 
 //template <class T, class... V>bool oneOfV(T const& t, V const&... v){
 //	return ((t== v)|| ...);
