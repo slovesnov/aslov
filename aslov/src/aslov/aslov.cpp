@@ -592,9 +592,17 @@ int indexOf(const char t,const std::string& v){
 	return i==std::string::npos ? -1 : i;
 }
 
-bool oneOfChar(char const& t, const std::string& v){
+bool oneOf(char const& t, std::string const& v){
 	return indexOf(t,v)!=-1;
 }
+
+bool oneOf(char const& t, char const* v){
+	return oneOf(t,std::string(v));
+}
+
+//bool oneOfChar(char const& t, const std::string& v){
+//	return indexOf(t,v)!=-1;
+//}
 
 #ifdef _WIN32
 //Note this function should be called before gtk_init
