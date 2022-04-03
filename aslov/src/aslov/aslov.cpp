@@ -592,7 +592,7 @@ int indexOf(const char t,const std::string& v){
 	return i==std::string::npos ? -1 : i;
 }
 
-bool oneOf(char const& t, std::string const& v){
+bool oneOf(char const& t, const std::string& v){
 	return indexOf(t,v)!=-1;
 }
 

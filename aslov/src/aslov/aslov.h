@@ -537,7 +537,7 @@ int indexOfNoCase(const std::string t,const char *v[], int size);
  */
 int indexOf(const char t,const std::string& v);
 
-bool oneOf(char const& t, std::string const& v);
+bool oneOf(char const& t, const std::string & v);
 bool oneOf(char const& t, char const* v);
 
 //template <class T, class... V>bool oneOfV(T const& t, V const&... v){
