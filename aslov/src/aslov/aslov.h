@@ -568,7 +568,11 @@ PairDoubleDouble getScaleFactor();
 
 #ifndef NOGTK
 void addClass(GtkWidget *w, const gchar *s);
+void addClass(GtkWidget *w, const std::string & s);
 void removeClass(GtkWidget *w, const gchar *s);
+void removeClass(GtkWidget *w, const std::string & s);
+void addRemoveClass(GtkWidget *w, const gchar *s,bool add);
+void addRemoveClass(GtkWidget *w, const std::string & s,bool add);
 void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
 void destroy(cairo_t* p);

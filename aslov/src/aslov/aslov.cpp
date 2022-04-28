@@ -635,10 +635,32 @@ PairDoubleDouble getScaleFactor(){
 #endif
 
 #ifndef NOGTK
+void addClass(GtkWidget *w, const std::string & s) {
+	addClass(w,s.c_str());
+}
+
 void addClass(GtkWidget *w, const gchar *s) {
 	GtkStyleContext *context;
 	context = gtk_widget_get_style_context(w);
 	gtk_style_context_add_class(context, s);
+}
+
+void removeClass(GtkWidget *w, const std::string & s) {
+	removeClass(w,s.c_str());
+}
+
+void addRemoveClass(GtkWidget *w, const gchar *s,bool add){
+	GtkStyleContext *context;
+	context = gtk_widget_get_style_context(w);
+	if (add) {
+		gtk_style_context_add_class(context, s);
+	} else {
+		gtk_style_context_remove_class(context, s);
+	}
+}
+
+void addRemoveClass(GtkWidget *w, const std::string & s,bool add){
+	addRemoveClass(w,s.c_str(),add);
 }
 
 void removeClass(GtkWidget *w, const gchar *s) {
