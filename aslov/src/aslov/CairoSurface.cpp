@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include "CairoSurface.h"
+#include "Pixbuf.h"
 
 void CairoSurface::init() {
 	m_cairo = nullptr;
@@ -117,13 +118,24 @@ void CairoSurface::copyToCairo(cairo_t * cr, int destx, int desty, int width, in
 	cairo_fill(cr);
 }
 
-
 CairoSurface::operator cairo_t*() {
 	return m_cairo;
 }
 
 CairoSurface::operator cairo_surface_t*() {
 	return m_surface;
+}
+
+void CairoSurface::savePng(const std::string &path) const {
+	cairo_surface_write_to_png (m_surface, path.c_str());
+}
+
+GdkPixbuf* CairoSurface::toPixbuf(int startx, int starty, int width, int height) {
+	return gdk_pixbuf_get_from_surface(m_surface,startx, starty, width, height);
+}
+
+GdkPixbuf* CairoSurface::toPixbuf() {
+	return toPixbuf(0,0,width(),height());
 }
 
 #endif //NOGTK

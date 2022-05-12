@@ -553,6 +553,10 @@ template<class T> bool oneOf(const T &t, T const v[], int size) {
 	return indexOf(t,v, size) != -1;
 }
 
+template<class T> bool oneOf(const T &t, T v[], int size) {
+	return indexOf(t,v, size) != -1;
+}
+
 template<class T> bool oneOf(const T& t,std::vector<T> const& v) {
 	return indexOf(t,v) != -1;
 }

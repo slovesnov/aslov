@@ -49,6 +49,10 @@ public:
 
 	operator cairo_t *();
 	operator cairo_surface_t *();
+	void savePng(std::string const &path)const;
+
+	GdkPixbuf* toPixbuf(int startx, int starty, int width, int height);
+	GdkPixbuf* toPixbuf();
 
 /*
 	cairo_t*& cairo1(){
