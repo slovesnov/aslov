@@ -42,6 +42,7 @@ static cairo_font_weight_t fontWeight;
 #ifdef _WIN32
 static PairDoubleDouble scale;
 #endif
+static int aslovOutputWide=40;
 
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...) {
@@ -73,9 +74,9 @@ void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f, co
 				q->tm_mon + 1, q->tm_year + 1900);
 		fclose(w);
 	} else if(t==ASLOV_OUTPUT_TYPE::STDERR){
-		g_printerr("%-40s %s:%d %s()\n", s.c_str(), p, l, fu);
+		g_printerr("%-*s %s:%d %s()\n",aslovOutputWide, s.c_str(), p, l, fu);
 	} else{
-		g_print("%-40s %s:%d %s()\n", s.c_str(), p, l, fu);
+		g_print("%-*s %s:%d %s()\n",aslovOutputWide, s.c_str(), p, l, fu);
 	}
 }
 
@@ -990,4 +991,8 @@ void preventThreadSleep(){
 	//stackoverflow.com/questions/34836406/how-to-prevent-windows-from-going-to-sleep-when-my-c-application-is-running
 	SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
 #endif
+}
+
+void aslovSetOutputWidth(int width){
+	aslovOutputWide=width;
 }

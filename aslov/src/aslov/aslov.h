@@ -652,4 +652,6 @@ template <class T>std::string aslovTypeName(){
 #define OBJECT_TYPE(v)   aslovTypeName<decltype(v)>()
 #endif /* __GNUC__ */
 
+void aslovSetOutputWidth(int width);
+
 #endif /* ASLOV_H_ */
