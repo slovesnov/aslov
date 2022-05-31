@@ -276,6 +276,8 @@ PairStringString pairFromBuffer(const char*b);
 //END config functions
 
 //BEGIN string functions
+std::string timeToString(const char *format, bool toLowerCase = false);
+
 template <typename T>
 std::string toString(T t, char separator = ' ', int digits = 3) {
 	//std::fixed to prevents scientific notation t=1234567.890123 b=1.23457e +06

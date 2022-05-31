@@ -314,6 +314,18 @@ PairStringString pairFromBuffer(const char*b){
 
 
 //BEGIN string functions
+std::string timeToString(const char *format, bool toLowerCase/*=false*/) {
+	const int size = 100;
+	char s[size];
+	auto t = std::time(nullptr);
+	std::strftime(s, size, format, std::localtime(&t));
+	if (toLowerCase) {
+		std::transform(s, s + size, s, tolower);
+	}
+	return s;
+}
+
+
 bool startsWith(const char *s, const char *begin) {
 	return strncmp(s, begin, strlen(begin)) == 0;
 }
