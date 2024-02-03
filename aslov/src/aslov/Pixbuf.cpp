@@ -16,7 +16,7 @@
 #include "Pixbuf.h"
 
 Pixbuf::Pixbuf() {
-	p=nullptr;
+	p = nullptr;
 }
 
 Pixbuf::~Pixbuf() {
@@ -24,17 +24,17 @@ Pixbuf::~Pixbuf() {
 }
 
 Pixbuf::Pixbuf(const char *path) {
-	p=nullptr;
+	p = nullptr;
 	set(path);
 }
 
 Pixbuf::Pixbuf(const std::string &path) {
-	p=nullptr;
+	p = nullptr;
 	set(path);
 }
 
-Pixbuf::Pixbuf(GdkPixbuf* pb){
-	p=pb;
+Pixbuf::Pixbuf(GdkPixbuf *pb) {
+	p = pb;
 }
 
 void Pixbuf::free() {
@@ -58,7 +58,7 @@ CSize Pixbuf::size() const {
 
 void Pixbuf::set(const char *path) {
 	free();
-	p=gdk_pixbuf_new_from_file(path, NULL);
+	p = gdk_pixbuf_new_from_file(path, NULL);
 	assert(p);
 }
 
@@ -66,11 +66,10 @@ void Pixbuf::set(const std::string &path) {
 	set(path.c_str());
 }
 
-void Pixbuf::set(GdkPixbuf* pb){
+void Pixbuf::set(GdkPixbuf *pb) {
 	free();
-	p=pb;
+	p = pb;
 }
-
 
 void Pixbuf::operator =(const char *path) {
 	set(path);
@@ -90,21 +89,20 @@ void Pixbuf::operator =(GdkPixbuf *pb) {
 
 void Pixbuf::createRGB(int width, int height) {
 	free();
-	p=gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
+	p = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
 }
 
-void Pixbuf::savePng(const std::string &path)const {
+void Pixbuf::savePng(const std::string &path) const {
 	gdk_pixbuf_save(p, path.c_str(), "png", NULL, NULL);
 }
 
-void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/)const {
-	auto s=std::to_string(quality);
-	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality",
-			s.c_str(), NULL);
+void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/) const {
+	auto s = std::to_string(quality);
+	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality", s.c_str(), NULL);
 }
 
 GdkPixbuf* Pixbuf::saturate(float f) const {
-	GdkPixbuf*pb= gdk_pixbuf_copy(p);
+	GdkPixbuf *pb = gdk_pixbuf_copy(p);
 	//desaturate image
 	gdk_pixbuf_saturate_and_pixelate(p, pb, f, false);
 	return pb;

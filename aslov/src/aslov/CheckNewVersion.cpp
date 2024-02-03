@@ -10,15 +10,17 @@
 #include "CheckNewVersion.h"
 
 static gpointer check_new_version_thread(gpointer d) {
-	((CheckNewVersion*)(d))->routine();
+	((CheckNewVersion*) (d))->routine();
 	return NULL;
 }
 
-void CheckNewVersion::start(std::string versionUrl, double version,GSourceFunc callback) {
+void CheckNewVersion::start(std::string versionUrl, double version,
+		GSourceFunc callback) {
 	m_versionUrl = versionUrl;
 	m_version = version;
-	m_callback=callback;
-	m_newVersionThread = g_thread_new("", check_new_version_thread, gpointer(this));
+	m_callback = callback;
+	m_newVersionThread = g_thread_new("", check_new_version_thread,
+			gpointer(this));
 }
 
 void CheckNewVersion::routine() {
@@ -27,7 +29,7 @@ void CheckNewVersion::routine() {
 	char *content = NULL;
 	if (g_file_load_contents(f, NULL, &content, &length, NULL, NULL)) {
 		std::string s(content, length); //content is not null terminated so create std::string
-		setNumericLocale();//dot interpret as decimal separator
+		setNumericLocale(); //dot interpret as decimal separator
 		//fixed 4may2022 was if (std::stod(s) > m_version) was exception if router returns some html code when no internet
 		char *p;
 		double v = strtod(s.c_str(), &p);

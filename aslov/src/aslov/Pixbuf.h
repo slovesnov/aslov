@@ -18,36 +18,36 @@
 #include "CSize.h"
 
 class Pixbuf {
-	GdkPixbuf*p;
+	GdkPixbuf *p;
 	void free();
 public:
 	Pixbuf();
-	Pixbuf(const char* path);
+	Pixbuf(const char *path);
 	Pixbuf(std::string const &path);
-	Pixbuf(GdkPixbuf* pb);
-	void set(const char* path);
+	Pixbuf(GdkPixbuf *pb);
+	void set(const char *path);
 	void set(std::string const &path);
-	void set(GdkPixbuf* pb);
+	void set(GdkPixbuf *pb);
 
-	void operator=(const char* path);
+	void operator=(const char *path);
 	void operator=(std::string const &path);
-	void operator=(GdkPixbuf* pb);
+	void operator=(GdkPixbuf *pb);
 
 	operator GdkPixbuf*();
 
 	virtual ~Pixbuf();
 
-	Pixbuf & operator=(const Pixbuf&) = delete;
+	Pixbuf& operator=(const Pixbuf&) = delete;
 	Pixbuf(const Pixbuf&) = delete;
 
-	int width()const;
-	int height()const;
-	CSize size()const;
+	int width() const;
+	int height() const;
+	CSize size() const;
 
-	void createRGB(int width,int height);
-	void savePng(std::string const &path)const;
-	void saveJpg(std::string const &path,int quality=100)const;
-	GdkPixbuf* saturate(float f)const;
+	void createRGB(int width, int height);
+	void savePng(std::string const &path) const;
+	void saveJpg(std::string const &path, int quality = 100) const;
+	GdkPixbuf* saturate(float f) const;
 };
 
 #endif /* ASLOV_PIXBUF_H_ */

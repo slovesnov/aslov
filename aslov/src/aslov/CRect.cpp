@@ -18,9 +18,9 @@ std::string CRect::toString() const {
 			+ std::to_string(width()) + "x" + std::to_string(height());
 }
 
-std::ostream& operator<<(std::ostream& os, const CRect& a){
-    os << a.toString();
-    return os;
+std::ostream& operator<<(std::ostream &os, const CRect &a) {
+	os << a.toString();
+	return os;
 }
 
 #endif

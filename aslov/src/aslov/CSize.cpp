@@ -12,13 +12,13 @@
 
 #include "CSize.h"
 
-std::string CSize::toString()const{
-	return std::to_string(cx)+"x"+std::to_string(cy);
+std::string CSize::toString() const {
+	return std::to_string(cx) + "x" + std::to_string(cy);
 }
 
-std::ostream& operator<<(std::ostream& os, const CSize& a){
-    os << a.toString();
-    return os;
+std::ostream& operator<<(std::ostream &os, const CSize &a) {
+	os << a.toString();
+	return os;
 }
 
 #endif

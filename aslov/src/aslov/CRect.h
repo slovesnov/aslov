@@ -37,7 +37,7 @@ public:
 		init(_left, _top, _right, _bottom);
 	}
 
-	CRect const& operator=(CRect const& r) {
+	CRect const& operator=(CRect const &r) {
 		left = r.left;
 		top = r.top;
 		right = r.right;
@@ -52,7 +52,7 @@ public:
 		bottom = _bottom;
 	}
 
-	void join(CRect const& r) {
+	void join(CRect const &r) {
 		if (r.left < left) {
 			left = r.left;
 		}
@@ -87,18 +87,20 @@ public:
 		return CPoint(left, top);
 	}
 
-	bool in(GdkEventButton*p) {
+#if GTK_MAJOR_VERSION==3
+	bool in(GdkEventButton *p) {
 		return in(p->x, p->y);
 	}
+#endif
 
 	bool in(double x, double y) {
 		return x >= left && x < right && y >= top && y < bottom;
 	}
 
-	std::string toString()const;
+	std::string toString() const;
 };
 
-std::ostream& operator<<(std::ostream& os, const CRect& a);
+std::ostream& operator<<(std::ostream &os, const CRect &a);
 
 #endif /* CRECT_H_ */
 #endif

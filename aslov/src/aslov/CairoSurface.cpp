@@ -22,11 +22,11 @@ void CairoSurface::init() {
 void CairoSurface::free() {
 	if (m_cairo) {
 		cairo_destroy(m_cairo);
-		m_cairo=nullptr;
+		m_cairo = nullptr;
 	}
 	if (m_surface) {
 		cairo_surface_destroy(m_surface);
-		m_surface=nullptr;
+		m_surface = nullptr;
 	}
 }
 
@@ -58,20 +58,20 @@ void CairoSurface::create(const CSize &size) {
 }
 
 /*
-cairo_t* CairoSurface::cairo() {
-	return m_cairo;
-}
+ cairo_t* CairoSurface::cairo() {
+ return m_cairo;
+ }
 
-cairo_surface_t* CairoSurface::surface() {
-	return m_surface;
-}
-*/
+ cairo_surface_t* CairoSurface::surface() {
+ return m_surface;
+ }
+ */
 
 void CairoSurface::create(const std::string &path) {
 	//from https://www.cairographics.org/manual/cairo-PNG-Support.html
 	//should be utf8 path
 	free();
-	m_surface=cairo_image_surface_create_from_png(path.c_str());
+	m_surface = cairo_image_surface_create_from_png(path.c_str());
 	m_cairo = cairo_create(m_surface);
 }
 
@@ -88,7 +88,7 @@ CSize CairoSurface::size() const {
 }
 
 void CairoSurface::copy(CairoSurface &dest) {
-	cairo_t* d=dest;
+	cairo_t *d = dest;
 	cairo_set_source_surface(d, m_surface, 0, 0);
 	cairo_paint(d);
 }
@@ -98,21 +98,21 @@ void CairoSurface::copy(CairoSurface &dest, const CRect &r) {
 }
 
 void CairoSurface::copy(CairoSurface &dest, int destx, int desty, int width,
-		int height)  {
+		int height) {
 	copy(dest, destx, desty, width, height, destx, desty);
 }
 
-void CairoSurface::copy(CairoSurface &dest, int destx, int desty,
-		int width, int height, int sourcex, int sourcey)  {
-	cairo_t* d=dest;
+void CairoSurface::copy(CairoSurface &dest, int destx, int desty, int width,
+		int height, int sourcex, int sourcey) {
+	cairo_t *d = dest;
 	copyToCairo(d, destx, desty, width, height, sourcex, sourcey);
 //	cairo_set_source_surface(d, m_surface, destx - sourcex, desty - sourcey);
 //	cairo_rectangle(d, destx, desty, width, height);
 //	cairo_fill(d);
 }
 
-void CairoSurface::copyToCairo(cairo_t * cr, int destx, int desty, int width, int height,
-		int sourcex, int sourcey){
+void CairoSurface::copyToCairo(cairo_t *cr, int destx, int desty, int width,
+		int height, int sourcex, int sourcey) {
 	cairo_set_source_surface(cr, m_surface, destx - sourcex, desty - sourcey);
 	cairo_rectangle(cr, destx, desty, width, height);
 	cairo_fill(cr);
@@ -127,15 +127,16 @@ CairoSurface::operator cairo_surface_t*() {
 }
 
 void CairoSurface::savePng(const std::string &path) const {
-	cairo_surface_write_to_png (m_surface, path.c_str());
+	cairo_surface_write_to_png(m_surface, path.c_str());
 }
 
-GdkPixbuf* CairoSurface::toPixbuf(int startx, int starty, int width, int height) {
-	return gdk_pixbuf_get_from_surface(m_surface,startx, starty, width, height);
+GdkPixbuf* CairoSurface::toPixbuf(int startx, int starty, int width,
+		int height) {
+	return gdk_pixbuf_get_from_surface(m_surface, startx, starty, width, height);
 }
 
 GdkPixbuf* CairoSurface::toPixbuf() {
-	return toPixbuf(0,0,width(),height());
+	return toPixbuf(0, 0, width(), height());
 }
 
 #endif //NOGTK

@@ -31,7 +31,6 @@
 #include <windows.h>
 #endif
 
-
 static std::string applicationName, applicationPath;
 #ifndef NOGTK
 static std::string fontFamily;
@@ -42,7 +41,7 @@ static cairo_font_weight_t fontWeight;
 #ifdef _WIN32
 static PairDoubleDouble scale;
 #endif
-static int aslovOutputWide=40;
+static int aslovOutputWide = 40;
 
 //format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...) {
@@ -61,11 +60,11 @@ std::string format(const char *f, ...) {
 	return s;
 }
 
-void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f, const int l,
-		const char *fu ) {
+void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f,
+		const int l, const char *fu) {
 	const char *p = strrchr(f, G_DIR_SEPARATOR);
 	p = p ? p + 1 : f;
-	if (t==ASLOV_OUTPUT_TYPE::FILE) {
+	if (t == ASLOV_OUTPUT_TYPE::FILE) {
 		time_t t = time(NULL);
 		tm *q = localtime(&t);
 		FILE *w = openApplicationLog("a");
@@ -73,10 +72,10 @@ void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f, co
 				l, fu, q->tm_hour, q->tm_min, q->tm_sec, q->tm_mday,
 				q->tm_mon + 1, q->tm_year + 1900);
 		fclose(w);
-	} else if(t==ASLOV_OUTPUT_TYPE::STDERR){
-		g_printerr("%-*s %s:%d %s()\n",aslovOutputWide, s.c_str(), p, l, fu);
-	} else{
-		g_print("%-*s %s:%d %s()\n",aslovOutputWide, s.c_str(), p, l, fu);
+	} else if (t == ASLOV_OUTPUT_TYPE::STDERR) {
+		g_printerr("%-*s %s:%d %s()\n", aslovOutputWide, s.c_str(), p, l, fu);
+	} else {
+		g_print("%-*s %s:%d %s()\n", aslovOutputWide, s.c_str(), p, l, fu);
 	}
 }
 
@@ -95,15 +94,15 @@ bool isDir(const char *path) {
 	GStatBuf b;
 	if (g_stat(path, &b) != 0) {
 		//error get file stat
-	    assert(0);
-	    return false;
+		assert(0);
+		return false;
 	}
 
 	return S_ISDIR(b.st_mode);
 #endif
 }
 
-bool isDir(const std::string& path) {
+bool isDir(const std::string &path) {
 	return isDir(path.c_str());
 }
 
@@ -121,8 +120,7 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
 	if (fi == FILEINFO::SHORT_NAME) {
 		if (pos == std::string::npos) {
 			return name;
-		}
-		else{
+		} else {
 			return name.substr(0, pos);
 		}
 	}
@@ -161,10 +159,10 @@ FILE* open(std::string path, const char *flags) {
 //END file functions
 
 //BEGIN application functions
-void aslovInit(char const*const*argv,bool storeScaleFactor/*=false*/) {
+void aslovInit(char const *const*argv, bool storeScaleFactor/*=false*/) {
 #ifdef _WIN32
-	if(storeScaleFactor){
-		scale=aslovGetScaleFactor();
+	if (storeScaleFactor) {
+		scale = aslovGetScaleFactor();
 	}
 #endif
 
@@ -180,13 +178,13 @@ void aslovInit(char const*const*argv,bool storeScaleFactor/*=false*/) {
 	std::string s = getFileInfo(p, FILEINFO::DIRECTORY);
 	for (std::string r : { "Release", "Debug" }) {
 		if (endsWith(s, r)) {
-			s = s.substr(0, s.length() - r.length()-1);
+			s = s.substr(0, s.length() - r.length() - 1);
 		}
 	}
 	//workingDirectory = s;
 #ifndef NOGTK
 	g_chdir(s.c_str());
-	s=getWritableFilePath("");
+	s = getWritableFilePath("");
 	//2nd parameter. The mode argument is ignored on Windows
 	g_mkdir(s.c_str(), 0);
 #endif
@@ -200,59 +198,61 @@ FILE* openApplicationLog(const char *flags) {
 	return open(getWritableFilePath("log.txt"), flags);
 }
 
-std::string const& getApplicationName(){
+std::string const& getApplicationName() {
 	return applicationName;
 }
 
-std::string getResourcePath(const std::string name){
-	return applicationName+G_DIR_SEPARATOR+name;
+std::string getResourcePath(const std::string name) {
+	return applicationName + G_DIR_SEPARATOR + name;
 }
 
 std::string getImagePath(const std::string name) {
 	return getResourcePath("images/" + name);
 }
 
-std::ifstream openResourceFileAsStream(const std::string name){
+std::ifstream openResourceFileAsStream(const std::string name) {
 	std::ifstream f(getResourcePath(name));
 	return f;
 }
 
-std::string getWritableFilePath(const std::string name){
+std::string getWritableFilePath(const std::string name) {
 #ifdef NOGTK
 	return name;
 #else
-	return g_get_user_config_dir() +(G_DIR_SEPARATOR + applicationName)+G_DIR_SEPARATOR+ name;
+	return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName)
+			+ G_DIR_SEPARATOR + name;
 #endif
 }
 
 #ifndef NOGTK
-void writableFileSetContents(const std::string name,const std::string& s){
+void writableFileSetContents(const std::string name, const std::string &s) {
 #ifndef NDEBUG
 	gboolean b=
 #endif
-			g_file_set_contents(getWritableFilePath(name).c_str(), s.c_str(), s.length(), 0);
+	g_file_set_contents(getWritableFilePath(name).c_str(), s.c_str(),
+			s.length(), 0);
 	assert(b);
 }
 
-const std::string writableFileGetContents(const std::string& name){
+const std::string writableFileGetContents(const std::string &name) {
 	return fileGetContent(getWritableFilePath(name));
 }
 #endif
 
-const std::string fileGetContent(const std::string& path,bool binary/*=false*/){
+const std::string fileGetContent(const std::string &path,
+		bool binary/*=false*/) {
 	//in non binary mode change "\r\n" to "\n"
-	auto m=binary ? std::ios::binary : std::ios::in;
-	#ifdef NOTGK_WITHOUT_ICONV
+	auto m = binary ? std::ios::binary : std::ios::in;
+#ifdef NOTGK_WITHOUT_ICONV
 	std::ifstream t(path,m);
 	#else
-	std::ifstream t(utf8ToLocale(path),m);
-	#endif
+	std::ifstream t(utf8ToLocale(path), m);
+#endif
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	return buffer.str();
 }
 //END application functions
-
 
 //BEGIN config functions
 #ifndef NOGTK
@@ -264,16 +264,16 @@ std::string getConfigPathLocaled() {
 	return utf8ToLocale(getConfigPath());
 }
 
-bool loadConfig(MapStringString&map){
-	std::string s=getConfigPathLocaled();
+bool loadConfig(MapStringString &map) {
+	std::string s = getConfigPathLocaled();
 	std::ifstream f(s);
-	if(!f.is_open()){//it's ok first time loading
+	if (!f.is_open()) { //it's ok first time loading
 		return false;
 	}
 
 	//order of strings in file is not important
-	while( std::getline( f, s ) ){
-		auto p=pairFromBuffer(s);
+	while (std::getline(f, s)) {
+		auto p = pairFromBuffer(s);
 #ifndef NDEBUG
 		if(map.find(p.first)!=map.end()){
 			printl("warning duplicate key",p.first)
@@ -285,17 +285,17 @@ bool loadConfig(MapStringString&map){
 
 }
 
-PairStringString pairFromBuffer(const std::string&s){
+PairStringString pairFromBuffer(const std::string &s) {
 	return pairFromBuffer(s.c_str());
 }
 
-PairStringString pairFromBuffer(const char*b){
-	char*w=strchr(b, '=');
-	if(!w){
+PairStringString pairFromBuffer(const char *b) {
+	char *w = strchr(b, '=');
+	if (!w) {
 		return {"",""};
 	}
-	const char*p = w + 2;
-	char*f;
+	const char *p = w + 2;
+	char *f;
 	const char *search;
 	const char s[] = "\r\n";
 	for (search = s; *search != '\0'; search++) {
@@ -304,14 +304,13 @@ PairStringString pairFromBuffer(const char*b){
 			*f = 0;
 		}
 	}
-	if(w>b && w[-1]==' '){
+	if (w > b && w[-1] == ' ') {
 		w--;
 	}
 	return {std::string(b,w-b),std::string(p)};
 }
 #endif
 //END config functions
-
 
 //BEGIN string functions
 std::string timeToString(const char *format, bool toLowerCase/*=false*/) {
@@ -325,7 +324,6 @@ std::string timeToString(const char *format, bool toLowerCase/*=false*/) {
 	return s;
 }
 
-
 bool startsWith(const char *s, const char *begin) {
 	return strncmp(s, begin, strlen(begin)) == 0;
 }
@@ -334,18 +332,18 @@ bool startsWith(const char *s, const std::string &begin) {
 	return startsWith(s, begin.c_str());
 }
 
-bool startsWith(const std::string& s, const char* begin){
+bool startsWith(const std::string &s, const char *begin) {
 	return startsWith(s.c_str(), begin);
 }
 
-bool startsWith(const std::string& s, const std::string & begin){
+bool startsWith(const std::string &s, const std::string &begin) {
 	return startsWith(s.c_str(), begin.c_str());
 }
 
 bool endsWith(std::string const &s, std::string const &e) {
 	auto i = e.length();
-	auto l= s.length();
-	if(l<i){
+	auto l = s.length();
+	if (l < i) {
 		return false;
 	}
 	return s.compare(s.length() - i, i, e) == 0;
@@ -361,7 +359,7 @@ std::string replaceAll(std::string subject, const std::string &from,
 	return subject;
 }
 
-VString split(const std::string& subject, const std::string& separator) {
+VString split(const std::string &subject, const std::string &separator) {
 	VString r;
 	size_t pos, prev;
 	for (prev = 0; (pos = subject.find(separator, prev)) != std::string::npos;
@@ -372,8 +370,8 @@ VString split(const std::string& subject, const std::string& separator) {
 	return r;
 }
 
-VString split(const std::string& subject, const char separator){
-	return split(subject, std::string(1,separator));
+VString split(const std::string &subject, const char separator) {
+	return split(subject, std::string(1, separator));
 }
 
 int countOccurence(const std::string &subject, const std::string &a) {
@@ -386,38 +384,39 @@ int countOccurence(const std::string &subject, const std::string &a) {
 	return i;
 }
 
-int countOccurence(const std::string& subject, const char c) {
-	return count_if(subject.begin(), subject.end(), [&c](char a) {return a==c;});
+int countOccurence(const std::string &subject, const char c) {
+	return count_if(subject.begin(), subject.end(), [&c](char a) {
+		return a == c;
+	});
 }
 
-bool cmpnocase(const std::string& a, const char* b) {
+bool cmpnocase(const std::string &a, const char *b) {
 	return cmpnocase(a.c_str(), b);
 }
 
-bool cmpnocase(const char* a, const char* b) {
+bool cmpnocase(const char *a, const char *b) {
 	return strcasecmp(a, b) == 0;
 }
 
-bool cmp(const char* a, const char* b) {
+bool cmp(const char *a, const char *b) {
 	return strcmp(a, b) == 0;
 }
 
-bool cmp(const std::string& a, const char* b) {
+bool cmp(const std::string &a, const char *b) {
 	return cmp(a.c_str(), b);
 }
 
-bool contains(const std::string& a, const char b){
-	return a.find(b)!=std::string::npos;
+bool contains(const std::string &a, const char b) {
+	return a.find(b) != std::string::npos;
 }
 
-bool contains(const std::string& a, const char* b){
-	return a.find(b)!=std::string::npos;
+bool contains(const std::string &a, const char *b) {
+	return a.find(b) != std::string::npos;
 }
 
-bool contains(const std::string& a, const std::string& b){
-	return a.find(b)!=std::string::npos;
+bool contains(const std::string &a, const std::string &b) {
+	return a.find(b) != std::string::npos;
 }
-
 
 #ifdef NOTGK_WITH_ICONV //local function should be before localeToUtf8 & utf8ToLocale
 std::string encodeIconv(const std::string& s, bool toUtf8) {
@@ -487,7 +486,7 @@ std::string utf8ToLowerCase(const std::string &s
 #ifdef NOGTK
 	return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
 #else
-	gchar*a=g_utf8_strdown(s.c_str(), s.length());
+	gchar *a = g_utf8_strdown(s.c_str(), s.length());
 	std::string r(a);
 	g_free(a);
 	return r;
@@ -498,12 +497,12 @@ std::string utf8ToUpperCase(const std::string &s
 #ifdef NOGTK
 		,bool onlyRussainChars/*=false*/
 #endif
-		){
+		) {
 #ifdef NOGTK
 	assert(0);//TODO
 	return "";
 #else
-	gchar*a=g_utf8_strup(s.c_str(), s.length());
+	gchar *a = g_utf8_strup(s.c_str(), s.length());
 	std::string r(a);
 	g_free(a);
 	return r;
@@ -513,9 +512,10 @@ std::string utf8ToUpperCase(const std::string &s
 #endif //#ifndef NOTGK_WITHOUT_ICONV
 
 #ifndef NOGTK
-std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos){
+std::string utf8Substring(const std::string &s, glong start_pos,
+		glong end_pos) {
 	gchar *p = g_utf8_substring(s.c_str(), start_pos, end_pos);
-	std::string r=p;
+	std::string r = p;
 	g_free(p);
 	return r;
 }
@@ -544,37 +544,36 @@ void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
 	cairo_fill(dest);
 }
 
-GdkPixbuf* pixbuf(const char* s){
+GdkPixbuf* pixbuf(const char *s) {
 	return gdk_pixbuf_new_from_file(getImagePath(s).c_str(), NULL);
 }
 
-GdkPixbuf* pixbuf(const std::string& s){
+GdkPixbuf* pixbuf(const std::string &s) {
 	return pixbuf(s.c_str());
 }
 
-GdkPixbuf* pixbuf(std::string s, int x, int y, int width,
-		int height) {
+GdkPixbuf* pixbuf(std::string s, int x, int y, int width, int height) {
 	return gdk_pixbuf_new_subpixbuf(pixbuf(s), x, y, width, height);
 }
 
-GdkPixbuf* writablePixbuf(const char* s){
-	std::string q=getWritableFilePath(s);
+GdkPixbuf* writablePixbuf(const char *s) {
+	std::string q = getWritableFilePath(s);
 	return gdk_pixbuf_new_from_file(q.c_str(), NULL);
 }
 
-GdkPixbuf* writablePixbuf(const std::string& s){
+GdkPixbuf* writablePixbuf(const std::string &s) {
 	return writablePixbuf(s.c_str());
 }
 
-GtkWidget* image(const char* s){
+GtkWidget* image(const char *s) {
 	return gtk_image_new_from_file(getImagePath(s).c_str());
 }
 
-GtkWidget* image(const std::string& s){
+GtkWidget* image(const std::string &s) {
 	return image(s.c_str());
 }
 
-GtkWidget* animatedImage(const char* s){
+GtkWidget* animatedImage(const char *s) {
 	return gtk_image_new_from_animation(
 			gdk_pixbuf_animation_new_from_file(getImagePath(s).c_str(), 0));
 }
@@ -582,12 +581,10 @@ GtkWidget* animatedImage(const char* s){
 #endif
 //END pixbuf functions
 
-
 //BEGIN 2 dimensional array functions
 //END 2 dimensional array functions
 
-
-int indexOfNoCase(const char *t,const char *v[], int size) {
+int indexOfNoCase(const char *t, const char *v[], int size) {
 	for (int i = 0; i < size; i++) {
 		if (cmpnocase(v[i], t)) {
 			return i;
@@ -596,21 +593,21 @@ int indexOfNoCase(const char *t,const char *v[], int size) {
 	return -1;
 }
 
-int indexOfNoCase(const std::string t,const char *v[], int size ) {
-	return indexOfNoCase(t.c_str(),v, size );
+int indexOfNoCase(const std::string t, const char *v[], int size) {
+	return indexOfNoCase(t.c_str(), v, size);
 }
 
-int indexOf(const char t,const std::string& v){
-	auto i=v.find(t);
-	return i==std::string::npos ? -1 : i;
+int indexOf(const char t, const std::string &v) {
+	auto i = v.find(t);
+	return i == std::string::npos ? -1 : i;
 }
 
-bool oneOf(char const& t, const std::string& v){
-	return indexOf(t,v)!=-1;
+bool oneOf(char const &t, const std::string &v) {
+	return indexOf(t, v) != -1;
 }
 
-bool oneOf(char const& t, char const* v){
-	return oneOf(t,std::string(v));
+bool oneOf(char const &t, char const *v) {
+	return oneOf(t, std::string(v));
 }
 
 //bool oneOfChar(char const& t, const std::string& v){
@@ -619,37 +616,41 @@ bool oneOf(char const& t, char const* v){
 
 #ifdef _WIN32
 //Note this function should be called before gtk_init
-PairDoubleDouble aslovGetScaleFactor(){
-    auto activeWindow = GetActiveWindow();
-    HMONITOR monitor = MonitorFromWindow(activeWindow, MONITOR_DEFAULTTONEAREST);
+PairDoubleDouble aslovGetScaleFactor() {
+	auto activeWindow = GetActiveWindow();
+	HMONITOR monitor = MonitorFromWindow(activeWindow,
+	MONITOR_DEFAULTTONEAREST);
 
-    // Get the logical width and height of the monitor
-    MONITORINFOEX monitorInfoEx;
-    monitorInfoEx.cbSize = sizeof(monitorInfoEx);
-    GetMonitorInfo(monitor, &monitorInfoEx);
-    auto cxLogical = monitorInfoEx.rcMonitor.right - monitorInfoEx.rcMonitor.left;
-    auto cyLogical = monitorInfoEx.rcMonitor.bottom - monitorInfoEx.rcMonitor.top;
+	// Get the logical width and height of the monitor
+	MONITORINFOEX monitorInfoEx;
+	monitorInfoEx.cbSize = sizeof(monitorInfoEx);
+	GetMonitorInfo(monitor, &monitorInfoEx);
+	auto cxLogical = monitorInfoEx.rcMonitor.right
+			- monitorInfoEx.rcMonitor.left;
+	auto cyLogical = monitorInfoEx.rcMonitor.bottom
+			- monitorInfoEx.rcMonitor.top;
 
-    // Get the physical width and height of the monitor
-    DEVMODE devMode;
-    devMode.dmSize = sizeof(devMode);
-    devMode.dmDriverExtra = 0;
-    EnumDisplaySettings(monitorInfoEx.szDevice, ENUM_CURRENT_SETTINGS, &devMode);
-    auto cxPhysical = devMode.dmPelsWidth;
-    auto cyPhysical = devMode.dmPelsHeight;
+	// Get the physical width and height of the monitor
+	DEVMODE devMode;
+	devMode.dmSize = sizeof(devMode);
+	devMode.dmDriverExtra = 0;
+	EnumDisplaySettings(monitorInfoEx.szDevice, ENUM_CURRENT_SETTINGS,
+			&devMode);
+	auto cxPhysical = devMode.dmPelsWidth;
+	auto cyPhysical = devMode.dmPelsHeight;
 
-    // Calculate the scaling factor
-    return  {(double) cxPhysical / (double)cxLogical, ((double) cyPhysical / (double)cyLogical)};
+	// Calculate the scaling factor
+	return {(double) cxPhysical / (double)cxLogical, ((double) cyPhysical / (double)cyLogical)};
 }
 
-PairDoubleDouble getScaleFactor(){
+PairDoubleDouble getScaleFactor() {
 	return scale;
 }
 #endif
 
 #ifndef NOGTK
-void addClass(GtkWidget *w, const std::string & s) {
-	addClass(w,s.c_str());
+void addClass(GtkWidget *w, const std::string &s) {
+	addClass(w, s.c_str());
 }
 
 void addClass(GtkWidget *w, const gchar *s) {
@@ -658,11 +659,11 @@ void addClass(GtkWidget *w, const gchar *s) {
 	gtk_style_context_add_class(context, s);
 }
 
-void removeClass(GtkWidget *w, const std::string & s) {
-	removeClass(w,s.c_str());
+void removeClass(GtkWidget *w, const std::string &s) {
+	removeClass(w, s.c_str());
 }
 
-void addRemoveClass(GtkWidget *w, const gchar *s,bool add){
+void addRemoveClass(GtkWidget *w, const gchar *s, bool add) {
 	GtkStyleContext *context;
 	context = gtk_widget_get_style_context(w);
 	if (add) {
@@ -672,8 +673,8 @@ void addRemoveClass(GtkWidget *w, const gchar *s,bool add){
 	}
 }
 
-void addRemoveClass(GtkWidget *w, const std::string & s,bool add){
-	addRemoveClass(w,s.c_str(),add);
+void addRemoveClass(GtkWidget *w, const std::string &s, bool add) {
+	addRemoveClass(w, s.c_str(), add);
 }
 
 void removeClass(GtkWidget *w, const gchar *s) {
@@ -682,7 +683,7 @@ void removeClass(GtkWidget *w, const gchar *s) {
 	gtk_style_context_remove_class(context, s);
 }
 
-void loadCSS(std::string const &additionalData /*= ""*/){
+void loadCSS(std::string const &additionalData /*= ""*/) {
 	GtkCssProvider *provider;
 	GdkDisplay *display;
 	GdkScreen *screen;
@@ -695,10 +696,10 @@ void loadCSS(std::string const &additionalData /*= ""*/){
 			GTK_STYLE_PROVIDER(provider),
 			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-	std::ifstream t(applicationName+".css");
+	std::ifstream t(applicationName + ".css");
 	std::stringstream buffer;
 	buffer << t.rdbuf();
-	s=buffer.str()+additionalData;
+	s = buffer.str() + additionalData;
 	gtk_css_provider_load_from_data(provider, s.c_str(), -1, NULL);
 	g_object_unref(provider);
 }
@@ -718,26 +719,26 @@ void openURL(std::string url) {
 	 */
 #ifdef _WIN32
 	//printv(url)
-	ShellExecute(0, 0, url.c_str(), 0, 0 , SW_SHOW );
+	ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
 #else
 	gtk_show_uri_on_window(0, url.c_str(), gtk_get_current_event_time(), NULL);
 #endif
 }
 
-void destroy(cairo_t* p) {
+void destroy(cairo_t *p) {
 	if (p) {
 		cairo_destroy(p);
 	}
 }
 
-void destroy(cairo_surface_t * p) {
+void destroy(cairo_surface_t *p) {
 	if (p) {
 		cairo_surface_destroy(p);
 	}
 }
 
-std::string getBuildVersionString(bool _long){
-	return getBuildString(_long)+", "+getVersionString(_long);
+std::string getBuildVersionString(bool _long) {
+	return getBuildString(_long) + ", " + getVersionString(_long);
 }
 
 std::string getBuildString(bool _long) {
@@ -761,7 +762,7 @@ std::string getBuildString(bool _long) {
 	}
 	return format("build %.*s %.*s %s %s", 2 - i,
 	__DATE__ + 4 + i, _long ? strlen(b) : 3, _long ? b : __DATE__, __DATE__ + 7,
-			__TIME__);
+	__TIME__);
 }
 
 std::string getVersionString(bool _long) {
@@ -771,35 +772,34 @@ std::string getVersionString(bool _long) {
 	GTK_MICRO_VERSION);
 }
 
-void showHideWidget(GtkWidget *w,bool show){
-	if(show){
+void showHideWidget(GtkWidget *w, bool show) {
+	if (show) {
 		gtk_widget_show(w);
-	}
-	else{
+	} else {
 		gtk_widget_hide(w);
 	}
 }
 
-std::pair<double,double> getMonitorSize(bool millimeters/*=true*/){
+std::pair<double, double> getMonitorSize(bool millimeters/*=true*/) {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
 	gdk_monitor_get_geometry(monitor, &r);
 	//not auto!
 	double w = gdk_monitor_get_width_mm(monitor);
 	double h = gdk_monitor_get_height_mm(monitor);
-	if(!millimeters){
-		w/=25.4;
-		h/=25.4;
+	if (!millimeters) {
+		w /= 25.4;
+		h /= 25.4;
 	}
 	return {w,h};
 }
 
-double getMonitorDiagonal(bool millimeters/*=true*/){
-	auto a=getMonitorSize(millimeters);
-	return sqrt(a.first*a.first+a.second*a.second);
+double getMonitorDiagonal(bool millimeters/*=true*/) {
+	auto a = getMonitorSize(millimeters);
+	return sqrt(a.first * a.first + a.second * a.second);
 }
 
-std::pair<double,double> getDPI(){
+std::pair<double, double> getDPI() {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
 	gdk_monitor_get_geometry(monitor, &r);
@@ -818,20 +818,19 @@ double getVerticalDPI() {
 
 void setFont(cairo_t *cr, const char *family, int height,
 		cairo_font_slant_t slant, cairo_font_weight_t weight) {
-	fontFamily=family;
-	fontHeight=height;
-	fontSlant=slant;
-	fontWeight=weight;
+	fontFamily = family;
+	fontHeight = height;
+	fontSlant = slant;
+	fontWeight = weight;
 	cairo_select_font_face(cr, family, slant, weight);
 	cairo_set_font_size(cr, height);
 }
 
-void setFont(cairo_t *cr, int height){
+void setFont(cairo_t *cr, int height) {
 	//if fontFamily="" need to call setFont(cairo_t *, const char *, int ,cairo_font_slant_t, cairo_font_weight_t ) at first
-	fontHeight=height;
+	fontHeight = height;
 	cairo_set_font_size(cr, height);
 }
-
 
 void drawText(cairo_t *cr, std::string const &s, double x, double y,
 		DRAW_TEXT optionx, DRAW_TEXT optiony) {
@@ -854,24 +853,24 @@ void drawText(cairo_t *cr, std::string const &s, double x, double y,
 }
 
 void drawMarkup(cairo_t *cr, std::string text, double x, double y,
-		DRAW_TEXT optionx, DRAW_TEXT optiony){
-	cairo_rectangle_int_t rect={int(x),int(y),0,0};
+		DRAW_TEXT optionx, DRAW_TEXT optiony) {
+	cairo_rectangle_int_t rect = { int(x), int(y), 0, 0 };
 	drawMarkup(cr, text, rect, optionx, optiony);
 }
 
 void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
 		DRAW_TEXT optionx, DRAW_TEXT optiony) {
 	int w, h;
-	PangoLayout *layout = createPangoLayout(cr,text);
+	PangoLayout *layout = createPangoLayout(cr, text);
 	pango_layout_get_pixel_size(layout, &w, &h);
 
 	double px = rect.x;
 	double py = rect.y;
-	if (optionx!=DRAW_TEXT_BEGIN) {
-		px += (rect.width - w) / (optionx==DRAW_TEXT_END?1:2);
+	if (optionx != DRAW_TEXT_BEGIN) {
+		px += (rect.width - w) / (optionx == DRAW_TEXT_END ? 1 : 2);
 	}
-	if (optiony!=DRAW_TEXT_BEGIN) {
-		py += (rect.height - h) /  (optiony==DRAW_TEXT_END?1:2);
+	if (optiony != DRAW_TEXT_BEGIN) {
+		py += (rect.height - h) / (optiony == DRAW_TEXT_END ? 1 : 2);
 	}
 
 	cairo_move_to(cr, px, py);
@@ -880,23 +879,24 @@ void drawMarkup(cairo_t *cr, std::string text, cairo_rectangle_int_t rect,
 	g_object_unref(layout);
 }
 
-PangoFontDescription* createPangoFontDescription(const PangoFontDescription*f,int height){
-	PangoFontDescription* d=pango_font_description_copy(f);
-	pango_font_description_set_absolute_size (d, height * PANGO_SCALE);
+PangoFontDescription* createPangoFontDescription(const PangoFontDescription *f,
+		int height) {
+	PangoFontDescription *d = pango_font_description_copy(f);
+	pango_font_description_set_absolute_size(d, height * PANGO_SCALE);
 	return d;
 }
 
-PangoFontDescription* createPangoFontDescription(){
-	std::string s=fontFamily+","+std::to_string(fontHeight);
-	PangoFontDescription* d=pango_font_description_from_string(s.c_str());
+PangoFontDescription* createPangoFontDescription() {
+	std::string s = fontFamily + "," + std::to_string(fontHeight);
+	PangoFontDescription *d = pango_font_description_from_string(s.c_str());
 	//https://www.cairographics.org/FAQ/
-	pango_font_description_set_absolute_size (d, fontHeight * PANGO_SCALE);
+	pango_font_description_set_absolute_size(d, fontHeight * PANGO_SCALE);
 	return d;
 }
 
-PangoLayout* createPangoLayout(cairo_t *cr,std::string text){
+PangoLayout* createPangoLayout(cairo_t *cr, std::string text) {
 	PangoLayout *layout = pango_cairo_create_layout(cr);
-	PangoFontDescription*desc = createPangoFontDescription();
+	PangoFontDescription *desc = createPangoFontDescription();
 	pango_layout_set_font_description(layout, desc);
 
 	pango_layout_set_markup(layout, text.c_str(), -1);
@@ -914,71 +914,71 @@ int getNumberOfCores() {
 #endif
 }
 
-double timeElapse(clock_t begin){
+double timeElapse(clock_t begin) {
 	return double(clock() - begin) / CLOCKS_PER_SEC;
 }
 
-std::string secondsToString(double seconds){
-	int h,m,s,t=int(seconds);
-	h = t/3600;
-	t = t%3600;
-	m = t/60;
-	t = t%60;
+std::string secondsToString(double seconds) {
+	int h, m, s, t = int(seconds);
+	h = t / 3600;
+	t = t % 3600;
+	m = t / 60;
+	t = t % 60;
 	s = t;
-	if(h>0){
-		return format("%d:%02d:%02d",h,m,s);
-	}
-	else{
-		return format("%d:%02d",m,s);
+	if (h > 0) {
+		return format("%d:%02d:%02d", h, m, s);
+	} else {
+		return format("%d:%02d", m, s);
 	}
 }
 
-std::string secondsToString(clock_t end,clock_t begin){
+std::string secondsToString(clock_t end, clock_t begin) {
 	return secondsToString(double(end - begin) / CLOCKS_PER_SEC);
 }
 
-std::string secondsToString(clock_t begin){
+std::string secondsToString(clock_t begin) {
 	return secondsToString(timeElapse(begin));
 }
 
-std::string trim(const std::string& s) {
+std::string trim(const std::string &s) {
 	std::string q = ltrim(s);
 	return rtrim(q);
 }
 
-std::string ltrim(const std::string& s) {
+std::string ltrim(const std::string &s) {
 	std::string::const_iterator it;
 	for (it = s.begin(); it != s.end() && isspace(*it); it++)
 		;
 	return s.substr(it - s.begin());
 }
 
-std::string rtrim(const std::string& s) {
+std::string rtrim(const std::string &s) {
 	std::string::const_reverse_iterator it;
 	for (it = s.rbegin(); it != s.rend() && isspace(*it); it++)
 		;
 	return s.substr(0, s.length() - (it - s.rbegin()));
 }
 
-void setNumericLocale(){
+void setNumericLocale() {
 	setlocale(LC_NUMERIC, "C");
 }
 
-void setAllLocales(){
+void setAllLocales() {
 	setlocale(LC_ALL, "C");
 }
 
-std::string normalize(std::string const& s){
-	std::string::size_type p,p1=0;
-	if ((p= s.find('.')) == std::string::npos) {
+std::string normalize(std::string const &s) {
+	std::string::size_type p, p1 = 0;
+	if ((p = s.find('.')) == std::string::npos) {
 		return s;
 	}
-	for(p1=s.length()-1;p1>p && s[p1]=='0';p1--);
-		//"3.875000"->"3.875"
-	if(s[p1]=='.'){
+	for (p1 = s.length() - 1; p1 > p && s[p1] == '0'; p1--)
+		;
+	//"3.875000"->"3.875"
+	if (s[p1] == '.') {
 		p1--;
 	}
-	return s.substr(0,p1+1);
+	return s.substr(0, p1 + 1);
 }
 
 //https://stackoverflow.com/questions/2704521/generate-random-double-numbers-in-c/9324796
@@ -997,14 +997,15 @@ double randomDouble(double from, double to) {
 	return dist(gen, typename dist_type::param_type { from, to });
 }
 
-void preventThreadSleep(){
+void preventThreadSleep() {
 #ifdef _WIN32
 	//prevents windows 10 threads sleep
 	//stackoverflow.com/questions/34836406/how-to-prevent-windows-from-going-to-sleep-when-my-c-application-is-running
-	SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
+	SetThreadExecutionState(
+	ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
 #endif
 }
 
-void aslovSetOutputWidth(int width){
-	aslovOutputWide=width;
+void aslovSetOutputWidth(int width) {
+	aslovOutputWide = width;
 }

@@ -16,9 +16,9 @@ std::string CPoint::toString() const {
 	return std::to_string(x) + "," + std::to_string(y);
 }
 
-std::ostream& operator<<(std::ostream& os, const CPoint& a){
-    os << a.toString();
-    return os;
+std::ostream& operator<<(std::ostream &os, const CPoint &a) {
+	os << a.toString();
+	return os;
 }
 
 #endif

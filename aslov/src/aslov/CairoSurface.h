@@ -25,7 +25,7 @@ public:
 	CairoSurface();
 	CairoSurface(int width, int height);
 	CairoSurface(CSize const &size);
-	CairoSurface & operator=(const CairoSurface&) = delete;
+	CairoSurface& operator=(const CairoSurface&) = delete;
 	CairoSurface(const CairoSurface&) = delete;
 
 	void create(int width, int height);
@@ -35,34 +35,34 @@ public:
 //	cairo_t* cairo();
 //	cairo_surface_t* surface();
 
-	int width()const;
-	int height()const;
-	CSize size()const;
+	int width() const;
+	int height() const;
+	CSize size() const;
 
 	void copy(CairoSurface &dest);
 	void copy(CairoSurface &dest, CRect const &r);
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height);
 	void copy(CairoSurface &dest, int destx, int desty, int width, int height,
 			int sourcex, int sourcey);
-	void copyToCairo(cairo_t * cr, int destx, int desty, int width, int height,
+	void copyToCairo(cairo_t *cr, int destx, int desty, int width, int height,
 			int sourcex, int sourcey);
 
 	operator cairo_t *();
 	operator cairo_surface_t *();
-	void savePng(std::string const &path)const;
+	void savePng(std::string const &path) const;
 
 	GdkPixbuf* toPixbuf(int startx, int starty, int width, int height);
 	GdkPixbuf* toPixbuf();
 
-/*
-	cairo_t*& cairo1(){
-		return m_cairo;
-	}
+	/*
+	 cairo_t*& cairo1(){
+	 return m_cairo;
+	 }
 
-	cairo_surface_t*& surface1(){
-		return m_surface;
-	}
-*/
+	 cairo_surface_t*& surface1(){
+	 return m_surface;
+	 }
+	 */
 
 };
 

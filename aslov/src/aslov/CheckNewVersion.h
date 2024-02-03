@@ -16,11 +16,11 @@
 class CheckNewVersion {
 	std::string m_versionUrl;
 	double m_version;
-	GThread* m_newVersionThread;
+	GThread *m_newVersionThread;
 	GSourceFunc m_callback;
 public:
 	std::string m_message;
-	void start(std::string versionUrl, double version,GSourceFunc callback);
+	void start(std::string versionUrl, double version, GSourceFunc callback);
 	void routine();
 	~CheckNewVersion();
 };

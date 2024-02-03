@@ -27,20 +27,19 @@ public:
 		cy = _cy;
 	}
 
-	CSize(const CSize& size) {
+	CSize(const CSize &size) {
 		cx = size.cx;
 		cy = size.cy;
 	}
 
-	bool operator!=(const CSize& size) const {
+	bool operator!=(const CSize &size) const {
 		return cx != size.cx || cy != size.cy;
 	}
 
-	std::string toString()const;
+	std::string toString() const;
 };
 
-std::ostream& operator<<(std::ostream& os, const CSize& a);
-
+std::ostream& operator<<(std::ostream &os, const CSize &a);
 
 #endif /* CSIZE_H_ */
 #endif

@@ -13,7 +13,6 @@
 #ifndef CPOINT_H_
 #define CPOINT_H_
 
-
 #include <gtk/gtk.h>
 #include <ostream>
 
@@ -27,28 +26,30 @@ public:
 		x = _x;
 		y = _y;
 	}
-	CPoint(GdkEventButton*p) {
+#if GTK_MAJOR_VERSION==3
+	CPoint(GdkEventButton *p) {
 		x = p->x;
 		y = p->y;
 	}
-	void operator+=(const CPoint& p) {
+#endif
+	void operator+=(const CPoint &p) {
 		x += p.x;
 		y += p.y;
 	}
-	void operator-=(const CPoint& p) {
+	void operator-=(const CPoint &p) {
 		x -= p.x;
 		y -= p.y;
 	}
 
-	bool operator==(const CPoint& p) const {
+	bool operator==(const CPoint &p) const {
 		return x == p.x && y == p.y;
 	}
 
-	std::string toString()const;
+	std::string toString() const;
 
 };
 
-std::ostream& operator<<(std::ostream& os, const CPoint& a);
+std::ostream& operator<<(std::ostream &os, const CPoint &a);
 
 #endif /* CPOINT_H_ */
 #endif
