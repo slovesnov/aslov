@@ -373,6 +373,20 @@ VString split(const std::string &subject, const std::string &separator) {
 VString split(const std::string &subject, const char separator) {
 	return split(subject, std::string(1, separator));
 }
+#ifndef NOGTK
+VString splitr(const std::string &subject, const std::string &regex) {
+	VString v;
+	auto fields = g_regex_split_simple(regex.c_str(), subject.c_str(),
+			G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT);
+	guint i;
+	for (i = 0; i < g_strv_length(fields); i++) {
+		v.push_back(fields[i]);
+	}
+	g_strfreev(fields);
+	return v;
+}
+#endif
+
 
 int countOccurence(const std::string &subject, const std::string &a) {
 	size_t pos = 0;

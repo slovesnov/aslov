@@ -368,6 +368,10 @@ std::string replaceAll(std::string subject, const std::string &from,
 	const std::string &to);
 VString split(const std::string &subject, const std::string &separator);
 VString split(const std::string &subject, const char separator = ' ');
+#ifndef NOGTK
+VString splitr(const std::string &subject, const std::string &regex);
+#endif
+
 int countOccurence(const std::string &subject, const std::string &a);
 int countOccurence(const std::string &subject, const char c);
 
