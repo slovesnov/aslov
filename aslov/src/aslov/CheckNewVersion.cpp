@@ -30,13 +30,13 @@ void CheckNewVersion::routine() {
 	if (g_file_load_contents(f, NULL, &content, &length, NULL, NULL)) {
 		std::string s(content, length); //content is not null terminated so create std::string
 		setNumericLocale(); //dot interpret as decimal separator
-		//fixed 4may2022 was if (std::stod(s) > m_version) was exception if router returns some html code when no internet
 		char *p;
-		double v = strtod(s.c_str(), &p);
+		double v = strtod(s.c_str(), &p); //std::stod(s) throws exception if cann't parse double
 		//symbol \r or \n should goes after version in version files
 		bool ok = p != s.c_str() && (*p == '\r' || *p == '\n');
 		if (ok && v > m_version) {
-			m_message = localeToUtf8(s);
+			//19oct25 file in utf8
+			m_message = s;
 			gdk_threads_add_idle(m_callback, NULL);
 		}
 	}
