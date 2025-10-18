@@ -387,7 +387,6 @@ VString splitr(const std::string &subject, const std::string &regex) {
 }
 #endif
 
-
 int countOccurence(const std::string &subject, const std::string &a) {
 	size_t pos = 0;
 	int i = 0;
