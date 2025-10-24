@@ -45,6 +45,10 @@ public:
 		return x == p.x && y == p.y;
 	}
 
+	bool operator!=(const CPoint &p) const {
+		return !(operator==(p));
+	}
+
 	std::string toString() const;
 
 };
