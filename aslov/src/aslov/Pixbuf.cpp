@@ -52,7 +52,7 @@ int Pixbuf::height() const {
 	return gdk_pixbuf_get_height(p);
 }
 
-CSize Pixbuf::size() const {
+CPoint Pixbuf::size() const {
 	return {width(),height()};
 }
 

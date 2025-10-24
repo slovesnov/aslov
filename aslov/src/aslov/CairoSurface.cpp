@@ -39,8 +39,8 @@ CairoSurface::CairoSurface(int width, int height) {
 	create(width, height);
 }
 
-CairoSurface::CairoSurface(const CSize &size) {
-	CairoSurface(size.cx, size.cy);
+CairoSurface::CairoSurface(const CPoint &size) {
+	CairoSurface(size.x, size.y);
 }
 
 CairoSurface::~CairoSurface() {
@@ -53,8 +53,8 @@ void CairoSurface::create(int width, int height) {
 	m_cairo = cairo_create(m_surface);
 }
 
-void CairoSurface::create(const CSize &size) {
-	create(size.cx, size.cy);
+void CairoSurface::create(const CPoint &size) {
+	create(size.x, size.y);
 }
 
 /*
@@ -83,7 +83,7 @@ int CairoSurface::height() const {
 	return cairo_image_surface_get_height(m_surface);
 }
 
-CSize CairoSurface::size() const {
+CPoint CairoSurface::size() const {
 	return {width(),height()};
 }
 

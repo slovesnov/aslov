@@ -15,7 +15,7 @@
 
 #include <gtk/gtk.h>
 #include <string>
-#include "CSize.h"
+#include "CPoint.h"
 
 class Pixbuf {
 	GdkPixbuf *p;
@@ -42,7 +42,7 @@ public:
 
 	int width() const;
 	int height() const;
-	CSize size() const;
+	CPoint size() const;
 
 	void createRGB(int width, int height);
 	void savePng(std::string const &path) const;

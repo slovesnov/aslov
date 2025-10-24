@@ -13,7 +13,6 @@
 #define CRECT_H_
 
 #include "CPoint.h"
-#include "CSize.h"
 
 class CRect {
 public:
@@ -26,11 +25,11 @@ public:
 		left = top = right = bottom = 0;
 	}
 
-	CRect(CPoint p, CSize s) {
+	CRect(CPoint p, CPoint s) {
 		left = p.x;
 		top = p.y;
-		right = left + s.cx;
-		bottom = top + s.cy;
+		right = left + s.x;
+		bottom = top + s.y;
 	}
 
 	CRect(int _left, int _top, int _right, int _bottom) {
@@ -75,7 +74,7 @@ public:
 		return bottom - top;
 	}
 
-	CSize size() const {
+	CPoint size() const {
 		return {width(),height()};
 	}
 

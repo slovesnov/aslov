@@ -24,12 +24,12 @@ class CairoSurface {
 public:
 	CairoSurface();
 	CairoSurface(int width, int height);
-	CairoSurface(CSize const &size);
+	CairoSurface(CPoint const &size);
 	CairoSurface& operator=(const CairoSurface&) = delete;
 	CairoSurface(const CairoSurface&) = delete;
 
 	void create(int width, int height);
-	void create(CSize const &size);
+	void create(CPoint const &size);
 	void create(std::string const &path);
 	virtual ~CairoSurface();
 //	cairo_t* cairo();
@@ -37,7 +37,7 @@ public:
 
 	int width() const;
 	int height() const;
-	CSize size() const;
+	CPoint size() const;
 
 	void copy(CairoSurface &dest);
 	void copy(CairoSurface &dest, CRect const &r);
