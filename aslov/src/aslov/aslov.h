@@ -25,7 +25,7 @@
 #endif
 #ifndef NOGTK
 #include <gtk/gtk.h>
-#include "CairoSurface.h" //CRect,CSize,CPoint
+#include "CairoSurface.h" //CRect,CPoint
 #include "Pixbuf.h"
 #endif
 
