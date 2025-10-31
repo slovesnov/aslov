@@ -22,4 +22,7 @@ int main(int argc, char *argv[]) {
 	std::string s="df";
 	printl(join(a,s));
 	printl(join(3,"sd"));
+	VString v={"d","3"};
+	printl(joinV(v,"#"));
+
 }

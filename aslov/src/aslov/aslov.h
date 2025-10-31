@@ -453,10 +453,9 @@ for (int i = 0; i < size; i++) {
 return c.str();
 }
 
-//(T&& t,P&& ... p) two ampersands conflict with std::string join(VString const &v, const char separator=' ');
-template<typename T, typename ...P>
-std::string join(T &&t, P &&... p) {
-return joinS(" ", t, p...);
+template<typename ...P>
+std::string join(P &&... p) {
+return joinS(" ", p...);
 }
 
 //END string functions
