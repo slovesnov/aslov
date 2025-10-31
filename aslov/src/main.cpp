@@ -12,11 +12,14 @@
 //#include <cstring>
 //#include <limits.h>
 
-void checkParser();
-
 int main(int argc, char *argv[]) {
 	gtk_init(&argc, &argv); //do not remove
 	aslovInit(argv);
 
-	printl(formats(" ",3,28,58));
+//	auto a=getDPI();
+//	printl(a.first,a.second);
+	int a=1;
+	std::string s="df";
+	printl(join(a,s));
+	printl(join(3,"sd"));
 }

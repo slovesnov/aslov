@@ -455,7 +455,7 @@ return c.str();
 
 //(T&& t,P&& ... p) two ampersands conflict with std::string join(VString const &v, const char separator=' ');
 template<typename T, typename ...P>
-std::string join(T &t, P &... p) {
+std::string join(T &&t, P &&... p) {
 return joinS(" ", t, p...);
 }
 
