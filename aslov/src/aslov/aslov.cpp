@@ -793,7 +793,7 @@ void showHideWidget(GtkWidget *w, bool show) {
 	}
 }
 
-std::pair<double, double> getMonitorSize(bool millimeters/*=true*/) {
+PairDoubleDouble getMonitorSize(bool millimeters/*=true*/) {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
 	gdk_monitor_get_geometry(monitor, &r);
@@ -812,7 +812,7 @@ double getMonitorDiagonal(bool millimeters/*=true*/) {
 	return sqrt(a.first * a.first + a.second * a.second);
 }
 
-std::pair<double, double> getDPI() {
+PairDoubleDouble getDPI() {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
 	gdk_monitor_get_geometry(monitor, &r);
