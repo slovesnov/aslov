@@ -586,6 +586,8 @@ std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w, bool show);
+void clearContainer(GtkWidget *w);
+int getContainerIndex(GtkWidget *container, GtkWidget *w);
 //millimeters or inches
 PairDoubleDouble getMonitorSize(bool millimeters = true);
 double getMonitorDiagonal(bool millimeters = true);
@@ -611,7 +613,6 @@ PangoFontDescription* createPangoFontDescription(const PangoFontDescription *f,
 int height);
 PangoFontDescription* createPangoFontDescription();
 PangoLayout* createPangoLayout(cairo_t *cr, std::string text);
-
 #endif
 int getNumberOfCores();
 double timeElapse(clock_t begin);

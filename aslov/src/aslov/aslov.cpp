@@ -793,6 +793,23 @@ void showHideWidget(GtkWidget *w, bool show) {
 	}
 }
 
+void clearContainer(GtkWidget *w) {
+	GList *children, *iter;
+	children = gtk_container_get_children(GTK_CONTAINER(w));
+	for (iter = children; iter != NULL; iter = g_list_next(iter)) {
+		gtk_widget_destroy(GTK_WIDGET(iter->data));
+	}
+	g_list_free(children);
+}
+
+int getContainerIndex(GtkWidget *container, GtkWidget *w) {
+	GValue t = G_VALUE_INIT;
+	g_value_init(&t, G_TYPE_INT);
+	gtk_container_child_get_property(GTK_CONTAINER(container), w, "position",
+			&t);
+	return g_value_get_int(&t);
+}
+
 PairDoubleDouble getMonitorSize(bool millimeters/*=true*/) {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
 	GdkRectangle r;
@@ -916,7 +933,6 @@ PangoLayout* createPangoLayout(cairo_t *cr, std::string text) {
 	pango_font_description_free(desc);
 	return layout;
 }
-
 #endif
 
 int getNumberOfCores() {

@@ -16,6 +16,9 @@ int main(int argc, char *argv[]) {
 	gtk_init(&argc, &argv); //do not remove
 	aslovInit(argv);
 
+	printlog("%d",1)
+	printlo(1)
+	printlogi
 //	auto a=getDPI();
 //	printl(a.first,a.second);
 	int a=1;
