@@ -802,6 +802,7 @@ void clearContainer(GtkWidget *w) {
 	g_list_free(children);
 }
 
+/*
 int getContainerIndex(GtkWidget *container, GtkWidget *w) {
 	GValue t = G_VALUE_INIT;
 	g_value_init(&t, G_TYPE_INT);
@@ -809,6 +810,7 @@ int getContainerIndex(GtkWidget *container, GtkWidget *w) {
 			&t);
 	return g_value_get_int(&t);
 }
+*/
 
 PairDoubleDouble getMonitorSize(bool millimeters/*=true*/) {
 	auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);

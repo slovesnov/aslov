@@ -587,7 +587,7 @@ std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w, bool show);
 void clearContainer(GtkWidget *w);
-int getContainerIndex(GtkWidget *container, GtkWidget *w);
+//int getContainerIndex(GtkWidget *container, GtkWidget *w);
 //millimeters or inches
 PairDoubleDouble getMonitorSize(bool millimeters = true);
 double getMonitorDiagonal(bool millimeters = true);
