@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+
 #ifdef __GNUC__
 #include <memory>//for type name
 #include <cxxabi.h>//for type name this include file exists not for all compilers
@@ -28,6 +29,62 @@
 #include "CairoSurface.h" //CRect,CPoint
 #include "Pixbuf.h"
 #endif
+
+/*BEGIN NEW FUNCTIONS 2026*/
+#include <iostream>
+#include <source_location>
+
+template <typename... Args>
+void show_variables(std::string_view label, Args &&...args) {
+  (
+      [&label](auto &&value) {
+        size_t comma_pos = label.find(',');
+        std::string_view current_name = (comma_pos != std::string_view::npos)
+                                            ? label.substr(0, comma_pos)
+                                            : label;
+
+        std::cout << current_name << "="
+                  << std::forward<decltype(value)>(value);
+
+        if (comma_pos == std::string_view::npos) {
+          std::cout << ' ';
+        } else {
+          std::cout << ", ";
+          label = label.substr(comma_pos + 1);
+          size_t next_non_space = label.find_first_not_of(' ');
+          if (next_non_space != std::string_view::npos) {
+            label = label.substr(next_non_space);
+          }
+        }
+      }(std::forward<Args>(args)),
+      ...);
+}
+
+template <typename... Args> void print_variables(Args &&...args) {
+  ((std::cout << std::forward<Args>(args) << " "), ...);
+}
+
+// pr("123",i,v);
+#define pr(...)                                                                \
+  print_variables(__VA_ARGS__);                                                \
+  pri
+
+#define pri                                                                    \
+  std::cout << std::source_location::current().file_name() << ":"              \
+            << std::source_location::current().line() << " "                   \
+            << std::source_location::current().function_name() << "\n";
+
+// pr1("error {} {}", v[i], v[i + 1]);
+#define pr1(fmt, ...)                                                          \
+  std::cout << std::format(fmt " " __VA_OPT__(, ) __VA_ARGS__);                \
+  pri
+
+// prv("123",i,v);
+#define prv(...)                                                               \
+  show_variables(#__VA_ARGS__, __VA_ARGS__);                                   \
+  pri
+
+/*END NEW FUNCTIONS 2026*/
 
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
  * default macro value is 0 so
