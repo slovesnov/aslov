@@ -14,13 +14,12 @@
 #include <gtk/gtk.h>
 
 class CheckNewVersion {
-	std::string m_versionUrl;
-	double m_version;
+	std::string m_version;
 	GThread *m_newVersionThread;
 	GSourceFunc m_callback;
 public:
 	std::string m_message;
-	void start(std::string versionUrl, double version, GSourceFunc callback);
+	void start(double version, GSourceFunc callback);
 	void routine();
 	~CheckNewVersion();
 };
