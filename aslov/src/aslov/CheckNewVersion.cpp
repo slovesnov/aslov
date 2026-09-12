@@ -16,13 +16,8 @@ static gpointer check_new_version_thread(gpointer d) {
   return NULL;
 }
 
-void CheckNewVersion::start(double version, GSourceFunc callback) {
-  int v = static_cast<int>(version * 100);
-  int major = v / 100;       
-  int minor = (v / 10) % 10; 
-  int patch = v % 10;
-  m_version = "v" + std::to_string(major) + "." + std::to_string(minor) + "." +
-              std::to_string(patch);
+void CheckNewVersion::start(std::string version, GSourceFunc callback) {
+  m_version = "v" + version;
   m_callback = callback;
   m_newVersionThread =
       g_thread_new("", check_new_version_thread, gpointer(this));

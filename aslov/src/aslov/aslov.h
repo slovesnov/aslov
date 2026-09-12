@@ -522,21 +522,6 @@ template <typename T>
 std::vector<std::vector<T>> create2dArray(size_t rows, size_t cols, const T& initial_value = T()) {
     return std::vector<std::vector<T>>(rows, std::vector<T>(cols, initial_value));
 }
-/*create2dArray
-template<class T> T** create2dArray(int dimension1, int dimension2) {
-T **p = new T*[dimension1];
-for (int i = 0; i < dimension1; i++) {
-	p[i] = new T[dimension2];
-}
-return p;
-}
-
-template<class T> void delete2dArray(T **p, int dimension1) {
-for (int i = 0; i < dimension1; i++) {
-	delete[] p[i];
-}
-delete[] p;
-}*/
 //END 2 dimensional array functions
 
 //BEGIN pixbuf/image functions

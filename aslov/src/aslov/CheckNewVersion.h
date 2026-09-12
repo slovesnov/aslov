@@ -19,7 +19,7 @@ class CheckNewVersion {
 	GSourceFunc m_callback;
 public:
 	std::string m_message;
-	void start(double version, GSourceFunc callback);
+	void start(std::string version, GSourceFunc callback);
 	void routine();
 	~CheckNewVersion();
 };
