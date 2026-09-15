@@ -595,7 +595,7 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
   return i == std::end(l) ? -1 : i - std::begin(l);
 }
 
-template <typename T> int indexOf(const T &t, std::initializer_list<T> v) {
+template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   auto it = std::find(v.begin(), v.end(), t);
   return it == v.end() ? -1 : std::distance(v.begin(), it);
 }
@@ -618,7 +618,7 @@ int indexOfNoCase(const std::string t, const char *v[], int size);
  */
 int indexOf(const char t, const std::string &v);
 
-template <typename T> bool oneOf(const T &t, std::initializer_list<T> v) {
+template <class T> bool oneOf(const T &t, std::initializer_list<T> v) {
   return indexOf(t, v) != -1;
 }
 
