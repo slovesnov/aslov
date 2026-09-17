@@ -547,21 +547,6 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 
 //END string functions
 
-std::string joinV(const std::vector<std::string>& v, const std::string& separator) {
-    if (v.empty()) return {};
-    
-    size_t total_size = separator.size() * (v.size() - 1);
-    for (const auto& s : v) total_size += s.size();
-
-    std::string result = v[0];
-    for (size_t i = 1; i < v.size(); ++i) {
-        result += separator;
-        result += v[i];
-    }
-    return result;
-}
-
-
 //BEGIN pixbuf functions
 #ifndef NOGTK
 
@@ -951,14 +936,6 @@ PangoLayout* createPangoLayout(cairo_t *cr, std::string text) {
 	return layout;
 }
 #endif
-
-int getNumberOfCores() {
-#ifdef NOGTK
-	return std::thread::hardware_concurrency();
-#else
-	return g_get_num_processors();
-#endif
-}
 
 double timeElapse(clock_t begin) {
 	return double(clock() - begin) / CLOCKS_PER_SEC;

@@ -8,8 +8,7 @@
  *         homepage: slovesnov.rf.gd
  */
 
-#ifndef ASLOV_H_
-#define ASLOV_H_
+#pragma once
 
 #include <algorithm>
 #include <cassert>
@@ -510,26 +509,37 @@ std::string joinS(const char separator, T &&t, P &&...p) {
   return joinS(std::string(1, separator), t, p...);
 }
 
-//fast function
-std::string joinV(const VString& v, std::string const &separator = " ");
+template <typename T>
+requires std::convertible_to<T, std::string_view>
+inline std::string joinV(const std::vector<T>& v, std::string_view separator = " ") {
+    if (v.empty()) return {};
+
+    size_t total_size = separator.size() * (v.size() - 1);
+    for (const auto& s : v) {
+        total_size += std::string_view(s).size();
+    }
+
+    std::string result;
+    result.reserve(total_size);
+    
+    result += v[0];
+    for (size_t i = 1; i < v.size(); ++i) {
+        result += separator;
+        result += v[i];
+    }
+    return result;
+}
 
 template <typename T>
-requires (!std::same_as<T, std::string>)
-std::string joinV(const std::vector<T>& v, const std::string& separator) {
+requires (!std::convertible_to<T, std::string_view>)
+inline std::string joinV(const std::vector<T>& v, std::string_view separator = " ") {
     if (v.empty()) return {};
-    
     std::stringstream c;
     c << v[0];
     for (size_t i = 1; i < v.size(); ++i) {
         c << separator << v[i];
     }
     return c.str();
-}
-
-template <typename T>
-requires (!std::same_as<T, std::string>)
-std::string joinV(const std::vector<T>& v) {
-    return joinV(v, " ");
 }
 
 // separator can be default so use as 2nd parameter. It differs from other
@@ -546,9 +556,32 @@ std::string join(T const v[], int size, const char separator = ' ') {
   return c.str();
 }
 
+template <typename T, std::size_t N>
+std::string join(const std::array<T, N>& v, const char separator = ' ') {
+  std::stringstream c;
+  for (std::size_t i = 0; i < N; i++) {
+    if (i) {
+      c << separator;
+    }
+    c << v[i];
+  }
+  return c.str();
+}
+
+template <typename T>
+struct is_std_array : std::false_type {};
+
+template <typename T, std::size_t N>
+struct is_std_array<std::array<T, N>> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_std_array_v = is_std_array<T>::value;
+
 template <typename First, typename... P>
-requires (!std::is_array_v<std::remove_reference_t<First>>)
-std::string join(First &&first, P &&...p) {
+requires (
+    !std::is_array_v<std::remove_cvref_t<First>> && 
+    !is_std_array_v<std::remove_cvref_t<First>>
+)std::string join(First &&first, P &&...p) {
   return joinS(" ", std::forward<First>(first), std::forward<P>(p)...);
 }
 
@@ -695,7 +728,6 @@ PangoFontDescription *createPangoFontDescription(const PangoFontDescription *f,
 PangoFontDescription *createPangoFontDescription();
 PangoLayout *createPangoLayout(cairo_t *cr, std::string text);
 #endif
-int getNumberOfCores();
 double timeElapse(clock_t begin);
 std::string secondsToString(double seconds);
 std::string secondsToString(clock_t end, clock_t begin);
@@ -735,5 +767,3 @@ template <class T> std::string aslovTypeName() {
 #endif /* __GNUC__ */
 
 void aslovSetOutputWidth(int width);
-
-#endif /* ASLOV_H_ */
