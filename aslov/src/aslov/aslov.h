@@ -24,13 +24,12 @@
 #ifdef __GNUC__
 #include <cxxabi.h> //for type name this include file exists not for all compilers
 #include <memory>   //for type name
-
 #endif
+
 #ifndef NOGTK
 #include "CairoSurface.h" //CRect,CPoint
 #include "Pixbuf.h"
 #include <gtk/gtk.h>
-
 #endif
 
 /*BEGIN NEW FUNCTIONS 2026*/
@@ -511,26 +510,26 @@ std::string joinS(const char separator, T &&t, P &&...p) {
   return joinS(std::string(1, separator), t, p...);
 }
 
-// separator can be default so use as 2nd parameter. It differs from other
-// functions arguments order.
+//fast function
+std::string joinV(const VString& v, std::string const &separator = " ");
+
 template <typename T>
-std::string joinV(std::vector<T> const &v, std::string const &separator = " ") {
-  std::stringstream c;
-  bool f = true;
-  for (auto const &a : v) {
-    if (f) {
-      f = false;
-    } else {
-      c << separator;
+requires (!std::same_as<T, std::string>)
+std::string joinV(const std::vector<T>& v, const std::string& separator) {
+    if (v.empty()) return {};
+    
+    std::stringstream c;
+    c << v[0];
+    for (size_t i = 1; i < v.size(); ++i) {
+        c << separator << v[i];
     }
-    c << a;
-  }
-  return c.str();
+    return c.str();
 }
 
 template <typename T>
-std::string joinV(std::vector<T> const &v, const char separator) {
-  return joinV(v, std::string(1, separator));
+requires (!std::same_as<T, std::string>)
+std::string joinV(const std::vector<T>& v) {
+    return joinV(v, " ");
 }
 
 // separator can be default so use as 2nd parameter. It differs from other
@@ -547,7 +546,11 @@ std::string join(T const v[], int size, const char separator = ' ') {
   return c.str();
 }
 
-template <typename... P> std::string join(P &&...p) { return joinS(" ", p...); }
+template <typename First, typename... P>
+requires (!std::is_array_v<std::remove_reference_t<First>>)
+std::string join(First &&first, P &&...p) {
+  return joinS(" ", std::forward<First>(first), std::forward<P>(p)...);
+}
 
 // END string functions
 

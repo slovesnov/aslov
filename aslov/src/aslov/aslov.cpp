@@ -547,6 +547,21 @@ std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
 
 //END string functions
 
+std::string joinV(const std::vector<std::string>& v, const std::string& separator) {
+    if (v.empty()) return {};
+    
+    size_t total_size = separator.size() * (v.size() - 1);
+    for (const auto& s : v) total_size += s.size();
+
+    std::string result = v[0];
+    for (size_t i = 1; i < v.size(); ++i) {
+        result += separator;
+        result += v[i];
+    }
+    return result;
+}
+
+
 //BEGIN pixbuf functions
 #ifndef NOGTK
 
