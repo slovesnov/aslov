@@ -31,7 +31,7 @@
 #include <gtk/gtk.h>
 #endif
 
-/*BEGIN NEW FUNCTIONS 2026*/
+#include <filesystem>
 #include <iostream>
 #include <source_location>
 
@@ -62,6 +62,7 @@ void show_variables(std::string_view label, Args &&...args) {
 }
 
 template <typename... Args> void print_variables(Args &&...args) {
+  std::cout << std::dec; // after ptr output
   ((std::cout << std::forward<Args>(args) << " "), ...);
 }
 
@@ -69,6 +70,24 @@ template <typename... Args> void print_variables(Args &&...args) {
 #define pr(...)                                                                \
   print_variables(__VA_ARGS__);                                                \
   pri
+
+#define prs(...)                                                               \
+  print_variables(__VA_ARGS__);                                                \
+  pri_short
+
+/*   #define pri \
+  std::cout <<
+  std::filesystem::path(std::source_location::current().file_name()).filename().string()
+  << ":"              \
+            << std::source_location::current().line() << " "                   \
+            << std::source_location::current().function_name() << "\n";
+ */
+#define pri_short                                                              \
+  std::cout << std::filesystem::path(                                          \
+                   std::source_location::current().file_name())                \
+                   .filename()                                                 \
+                   .string()                                                   \
+            << ":" << std::source_location::current().line() << "\n";
 
 #define pri                                                                    \
   std::cout << std::source_location::current().file_name() << ":"              \
@@ -85,8 +104,6 @@ template <typename... Args> void print_variables(Args &&...args) {
   show_variables(#__VA_ARGS__, __VA_ARGS__);                                   \
   pri
 
-/*END NEW FUNCTIONS 2026*/
-
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
  * default macro value is 0 so
  * #ifndef NOGTK => #if NOGTK==0 is true
@@ -100,12 +117,15 @@ template <typename... Args> void print_variables(Args &&...args) {
 #endif
 #endif
 
-#define GP(a) gpointer(int64_t(a))
-#define GP2INT(a) int(int64_t(a))
+// #define GP(a) gpointer(int64_t(a))
+// #define GP2INT(a) int(int64_t(a))
+// #define GP GINT_TO_POINTER
+// #define GP2INT GPOINTER_TO_INT
+
 #define SIZE G_N_ELEMENTS
 #define SIZEI(a) int(G_N_ELEMENTS(a))
-#define INDEX_OF(id, a) indexOf(id, a, SIZEI(a))
-#define ONE_OF(id, a) oneOf(id, a, SIZEI(a))
+// #define INDEX_OF(id, a) indexOf(id, a, SIZEI(a))
+// #define ONE_OF(id, a) oneOf(id, a, SIZEI(a))
 #define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, SIZEI(a))
 #define JOIN(a) join(a, SIZEI(a))
 #define JOINS(a, separator) join(a, SIZEI(a), separator)
@@ -324,6 +344,7 @@ FILE *open(std::string path, const char *flags);
 void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
 FILE *openApplicationLog(const char *flags);
+void clearLog();
 std::string const &getApplicationName();
 // std::string const& getApplicationPath();
 // std::string const& getWorkingDirectory();
@@ -340,27 +361,6 @@ const std::string writableFileGetContents(const std::string &name);
 const std::string fileGetContent(const std::string &path, bool binary = false);
 
 // END application functions
-
-// BEGIN config functions
-#ifndef NOGTK
-std::string getConfigPath();
-std::string getConfigPathLocaled();
-bool loadConfig(MapStringString &map);
-#define WRITE_CONFIG(T, V, ...) aslovWriteConfig(T, SIZE(T), V, ##__VA_ARGS__);
-
-template <typename... T>
-void aslovWriteConfig(const std::string tags[], const int size, T &&...p) {
-  assert(size == sizeof...(T));
-  std::ofstream f(getConfigPathLocaled());
-  assert(f.is_open());
-  int i = 0;
-  ([&](auto &a) { f << tags[i++] << " = " << a << "\n"; }(p), ...);
-}
-
-PairStringString pairFromBuffer(const std::string &s);
-PairStringString pairFromBuffer(const char *b);
-#endif
-// END config functions
 
 // BEGIN string functions
 std::string timeToString(const char *format, bool toLowerCase = false);
@@ -510,36 +510,45 @@ std::string joinS(const char separator, T &&t, P &&...p) {
 }
 
 template <typename T>
-requires std::convertible_to<T, std::string_view>
-inline std::string joinV(const std::vector<T>& v, std::string_view separator = " ") {
-    if (v.empty()) return {};
+  requires std::convertible_to<T, std::string_view>
+inline std::string joinV(const std::vector<T> &v,
+                         std::string_view separator = " ") {
+  if (v.empty())
+    return {};
 
-    size_t total_size = separator.size() * (v.size() - 1);
-    for (const auto& s : v) {
-        total_size += std::string_view(s).size();
-    }
+  size_t total_size = separator.size() * (v.size() - 1);
+  for (const auto &s : v) {
+    total_size += std::string_view(s).size();
+  }
 
-    std::string result;
-    result.reserve(total_size);
-    
-    result += v[0];
-    for (size_t i = 1; i < v.size(); ++i) {
-        result += separator;
-        result += v[i];
-    }
-    return result;
+  std::string result;
+  result.reserve(total_size);
+
+  result += v[0];
+  for (size_t i = 1; i < v.size(); ++i) {
+    result += separator;
+    result += v[i];
+  }
+  return result;
 }
 
 template <typename T>
-requires (!std::convertible_to<T, std::string_view>)
-inline std::string joinV(const std::vector<T>& v, std::string_view separator = " ") {
-    if (v.empty()) return {};
-    std::stringstream c;
-    c << v[0];
-    for (size_t i = 1; i < v.size(); ++i) {
-        c << separator << v[i];
-    }
-    return c.str();
+  requires(!std::convertible_to<T, std::string_view>)
+inline std::string joinV(const std::vector<T> &v,
+                         std::string_view separator = " ") {
+  if (v.empty())
+    return {};
+  std::stringstream c;
+  c << v[0];
+  for (size_t i = 1; i < v.size(); ++i) {
+    c << separator << v[i];
+  }
+  return c.str();
+}
+
+template <typename T>
+inline std::string joinV(const std::vector<T> &v, char separator) {
+  return joinV(v, std::string(1, separator));
 }
 
 // separator can be default so use as 2nd parameter. It differs from other
@@ -557,7 +566,7 @@ std::string join(T const v[], int size, const char separator = ' ') {
 }
 
 template <typename T, std::size_t N>
-std::string join(const std::array<T, N>& v, const char separator = ' ') {
+std::string join(const std::array<T, N> &v, const char separator = ' ') {
   std::stringstream c;
   for (std::size_t i = 0; i < N; i++) {
     if (i) {
@@ -568,8 +577,7 @@ std::string join(const std::array<T, N>& v, const char separator = ' ') {
   return c.str();
 }
 
-template <typename T>
-struct is_std_array : std::false_type {};
+template <typename T> struct is_std_array : std::false_type {};
 
 template <typename T, std::size_t N>
 struct is_std_array<std::array<T, N>> : std::true_type {};
@@ -578,14 +586,83 @@ template <typename T>
 inline constexpr bool is_std_array_v = is_std_array<T>::value;
 
 template <typename First, typename... P>
-requires (
-    !std::is_array_v<std::remove_cvref_t<First>> && 
-    !is_std_array_v<std::remove_cvref_t<First>>
-)std::string join(First &&first, P &&...p) {
+  requires(!std::is_array_v<std::remove_cvref_t<First>> &&
+           !is_std_array_v<std::remove_cvref_t<First>>)
+std::string join(First &&first, P &&...p) {
   return joinS(" ", std::forward<First>(first), std::forward<P>(p)...);
 }
-
 // END string functions
+
+// BEGIN config functions
+#ifndef NOGTK
+std::string getConfigPath();
+std::string getConfigPathLocaled();
+bool loadConfig(MapStringString &map);
+#define READ_CONFIG(T, ...) aslovReadConfig(T, __VA_ARGS__)
+#define WRITE_CONFIG(T, ...) aslovWriteConfig(T, __VA_ARGS__)
+
+template <std::size_t N, typename... T>
+bool aslovReadConfig(const std::string (&tags)[N], T &&...p) {
+  static_assert(N == sizeof...(T),
+                "Number of arguments should match the number of tags");
+  MapStringString m;
+  if (!loadConfig(m)) {
+    return false;
+  }
+
+  int index = -1;
+  auto identify_and_process = [&](auto &&arg) -> bool {
+    index++;
+    auto it = m.find(tags[index]);
+    if (it == m.end()) {
+#ifndef NDEBUG
+      pr("error cann't find tag");
+#endif
+      return false;
+    }
+    auto &v = it->second;
+    using ActualType = decltype(arg);
+    if constexpr (std::is_same_v<ActualType, int &>) {
+      int i;
+      if (parseString(v, i)) {
+        arg = i;
+        // pr("ok",index,i);
+      } else {
+#ifndef NDEBUG
+        pr("error cann't parse string, to int string=", v);
+#endif
+        return false;
+      }
+    } else if constexpr (std::is_same_v<ActualType, std::string &>) {
+      // pr("ok",index,v);
+      arg = v;
+    } else {
+#ifndef NDEBUG
+      pr("error unknown type, for argument ", index);
+#endif
+      return false;
+    }
+    return true;
+  };
+
+  return (identify_and_process(std::forward<T>(p)) && ...);
+}
+
+template <std::size_t N, typename... T>
+void aslovWriteConfig(const std::string (&tags)[N], T &&...p) {
+  static_assert(N == sizeof...(T),
+                "Number of arguments should match the number of tags");
+  std::ofstream f(getConfigPathLocaled());
+  assert(f.is_open());
+  int i = 0;
+  ([&](auto &a) { f << tags[i++] << " = " << a << "\n"; }(p), ...);
+}
+
+PairStringString pairFromBuffer(const std::string &s);
+PairStringString pairFromBuffer(const char *b);
+std::string getSystemLanguage();
+#endif
+// END config functions
 
 // BEGIN 2 dimensional array functions
 template <typename T>
@@ -636,9 +713,15 @@ template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   return it == v.end() ? -1 : std::distance(v.begin(), it);
 }
 
-template <class T> int indexOf(const T &t, const T v[], int size) {
-  int i = std::find(v, v + size, t) - v;
-  return i == size ? -1 : i;
+// template <class T> int indexOf(const T &t, const T v[], int size) {
+//   int i = std::find(v, v + size, t) - v;
+//   return i == size ? -1 : i;
+// }
+template <class T, class U, std::size_t N> 
+int indexOf(const U &t, const T (&v)[N]) {
+    const T* it = std::find(v, v + N, t);
+    int i = static_cast<int>(it - v);
+    return i == N ? -1 : i;
 }
 
 template <class T> int indexOf(const T &t, std::vector<T> const &v) {
@@ -670,9 +753,14 @@ template <class T, class... V> bool oneOf(T const &t, V const &...v) {
   // return indexOfV(t,v...)!=-1;
 }
 
-template <class T> bool oneOf(const T &t, T const v[], int size) {
-  return indexOf(t, v, size) != -1;
+template <class T, class U, std::size_t N> 
+bool oneOf(const U &t, const T (&v)[N]) {
+  return indexOf(t, v) != -1;
 }
+
+// template <class T> bool oneOf(const T &t, T const v[], int size) {
+//   return indexOf(t, v, size) != -1;
+// }
 
 template <class T> bool oneOf(const T &t, std::vector<T> const &v) {
   return indexOf(t, v) != -1;

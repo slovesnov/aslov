@@ -21,7 +21,6 @@ public:
 	std::string m_message;
 	void start(std::string version, GSourceFunc callback);
 	void routine();
-	~CheckNewVersion();
 };
 
 #endif /* NOGTK */
