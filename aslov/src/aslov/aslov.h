@@ -117,15 +117,11 @@ template <typename... Args> void print_variables(Args &&...args) {
 #endif
 #endif
 
-// #define GP(a) gpointer(int64_t(a))
-// #define GP2INT(a) int(int64_t(a))
 // #define GP GINT_TO_POINTER
 // #define GP2INT GPOINTER_TO_INT
 
 #define SIZE G_N_ELEMENTS
 #define SIZEI(a) int(G_N_ELEMENTS(a))
-// #define INDEX_OF(id, a) indexOf(id, a, SIZEI(a))
-// #define ONE_OF(id, a) oneOf(id, a, SIZEI(a))
 #define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, SIZEI(a))
 #define JOIN(a) join(a, SIZEI(a))
 #define JOINS(a, separator) join(a, SIZEI(a), separator)
@@ -713,15 +709,17 @@ template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   return it == v.end() ? -1 : std::distance(v.begin(), it);
 }
 
-// template <class T> int indexOf(const T &t, const T v[], int size) {
-//   int i = std::find(v, v + size, t) - v;
-//   return i == size ? -1 : i;
-// }
-template <class T, class U, std::size_t N> 
+template <class T, std::size_t N>
+int indexOf(const T &t, const std::array<T, N> &v) {
+  auto it = std::find(v.begin(), v.end(), t);
+  return it == v.end() ? -1 : static_cast<int>(std::distance(v.begin(), it));
+}
+
+template <class T, class U, std::size_t N>
 int indexOf(const U &t, const T (&v)[N]) {
-    const T* it = std::find(v, v + N, t);
-    int i = static_cast<int>(it - v);
-    return i == N ? -1 : i;
+  const T *it = std::find(v, v + N, t);
+  int i = static_cast<int>(it - v);
+  return i == N ? -1 : i;
 }
 
 template <class T> int indexOf(const T &t, std::vector<T> const &v) {
@@ -741,6 +739,11 @@ template <class T> bool oneOf(const T &t, std::initializer_list<T> v) {
   return indexOf(t, v) != -1;
 }
 
+template <class T, std::size_t N>
+int oneOf(const T &t, const std::array<T, N> &v) {
+  return indexOf(t, v) != -1;
+}
+
 bool oneOf(char const &t, const std::string &v);
 bool oneOf(char const &t, char const *v);
 
@@ -753,14 +756,10 @@ template <class T, class... V> bool oneOf(T const &t, V const &...v) {
   // return indexOfV(t,v...)!=-1;
 }
 
-template <class T, class U, std::size_t N> 
+template <class T, class U, std::size_t N>
 bool oneOf(const U &t, const T (&v)[N]) {
   return indexOf(t, v) != -1;
 }
-
-// template <class T> bool oneOf(const T &t, T const v[], int size) {
-//   return indexOf(t, v, size) != -1;
-// }
 
 template <class T> bool oneOf(const T &t, std::vector<T> const &v) {
   return indexOf(t, v) != -1;
