@@ -75,13 +75,6 @@ template <typename... Args> void print_variables(Args &&...args) {
   print_variables(__VA_ARGS__);                                                \
   pri_short
 
-/*   #define pri \
-  std::cout <<
-  std::filesystem::path(std::source_location::current().file_name()).filename().string()
-  << ":"              \
-            << std::source_location::current().line() << " "                   \
-            << std::source_location::current().function_name() << "\n";
- */
 #define pri_short                                                              \
   std::cout << std::filesystem::path(                                          \
                    std::source_location::current().file_name())                \
@@ -341,9 +334,8 @@ void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
 FILE *openApplicationLog(const char *flags);
 void clearLog();
+std::string getLogPath();
 std::string const &getApplicationName();
-// std::string const& getApplicationPath();
-// std::string const& getWorkingDirectory();
 std::string getResourcePath(const std::string name);
 std::string getImagePath(const std::string name);
 std::ifstream openResourceFileAsStream(const std::string name);

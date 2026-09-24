@@ -110,7 +110,13 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
   if (fi == FILEINFO::DIRECTORY) {
     return path.substr(0, pos);
   }
-  std::string name = path.substr(pos + 1);
+
+  //"./words.exe" also ok
+  gchar *exe_name = g_path_get_basename(path.c_str());        
+  std::string name = exe_name;
+  g_free(exe_name);
+
+  // std::string name = path.substr(pos + 1);
   if (fi == FILEINFO::NAME) {
     return name;
   }
@@ -196,6 +202,10 @@ FILE *openApplicationLog(const char *flags) {
 void clearLog() {
   FILE *f = openApplicationLog("w+");
   fclose(f);
+}
+
+std::string getLogPath(){
+  return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName);
 }
 
 std::string const &getApplicationName() { return applicationName; }
