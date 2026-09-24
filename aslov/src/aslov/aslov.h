@@ -134,10 +134,10 @@ template <typename... Args> void print_variables(Args &&...args) {
 #define G_N_ELEMENTS(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
-typedef std::vector<std::string> VString;
-typedef std::map<std::string, std::string> MapStringString;
-typedef std::pair<std::string, std::string> PairStringString;
-typedef std::pair<double, double> PairDoubleDouble;
+using VString = std::vector<std::string>;
+using MapStringString = std::map<std::string, std::string>;
+using PairStringString = std::pair<std::string, std::string>;
+using PairDoubleDouble = std::pair<double, double>;
 
 // format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...);
@@ -594,11 +594,9 @@ std::string join(First &&first, P &&...p) {
 std::string getConfigPath();
 std::string getConfigPathLocaled();
 bool loadConfig(MapStringString &map);
-#define READ_CONFIG(T, ...) aslovReadConfig(T, __VA_ARGS__)
-#define WRITE_CONFIG(T, ...) aslovWriteConfig(T, __VA_ARGS__)
 
 template <std::size_t N, typename... T>
-bool aslovReadConfig(const std::string (&tags)[N], T &&...p) {
+bool readConfig(const std::string (&tags)[N], T &&...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
   MapStringString m;
@@ -645,7 +643,7 @@ bool aslovReadConfig(const std::string (&tags)[N], T &&...p) {
 }
 
 template <std::size_t N, typename... T>
-void aslovWriteConfig(const std::string (&tags)[N], T &&...p) {
+void writeConfig(const std::string (&tags)[N], T &&...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
   std::ofstream f(getConfigPathLocaled());
