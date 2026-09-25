@@ -694,6 +694,19 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
   return i == std::end(l) ? -1 : i - std::begin(l);
 }
 
+template <class T, class... Args> 
+int indexOf(T const &t, Args const &...v) {
+  // Create an initializer_list containing 't' and all elements of 'v'.
+  // This guarantees the list is never empty, enabling robust type deduction.
+  auto l = {t, v...}; 
+  
+  // Search for 't' starting from the second element (the beginning of 'v...').
+  auto it = std::find(std::next(std::begin(l)), std::end(l), t);
+  
+  // If found, calculate the index relative to 'v...' by subtracting 1.
+  return it == std::end(l) ? -1 : (it - std::begin(l) - 1);
+}
+
 template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   auto it = std::find(v.begin(), v.end(), t);
   return it == v.end() ? -1 : std::distance(v.begin(), it);
