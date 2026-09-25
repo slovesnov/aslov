@@ -622,6 +622,17 @@ bool readConfig(const std::string (&tags)[N], T &&...p) {
     } else if constexpr (std::is_same_v<ActualType, std::string &>) {
       // pr("ok",index,v);
       arg = v;
+    } else if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
+      PangoFontDescription *desc =
+          pango_font_description_from_string(v.c_str());
+      if (desc) {
+        arg = desc;
+      } else {
+#ifndef NDEBUG
+        pr("error cann't parse string to PangoFontDescription, string=", v);
+#endif
+        return false;
+      }
     } else {
 #ifndef NDEBUG
       pr("error unknown type, for argument ", index);
@@ -640,8 +651,24 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
                 "Number of arguments should match the number of tags");
   std::ofstream f(getConfigPathLocaled());
   assert(f.is_open());
+
   int i = 0;
-  ([&](auto &a) { f << tags[i++] << " = " << a << "\n"; }(p), ...);
+  (
+      [&](auto &&a) { // Используем auto&& для универсальности
+        using PureType = std::decay_t<decltype(a)>;
+        f << tags[i++] << " = ";
+        if constexpr (std::is_same_v<PureType, PangoFontDescription *>) {
+          assert(a);
+          char *font_str = pango_font_description_to_string(a);
+          f << font_str;
+          g_free(font_str);
+        } else {
+          f << a;
+        }
+
+        f << "\n";
+      }(std::forward<T>(p)),
+      ...);
 }
 
 PairStringString pairFromBuffer(const std::string &s);
@@ -694,15 +721,14 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
   return i == std::end(l) ? -1 : i - std::begin(l);
 }
 
-template <class T, class... Args> 
-int indexOf(T const &t, Args const &...v) {
+template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
   // Create an initializer_list containing 't' and all elements of 'v'.
   // This guarantees the list is never empty, enabling robust type deduction.
-  auto l = {t, v...}; 
-  
+  auto l = {t, v...};
+
   // Search for 't' starting from the second element (the beginning of 'v...').
   auto it = std::find(std::next(std::begin(l)), std::end(l), t);
-  
+
   // If found, calculate the index relative to 'v...' by subtracting 1.
   return it == std::end(l) ? -1 : (it - std::begin(l) - 1);
 }
