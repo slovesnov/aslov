@@ -347,6 +347,7 @@ void writableFileSetContents(const std::string name, const std::string &s);
 const std::string writableFileGetContents(const std::string &name);
 #endif
 const std::string fileGetContent(const std::string &path, bool binary = false);
+bool filePutContent(const std::string &path, const std::string &content, bool binary = false);
 
 // END application functions
 
@@ -588,7 +589,7 @@ std::string getConfigPathLocaled();
 bool loadConfig(MapStringString &map);
 
 template <std::size_t N, typename... T>
-bool readConfig(const std::string (&tags)[N], T &&...p) {
+bool readConfig(const std::string (&tags)[N], T &...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
   MapStringString m;
@@ -607,20 +608,20 @@ bool readConfig(const std::string (&tags)[N], T &&...p) {
       return false;
     }
     auto &v = it->second;
-    using ActualType = decltype(arg);
-    if constexpr (std::is_same_v<ActualType, int &>) {
+
+    using ActualType = std::decay_t<decltype(arg)>;
+
+    if constexpr (std::is_same_v<ActualType, int>) {
       int i;
       if (parseString(v, i)) {
         arg = i;
-        // pr("ok",index,i);
       } else {
 #ifndef NDEBUG
         pr("error cann't parse string, to int string=", v);
 #endif
         return false;
       }
-    } else if constexpr (std::is_same_v<ActualType, std::string &>) {
-      // pr("ok",index,v);
+    } else if constexpr (std::is_same_v<ActualType, std::string>) {
       arg = v;
     } else if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
       PangoFontDescription *desc =
@@ -642,7 +643,7 @@ bool readConfig(const std::string (&tags)[N], T &&...p) {
     return true;
   };
 
-  return (identify_and_process(std::forward<T>(p)) && ...);
+  return (identify_and_process(p) && ...);
 }
 
 template <std::size_t N, typename... T>

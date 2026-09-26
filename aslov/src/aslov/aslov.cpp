@@ -260,6 +260,26 @@ const std::string fileGetContent(const std::string &path,
   buffer << t.rdbuf();
   return buffer.str();
 }
+
+bool filePutContent(const std::string &path, const std::string &content, bool binary /*=false*/){
+    auto m = binary ? (std::ios::out | std::ios::binary | std::ios::trunc) 
+                    : (std::ios::out | std::ios::trunc);
+
+#ifdef NOTGK_WITHOUT_ICONV
+    std::ofstream t(path, m);
+#else
+    std::ofstream t(utf8ToLocale(path), m);
+#endif
+
+    if (!t.is_open()) {
+        return false;
+    }
+
+    t << content;
+    
+    return t.good();
+}
+
 // END application functions
 
 // BEGIN config functions
