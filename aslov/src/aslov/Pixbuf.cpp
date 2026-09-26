@@ -19,10 +19,6 @@ Pixbuf::Pixbuf() {
 	p = nullptr;
 }
 
-Pixbuf::~Pixbuf() {
-	free();
-}
-
 Pixbuf::Pixbuf(const char *path) {
 	p = nullptr;
 	set(path);
@@ -34,22 +30,15 @@ Pixbuf::Pixbuf(const std::string &path) {
 }
 
 Pixbuf::Pixbuf(GdkPixbuf *pb) {
-	p = pb;
-}
-
-void Pixbuf::free() {
-	if (p) {
-		g_object_unref(p);
-		p = nullptr;
-	}
+	p.reset(pb);
 }
 
 int Pixbuf::width() const {
-	return gdk_pixbuf_get_width(p);
+	return gdk_pixbuf_get_width(p.get());
 }
 
 int Pixbuf::height() const {
-	return gdk_pixbuf_get_height(p);
+	return gdk_pixbuf_get_height(p.get());
 }
 
 CPoint Pixbuf::size() const {
@@ -57,9 +46,8 @@ CPoint Pixbuf::size() const {
 }
 
 void Pixbuf::set(const char *path) {
-	free();
-	p = gdk_pixbuf_new_from_file(path, NULL);
-	assert(p);
+	p.reset(gdk_pixbuf_new_from_file(path, NULL));
+	assert(p.get());
 }
 
 void Pixbuf::set(const std::string &path) {
@@ -67,8 +55,7 @@ void Pixbuf::set(const std::string &path) {
 }
 
 void Pixbuf::set(GdkPixbuf *pb) {
-	free();
-	p = pb;
+	p.reset(pb);
 }
 
 void Pixbuf::operator =(const char *path) {
@@ -80,7 +67,7 @@ void Pixbuf::operator =(const std::string &path) {
 }
 
 Pixbuf::operator GdkPixbuf*() {
-	return p;
+	return p.get();
 }
 
 void Pixbuf::operator =(GdkPixbuf *pb) {
@@ -88,23 +75,22 @@ void Pixbuf::operator =(GdkPixbuf *pb) {
 }
 
 void Pixbuf::createRGB(int width, int height) {
-	free();
-	p = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
+	p.reset(gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height));
 }
 
 void Pixbuf::savePng(const std::string &path) const {
-	gdk_pixbuf_save(p, path.c_str(), "png", NULL, NULL);
+	gdk_pixbuf_save(p.get(), path.c_str(), "png", NULL, NULL);
 }
 
 void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/) const {
 	auto s = std::to_string(quality);
-	gdk_pixbuf_save(p, path.c_str(), "jpeg", NULL, "quality", s.c_str(), NULL);
+	gdk_pixbuf_save(p.get(), path.c_str(), "jpeg", NULL, "quality", s.c_str(), NULL);
 }
 
 GdkPixbuf* Pixbuf::saturate(float f) const {
-	GdkPixbuf *pb = gdk_pixbuf_copy(p);
+	GdkPixbuf *pb = gdk_pixbuf_copy(p.get());
 	//desaturate image
-	gdk_pixbuf_saturate_and_pixelate(p, pb, f, false);
+	gdk_pixbuf_saturate_and_pixelate(p.get(), pb, f, false);
 	return pb;
 }
 

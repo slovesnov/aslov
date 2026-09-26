@@ -10,16 +10,13 @@
 
 #ifndef NOGTK
 
-#ifndef ASLOV_PIXBUF_H_
-#define ASLOV_PIXBUF_H_
+#pragma once
 
-#include <gtk/gtk.h>
-#include <string>
 #include "CPoint.h"
+#include "SafeGtkTypes.h"
 
 class Pixbuf {
-	GdkPixbuf *p;
-	void free();
+	SafePixbuf p;
 public:
 	Pixbuf();
 	Pixbuf(const char *path);
@@ -35,8 +32,6 @@ public:
 
 	operator GdkPixbuf*();
 
-	virtual ~Pixbuf();
-
 	Pixbuf& operator=(const Pixbuf&) = delete;
 	Pixbuf(const Pixbuf&) = delete;
 
@@ -50,5 +45,4 @@ public:
 	GdkPixbuf* saturate(float f) const;
 };
 
-#endif /* ASLOV_PIXBUF_H_ */
 #endif
