@@ -70,7 +70,8 @@ void CheckNewVersion::routine() {
           if (m_version != version) {
             m_message = j.value("body", "");
             // pr(m_message)
-            gdk_threads_add_idle(m_callback, NULL);
+            g_idle_add(m_callback, NULL);
+            //g_threads_add_idle(m_callback, NULL);
           }
         } else {
           // Tag 'tag_name' not found in response

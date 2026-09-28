@@ -16,6 +16,7 @@
 #include <ctime>
 #include <fstream>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -34,7 +35,6 @@
 #include <filesystem>
 #include <iostream>
 #include <source_location>
-
 
 template <typename... Args>
 void show_variables(std::string_view label, Args &&...args) {
@@ -97,6 +97,20 @@ template <typename... Args> void print_variables(Args &&...args) {
 #define prv(...)                                                               \
   show_variables(#__VA_ARGS__, __VA_ARGS__);                                   \
   pri
+
+extern std::mutex aslovcout_mutex;
+
+#define prsync(...)                                                            \
+  {                                                                            \
+    std::lock_guard<std::mutex> lock(aslovcout_mutex);                         \
+    prs(__VA_ARGS__);                                                          \
+  }
+
+#define prsynci                                                                \
+  {                                                                            \
+    std::lock_guard<std::mutex> lock(aslovcout_mutex);                         \
+    pri_short;                                                                 \
+  }
 
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
  * default macro value is 0 so
@@ -348,7 +362,8 @@ void writableFileSetContents(const std::string name, const std::string &s);
 const std::string writableFileGetContents(const std::string &name);
 #endif
 const std::string fileGetContent(const std::string &path, bool binary = false);
-bool filePutContent(const std::string &path, const std::string &content, bool binary = false);
+bool filePutContent(const std::string &path, const std::string &content,
+                    bool binary = false);
 
 // END application functions
 
@@ -583,102 +598,6 @@ std::string join(First &&first, P &&...p) {
 }
 // END string functions
 
-// BEGIN config functions
-#ifndef NOGTK
-std::string getConfigPath();
-std::string getConfigPathLocaled();
-bool loadConfig(MapStringString &map);
-
-template <std::size_t N, typename... T>
-bool readConfig(const std::string (&tags)[N], T &...p) {
-  static_assert(N == sizeof...(T),
-                "Number of arguments should match the number of tags");
-  MapStringString m;
-  if (!loadConfig(m)) {
-    return false;
-  }
-
-  int index = -1;
-  auto identify_and_process = [&](auto &&arg) -> bool {
-    index++;
-    auto it = m.find(tags[index]);
-    if (it == m.end()) {
-#ifndef NDEBUG
-      pr("error cann't find tag");
-#endif
-      return false;
-    }
-    auto &v = it->second;
-
-    using ActualType = std::decay_t<decltype(arg)>;
-
-    if constexpr (std::is_same_v<ActualType, int>) {
-      int i;
-      if (parseString(v, i)) {
-        arg = i;
-      } else {
-#ifndef NDEBUG
-        pr("error cann't parse string, to int string=", v);
-#endif
-        return false;
-      }
-    } else if constexpr (std::is_same_v<ActualType, std::string>) {
-      arg = v;
-    } else if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
-      PangoFontDescription *desc =
-          pango_font_description_from_string(v.c_str());
-      if (desc) {
-        arg = desc;
-      } else {
-#ifndef NDEBUG
-        pr("error cann't parse string to PangoFontDescription, string=", v);
-#endif
-        return false;
-      }
-    } else {
-#ifndef NDEBUG
-      pr("error unknown type, for argument ", index);
-#endif
-      return false;
-    }
-    return true;
-  };
-
-  return (identify_and_process(p) && ...);
-}
-
-template <std::size_t N, typename... T>
-void writeConfig(const std::string (&tags)[N], T &&...p) {
-  static_assert(N == sizeof...(T),
-                "Number of arguments should match the number of tags");
-  std::ofstream f(getConfigPathLocaled());
-  assert(f.is_open());
-
-  int i = 0;
-  (
-      [&](auto &&a) { // Используем auto&& для универсальности
-        using PureType = std::decay_t<decltype(a)>;
-        f << tags[i++] << " = ";
-        if constexpr (std::is_same_v<PureType, PangoFontDescription *>) {
-          assert(a);
-          char *font_str = pango_font_description_to_string(a);
-          f << font_str;
-          g_free(font_str);
-        } else {
-          f << a;
-        }
-
-        f << "\n";
-      }(std::forward<T>(p)),
-      ...);
-}
-
-PairStringString pairFromBuffer(const std::string &s);
-PairStringString pairFromBuffer(const char *b);
-std::string getSystemLanguage();
-#endif
-// END config functions
-
 // BEGIN 2 dimensional array functions
 template <typename T>
 std::vector<std::vector<T>> create2dArray(size_t rows, size_t cols,
@@ -723,6 +642,30 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
   return i == std::end(l) ? -1 : i - std::begin(l);
 }
 
+#include <algorithm>
+#include <string_view>
+#include <type_traits>
+
+
+template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
+  auto is_equal = [](const auto &a, const auto &b) {
+    if constexpr (std::is_convertible_v<decltype(a), std::string_view> &&
+                  std::is_convertible_v<decltype(b), std::string_view>) {
+      return std::string_view(a) == std::string_view(b);
+    } else {
+      return a == b;
+    }
+  };
+
+  int index = 0;
+  int found_index = -1;
+
+  ((is_equal(t, v) ? (found_index = index, false) : (++index, true)) && ...);
+
+  return found_index;
+}
+
+/*
 template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
   // Create an initializer_list containing 't' and all elements of 'v'.
   // This guarantees the list is never empty, enabling robust type deduction.
@@ -733,7 +676,7 @@ template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
 
   // If found, calculate the index relative to 'v...' by subtracting 1.
   return it == std::end(l) ? -1 : (it - std::begin(l) - 1);
-}
+}*/
 
 template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   auto it = std::find(v.begin(), v.end(), t);
@@ -795,6 +738,114 @@ bool oneOf(const U &t, const T (&v)[N]) {
 template <class T> bool oneOf(const T &t, std::vector<T> const &v) {
   return indexOf(t, v) != -1;
 }
+
+// BEGIN config functions
+#ifndef NOGTK
+std::string getConfigPath();
+std::string getConfigPathLocaled();
+bool loadConfig(MapStringString &map);
+
+const std::string aslovBool[] = {"false", "true"};
+
+template <std::size_t N, typename... T>
+bool readConfig(const std::string (&tags)[N], T &...p) {
+  static_assert(N == sizeof...(T),
+                "Number of arguments should match the number of tags");
+  MapStringString m;
+  if (!loadConfig(m)) {
+    return false;
+  }
+
+  int index = -1;
+  auto identify_and_process = [&](auto &&arg) -> bool {
+    index++;
+    auto it = m.find(tags[index]);
+    if (it == m.end()) {
+#ifndef NDEBUG
+      pr("error cann't find tag");
+#endif
+      return false;
+    }
+    auto &v = it->second;
+    int i;
+    using ActualType = std::decay_t<decltype(arg)>;
+
+    if constexpr (std::is_same_v<ActualType, int>) {
+      if (parseString(v, i)) {
+        arg = i;
+      } else {
+#ifndef NDEBUG
+        pr("error cann't parse string, to int string=", v);
+#endif
+        return false;
+      }
+    } else if constexpr (std::is_same_v<ActualType, bool>) {
+      i = indexOf(v, aslovBool);
+      if (i == -1) {
+#ifndef NDEBUG
+        pr("error cann't parse string, to bool string=", v);
+#endif
+        return false;
+      } else {
+        arg = i;
+      }
+    } else if constexpr (std::is_same_v<ActualType, std::string>) {
+      arg = v;
+    } else if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
+      PangoFontDescription *desc =
+          pango_font_description_from_string(v.c_str());
+      if (desc) {
+        arg = desc;
+      } else {
+#ifndef NDEBUG
+        pr("error cann't parse string to PangoFontDescription, string=", v);
+#endif
+        return false;
+      }
+    } else {
+#ifndef NDEBUG
+      pr("error unknown type, for argument ", index);
+#endif
+      return false;
+    }
+    return true;
+  };
+
+  return (identify_and_process(p) && ...);
+}
+
+template <std::size_t N, typename... T>
+void writeConfig(const std::string (&tags)[N], T &&...p) {
+  static_assert(N == sizeof...(T),
+                "Number of arguments should match the number of tags");
+  std::ofstream f(getConfigPathLocaled());
+  assert(f.is_open());
+
+  int i = 0;
+  (
+      [&](auto &&a) { // Используем auto&& для универсальности
+        using PureType = std::decay_t<decltype(a)>;
+        f << tags[i++] << " = ";
+        if constexpr (std::is_same_v<PureType, PangoFontDescription *>) {
+          assert(a);
+          char *font_str = pango_font_description_to_string(a);
+          f << font_str;
+          g_free(font_str);
+        } else if constexpr (std::is_same_v<PureType, bool>) {
+          f << aslovBool[a];
+        } else {
+          f << a;
+        }
+        f << "\n";
+      }(std::forward<T>(p)),
+      ...);
+}
+
+PairStringString pairFromBuffer(const std::string &s);
+PairStringString pairFromBuffer(const char *b);
+std::string getSystemLanguage();
+#endif
+// END config functions
 
 #ifdef _WIN32
 /* this function counts scale factor immediately
@@ -885,4 +936,3 @@ template <class T> std::string aslovTypeName() {
 #endif /* __GNUC__ */
 
 void aslovSetOutputWidth(int width);
-

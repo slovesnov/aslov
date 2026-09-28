@@ -33,6 +33,7 @@
 #endif
 
 static std::string applicationName, applicationPath;
+std::mutex aslovcout_mutex;
 #ifndef NOGTK
 static std::string fontFamily;
 static int fontHeight;
