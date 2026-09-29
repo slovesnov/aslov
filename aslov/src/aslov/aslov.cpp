@@ -200,7 +200,7 @@ FILE *openApplicationLog(const char *flags) {
   return open(getWritableFilePath("log.txt"), flags);
 }
 
-void clearLog() {
+void clearlog() {
   FILE *f = openApplicationLog("w+");
   fclose(f);
 }

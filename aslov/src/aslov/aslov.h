@@ -321,13 +321,9 @@ void aslovPrints(ASLOV_OUTPUT_TYPE t, const char separator, A const &...a) {
  printv(...) ASLOV_PRINTV(ASLOV_PRINT_VARIABLE,__VA_ARGS__) #define printvi(...)
  ASLOV_PRINTV(ASLOV_PRINT_VARIABLE_I,__VA_ARGS__)
  */
-// output info to log file printlog("%d %s",1234,"some")
-#define printlog(...)                                                          \
-  aslovPrintHelp(ASLOV_OUTPUT_TYPE::FILE, format(__VA_ARGS__), __FILE__,       \
-                 __LINE__, __func__);
 
 // output info  to log file printlo(1234,"some")
-#define printlo(...)                                                           \
+#define printlog(...)                                                           \
   aslovPrintHelp(ASLOV_OUTPUT_TYPE::FILE, forma(__VA_ARGS__), __FILE__,        \
                  __LINE__, __func__);
 
@@ -348,7 +344,7 @@ FILE *open(std::string path, const char *flags);
 void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
 FILE *openApplicationLog(const char *flags);
-void clearLog();
+void clearlog();
 std::string getLogPath();
 std::string const &getApplicationName();
 std::string getResourcePath(const std::string name);
