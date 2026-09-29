@@ -144,7 +144,7 @@ extern std::mutex aslovcout_mutex;
 
 using VString = std::vector<std::string>;
 using MapStringString = std::map<std::string, std::string>;
-using PairStringString = std::pair<std::string, std::string>;
+//using PairStringString = std::pair<std::string, std::string>;
 using PairDoubleDouble = std::pair<double, double>;
 
 // format to string example format("%d %s",1234,"some")
@@ -323,7 +323,7 @@ void aslovPrints(ASLOV_OUTPUT_TYPE t, const char separator, A const &...a) {
  */
 
 // output info  to log file printlo(1234,"some")
-#define printlog(...)                                                           \
+#define printlog(...)                                                          \
   aslovPrintHelp(ASLOV_OUTPUT_TYPE::FILE, forma(__VA_ARGS__), __FILE__,        \
                  __LINE__, __func__);
 
@@ -642,7 +642,6 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
 #include <string_view>
 #include <type_traits>
 
-
 template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
   auto is_equal = [](const auto &a, const auto &b) {
     if constexpr (std::is_convertible_v<decltype(a), std::string_view> &&
@@ -814,7 +813,10 @@ template <std::size_t N, typename... T>
 void writeConfig(const std::string (&tags)[N], T &&...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
-  std::ofstream f(getConfigPathLocaled());
+  std::ofstream f(
+      getConfigPathLocaled(),
+      std::ios::out |
+          std::ios::binary); // binary f << "\n"; output only \n without \r
   assert(f.is_open());
 
   int i = 0;
@@ -837,8 +839,6 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
       ...);
 }
 
-PairStringString pairFromBuffer(const std::string &s);
-PairStringString pairFromBuffer(const char *b);
 std::string getSystemLanguage();
 #endif
 // END config functions

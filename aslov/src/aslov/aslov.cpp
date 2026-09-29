@@ -113,7 +113,7 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
   }
 
   //"./words.exe" also ok
-  gchar *exe_name = g_path_get_basename(path.c_str());        
+  gchar *exe_name = g_path_get_basename(path.c_str());
   std::string name = exe_name;
   g_free(exe_name);
 
@@ -205,7 +205,7 @@ void clearlog() {
   fclose(f);
 }
 
-std::string getLogPath(){
+std::string getLogPath() {
   return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName);
 }
 
@@ -262,23 +262,24 @@ const std::string fileGetContent(const std::string &path,
   return buffer.str();
 }
 
-bool filePutContent(const std::string &path, const std::string &content, bool binary /*=false*/){
-    auto m = binary ? (std::ios::out | std::ios::binary | std::ios::trunc) 
-                    : (std::ios::out | std::ios::trunc);
+bool filePutContent(const std::string &path, const std::string &content,
+                    bool binary /*=false*/) {
+  auto m = binary ? (std::ios::out | std::ios::binary | std::ios::trunc)
+                  : (std::ios::out | std::ios::trunc);
 
 #ifdef NOTGK_WITHOUT_ICONV
-    std::ofstream t(path, m);
+  std::ofstream t(path, m);
 #else
-    std::ofstream t(utf8ToLocale(path), m);
+  std::ofstream t(utf8ToLocale(path), m);
 #endif
 
-    if (!t.is_open()) {
-        return false;
-    }
+  if (!t.is_open()) {
+    return false;
+  }
 
-    t << content;
-    
-    return t.good();
+  t << content;
+
+  return t.good();
 }
 
 // END application functions
@@ -290,6 +291,8 @@ std::string getConfigPath() { return getWritableFilePath("config.txt"); }
 std::string getConfigPathLocaled() { return utf8ToLocale(getConfigPath()); }
 
 bool loadConfig(MapStringString &map) {
+  const std::string delimiter = " = ";
+  size_t pos;
   std::string s = getConfigPathLocaled();
   std::ifstream f(s);
   if (!f.is_open()) { // it's ok first time loading
@@ -298,40 +301,16 @@ bool loadConfig(MapStringString &map) {
 
   // order of strings in file is not important
   while (std::getline(f, s)) {
-    auto p = pairFromBuffer(s);
-#ifndef NDEBUG
-    if (map.find(p.first) != map.end()) {
-      printl("warning duplicate key", p.first)
+    pos = s.find(delimiter);
+    assert(pos != std::string::npos);
+    auto key = s.substr(0, pos);
+    auto value = s.substr(pos + delimiter.length());
+    if (map.find(key) != map.end()) {
+      assert(("error duplicate key" + key).c_str());
     }
-#endif
-    map.insert(p);
+    map.insert({key, value});
   }
   return true;
-}
-
-PairStringString pairFromBuffer(const std::string &s) {
-  return pairFromBuffer(s.c_str());
-}
-
-PairStringString pairFromBuffer(const char *b) {
-  char *w = strchr(b, '=');
-  if (!w) {
-    return {"", ""};
-  }
-  const char *p = w + 2;
-  char *f;
-  const char *search;
-  const char s[] = "\r\n";
-  for (search = s; *search != '\0'; search++) {
-    f = strrchr(p, *search);
-    if (f != NULL) {
-      *f = 0;
-    }
-  }
-  if (w > b && w[-1] == ' ') {
-    w--;
-  }
-  return {std::string(b, w - b), std::string(p)};
 }
 
 std::string getSystemLanguage() {
