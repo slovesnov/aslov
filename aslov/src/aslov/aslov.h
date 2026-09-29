@@ -740,8 +740,6 @@ std::string getConfigPath();
 std::string getConfigPathLocaled();
 bool loadConfig(MapStringString &map);
 
-const std::string aslovBool[] = {"false", "true"};
-
 template <std::size_t N, typename... T>
 bool readConfig(const std::string (&tags)[N], T &...p) {
   static_assert(N == sizeof...(T),
@@ -765,40 +763,24 @@ bool readConfig(const std::string (&tags)[N], T &...p) {
     int i;
     using ActualType = std::decay_t<decltype(arg)>;
 
-    if constexpr (std::is_same_v<ActualType, int>) {
-      if (parseString(v, i)) {
-        arg = i;
-      } else {
-#ifndef NDEBUG
-        pr("error cann't parse string, to int string=", v);
-#endif
-        return false;
-      }
-    } else if constexpr (std::is_same_v<ActualType, bool>) {
-      i = indexOf(v, aslovBool);
-      if (i == -1) {
-#ifndef NDEBUG
-        pr("error cann't parse string, to bool string=", v);
-#endif
-        return false;
-      } else {
-        arg = i;
-      }
-    } else if constexpr (std::is_same_v<ActualType, std::string>) {
-      arg = v;
-    } else if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
+    if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
       PangoFontDescription *desc =
           pango_font_description_from_string(v.c_str());
       if (desc) {
         arg = desc;
       } else {
 #ifndef NDEBUG
-        pr("error cann't parse string to PangoFontDescription, string=", v);
+        pr("error cann't parse to PangoFontDescription, string=", v);
 #endif
         return false;
       }
     } else {
-      std::istringstream(v) >> arg;
+      if (!(std::istringstream(v) >> arg)) {
+#ifndef NDEBUG
+        pr("error cann't parse string", v, "argument", index);
+#endif
+        return false;
+      }
     }
     return true;
   };
@@ -826,8 +808,6 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
           char *font_str = pango_font_description_to_string(a);
           f << font_str;
           g_free(font_str);
-        } else if constexpr (std::is_same_v<PureType, bool>) {
-          f << aslovBool[a];
         } else {
           f << a;
         }
