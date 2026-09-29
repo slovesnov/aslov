@@ -144,7 +144,7 @@ extern std::mutex aslovcout_mutex;
 
 using VString = std::vector<std::string>;
 using MapStringString = std::map<std::string, std::string>;
-//using PairStringString = std::pair<std::string, std::string>;
+// using PairStringString = std::pair<std::string, std::string>;
 using PairDoubleDouble = std::pair<double, double>;
 
 // format to string example format("%d %s",1234,"some")
@@ -798,10 +798,7 @@ bool readConfig(const std::string (&tags)[N], T &...p) {
         return false;
       }
     } else {
-#ifndef NDEBUG
-      pr("error unknown type, for argument ", index);
-#endif
-      return false;
+      std::istringstream(v) >> arg;
     }
     return true;
   };

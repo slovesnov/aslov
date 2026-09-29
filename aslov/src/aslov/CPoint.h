@@ -8,52 +8,43 @@
  *         homepage: slovesnov.rf.gd
  */
 
+#pragma once
 #ifndef NOGTK
 
-#ifndef CPOINT_H_
-#define CPOINT_H_
-
 #include <gtk/gtk.h>
-#include <ostream>
+#include <iostream>
 
 class CPoint {
 public:
-	int x, y;
-	CPoint() {
-		x = y = 0;
-	}
-	CPoint(int _x, int _y) {
-		x = _x;
-		y = _y;
-	}
-#if GTK_MAJOR_VERSION==3
-	CPoint(GdkEventButton *p) {
-		x = p->x;
-		y = p->y;
-	}
+  int x, y;
+  CPoint() { x = y = 0; }
+  CPoint(int _x, int _y) {
+    x = _x;
+    y = _y;
+  }
+#if GTK_MAJOR_VERSION == 3
+  CPoint(GdkEventButton *p) {
+    x = p->x;
+    y = p->y;
+  }
 #endif
-	void operator+=(const CPoint &p) {
-		x += p.x;
-		y += p.y;
-	}
-	void operator-=(const CPoint &p) {
-		x -= p.x;
-		y -= p.y;
-	}
+  void operator+=(const CPoint &p) {
+    x += p.x;
+    y += p.y;
+  }
+  void operator-=(const CPoint &p) {
+    x -= p.x;
+    y -= p.y;
+  }
 
-	bool operator==(const CPoint &p) const {
-		return x == p.x && y == p.y;
-	}
+  bool operator==(const CPoint &p) const { return x == p.x && y == p.y; }
 
-	bool operator!=(const CPoint &p) const {
-		return !(operator==(p));
-	}
+  bool operator!=(const CPoint &p) const { return !(operator==(p)); }
 
-	std::string toString() const;
-
+  std::string toString() const;
 };
 
-std::ostream& operator<<(std::ostream &os, const CPoint &a);
+std::ostream &operator<<(std::ostream &os, const CPoint &p);
+std::istream &operator>>(std::istream &os, CPoint &p);
 
-#endif /* CPOINT_H_ */
 #endif

@@ -5,9 +5,7 @@
  *      Author: alexey slovesnov
  */
 
-#ifndef CHECKNEWVERSION_H_
-#define CHECKNEWVERSION_H_
-
+#pragma once
 #ifndef NOGTK
 
 #include <string>
@@ -24,5 +22,3 @@ public:
 };
 
 #endif /* NOGTK */
-
-#endif /* CHECKNEWVERSION_H_ */
