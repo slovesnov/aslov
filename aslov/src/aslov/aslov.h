@@ -760,7 +760,6 @@ bool readConfig(const std::string (&tags)[N], T &...p) {
       return false;
     }
     auto &v = it->second;
-    int i;
     using ActualType = std::decay_t<decltype(arg)>;
 
     if constexpr (std::is_same_v<ActualType, PangoFontDescription *>) {
