@@ -744,6 +744,11 @@ template <std::size_t N, typename... T>
 bool readConfig(const std::string (&tags)[N], T &...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
+  for (const auto &tag : tags) {
+    assert(tag.find(' ') == std::string::npos && "Tag cannot contain spaces");
+    assert(tag.find('=') == std::string::npos &&
+           "Tag cannot contain '=' character");
+  }
   MapStringString m;
   if (!loadConfig(m)) {
     return false;
@@ -791,6 +796,11 @@ template <std::size_t N, typename... T>
 void writeConfig(const std::string (&tags)[N], T &&...p) {
   static_assert(N == sizeof...(T),
                 "Number of arguments should match the number of tags");
+  for (const auto &tag : tags) {
+    assert(tag.find(' ') == std::string::npos && "Tag cannot contain spaces");
+    assert(tag.find('=') == std::string::npos &&
+           "Tag cannot contain '=' character");
+  }
   std::ofstream f(
       getConfigPathLocaled(),
       std::ios::out |
