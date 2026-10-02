@@ -489,9 +489,7 @@ template <class T, class... V> int indexOfV(T const &t, V const &...v) {
   return i == std::end(l) ? -1 : i - std::begin(l);
 }
 
-#include <algorithm>
-#include <string_view>
-#include <type_traits>
+// #include <type_traits>
 
 template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
   auto is_equal = [](const auto &a, const auto &b) {
