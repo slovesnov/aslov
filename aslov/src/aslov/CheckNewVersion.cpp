@@ -60,6 +60,10 @@ void CheckNewVersion::routine() {
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
 
+    m_message="Проверочное сообщение! Ё ё";
+    g_usleep(1'000'000); // 1second
+    g_idle_add(m_callback, NULL);
+
     if (res == CURLE_OK) {
       try {
         // pr(readBuffer)
@@ -71,7 +75,7 @@ void CheckNewVersion::routine() {
             m_message = j.value("body", "");
             // pr(m_message)
             g_idle_add(m_callback, NULL);
-            //g_threads_add_idle(m_callback, NULL);
+            // g_threads_add_idle(m_callback, NULL);
           }
         } else {
           // Tag 'tag_name' not found in response

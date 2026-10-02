@@ -61,7 +61,7 @@ std::string format(const char *f, ...) {
   }
   return s;
 }
-
+/*
 void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f,
                     const int l, const char *fu) {
   const char *p = strrchr(f, G_DIR_SEPARATOR);
@@ -80,7 +80,7 @@ void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f,
     g_print("%-*s %s:%d %s()\n", aslovOutputWide, s.c_str(), p, l, fu);
   }
 }
-
+*/
 // BEGIN file functions
 bool isDir(const char *path) {
 #ifdef NOGTK
