@@ -60,9 +60,9 @@ void CheckNewVersion::routine() {
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
 
-    m_message="Проверочное сообщение! Ё ё";
-    g_usleep(1'000'000); // 1second
-    g_idle_add(m_callback, NULL);
+    // m_message="Проверочное сообщение! Ё ё";
+    // g_usleep(1'000'000); // 1second
+    // g_idle_add(m_callback, NULL);
 
     if (res == CURLE_OK) {
       try {
