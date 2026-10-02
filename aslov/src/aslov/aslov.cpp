@@ -61,26 +61,7 @@ std::string format(const char *f, ...) {
   }
   return s;
 }
-/*
-void aslovPrintHelp(ASLOV_OUTPUT_TYPE t, const std::string &s, const char *f,
-                    const int l, const char *fu) {
-  const char *p = strrchr(f, G_DIR_SEPARATOR);
-  p = p ? p + 1 : f;
-  if (t == ASLOV_OUTPUT_TYPE::FILE) {
-    time_t t = time(NULL);
-    tm *q = localtime(&t);
-    FILE *w = openApplicationLog("a");
-    fprintf(w, "%s %s:%d %s() %02d:%02d:%02d %02d.%02d.%d\n", s.c_str(), p, l,
-            fu, q->tm_hour, q->tm_min, q->tm_sec, q->tm_mday, q->tm_mon + 1,
-            q->tm_year + 1900);
-    fclose(w);
-  } else if (t == ASLOV_OUTPUT_TYPE::STDERR) {
-    g_printerr("%-*s %s:%d %s()\n", aslovOutputWide, s.c_str(), p, l, fu);
-  } else {
-    g_print("%-*s %s:%d %s()\n", aslovOutputWide, s.c_str(), p, l, fu);
-  }
-}
-*/
+
 // BEGIN file functions
 bool isDir(const char *path) {
 #ifdef NOGTK
@@ -593,11 +574,12 @@ GtkWidget *image(const char *s) {
 
 GtkWidget *image(const std::string &s) { return image(s.c_str()); }
 
+#ifdef USE_ANIMATED_IMAGE
 GtkWidget *animatedImage(const char *s) {
   return gtk_image_new_from_animation(
       gdk_pixbuf_animation_new_from_file(getImagePath(s).c_str(), 0));
 }
-
+#endif
 #endif
 // END pixbuf functions
 

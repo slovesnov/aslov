@@ -77,11 +77,11 @@ void print_variables(std::ostream &os, Args &&...args) {
 
 // pr("123",i,v);
 #define pr(...)                                                                \
-  print_variables(std::cout, __VA_ARGS__);                                     \
+  print_variables(std::cout __VA_OPT__(, ) __VA_ARGS__);                       \
   pri
 
 #define prs(...)                                                               \
-  print_variables(std::cout, __VA_ARGS__);                                     \
+  print_variables(std::cout __VA_OPT__(, ) __VA_ARGS__);                       \
   pri_short
 
 #define pri_short                                                              \
@@ -93,7 +93,7 @@ void print_variables(std::ostream &os, Args &&...args) {
 
 #define pri prio(std::cout)
 
-#define prio(os)                                                                \
+#define prio(os)                                                               \
   os << std::source_location::current().file_name() << ":"                     \
      << std::source_location::current().line() << " "                          \
      << std::source_location::current().function_name() << "\n";
@@ -110,13 +110,13 @@ void print_variables(std::ostream &os, Args &&...args) {
 
 // output info  to log file printlo(1234,"some")
 #define printlog(...)                                                          \
-  do {                                                                         \
+  {                                                                            \
     std::ofstream log_file(getWritableFilePath("log.txt"), std::ios::app);     \
     if (log_file.is_open()) {                                                  \
-      print_variables(log_file, #__VA_ARGS__, __VA_ARGS__);                     \
-      prio(log_file);                                                        \
+      print_variables(log_file __VA_OPT__(, ) __VA_ARGS__);                    \
+      prio(log_file);                                                          \
     }                                                                          \
-  } while (0);
+  }
 
 #define printlogi printlog("")
 
@@ -465,7 +465,9 @@ GdkPixbuf *writablePixbuf(const std::string &s);
 
 GtkWidget *image(const char *s);
 GtkWidget *image(const std::string &s);
+#ifdef USE_ANIMATED_IMAGE
 GtkWidget *animatedImage(const char *s);
+#endif
 #endif
 // END pixbuf/image functions
 
