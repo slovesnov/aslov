@@ -37,101 +37,56 @@
 #include <source_location>
 
 template <typename... Args>
-void show_variables(std::ostream &os, std::string_view label, Args &&...args) {
-  (
-      [&os, &label](auto &&value) {
-        size_t comma_pos = label.find(',');
-        std::string_view current_name = (comma_pos != std::string_view::npos)
-                                            ? label.substr(0, comma_pos)
-                                            : label;
-
-        // Удаляем лишние пробелы в начале и конце имени переменной для красоты
-        size_t first = current_name.find_first_not_of(' ');
-        if (first != std::string_view::npos) {
-          size_t last = current_name.find_last_not_of(' ');
-          current_name = current_name.substr(first, (last - first + 1));
-        }
-
-        // Выводим в переданный поток os вместо std::cout
-        os << current_name << "=" << std::forward<decltype(value)>(value);
-
-        if (comma_pos == std::string_view::npos) {
-          os << ' ';
-        } else {
-          os << ", ";
-          label = label.substr(comma_pos + 1);
-          size_t next_non_space = label.find_first_not_of(' ');
-          if (next_non_space != std::string_view::npos) {
-            label = label.substr(next_non_space);
-          }
-        }
-      }(std::forward<Args>(args)),
-      ...);
-}
-
-template <typename... Args>
-void print_variables(std::ostream &os, Args &&...args) {
+void aslovprintvariables(std::ostream &os, Args &&...args) {
   os << std::dec; // after possible ptr output
   ((os << std::forward<Args>(args) << " "), ...);
 }
 
-// pr("123",i,v);
+/*make inline to allow write like this
+#define ASLOV_SHORT_LOGGING
+#include "aslov.h"
+*/
+inline void aslovprio(std::ostream &os, const std::source_location location =
+                                     std::source_location::current()) {
+#ifdef ASLOV_SHORT_LOGGING
+  os << std::filesystem::path(location.file_name()).filename().string() << ":"
+     << location.line() << "\n";
+#else
+  os << location.file_name() << ":" << location.line() << " "
+     << location.function_name() << "\n";
+#endif
+}
+
 #define pr(...)                                                                \
-  print_variables(std::cout __VA_OPT__(, ) __VA_ARGS__);                       \
-  pri
+  __VA_OPT__(aslovprintvariables(std::cout, __VA_ARGS__);)                         \
+  aslovprio(std::cout);
 
-#define prs(...)                                                               \
-  print_variables(std::cout __VA_OPT__(, ) __VA_ARGS__);                       \
-  pri_short
+#define pri pr()
 
-#define pri_short                                                              \
-  std::cout << std::filesystem::path(                                          \
-                   std::source_location::current().file_name())                \
-                   .filename()                                                 \
-                   .string()                                                   \
-            << ":" << std::source_location::current().line() << "\n";
-
-#define pri prio(std::cout)
-
-#define prio(os)                                                               \
-  os << std::source_location::current().file_name() << ":"                     \
-     << std::source_location::current().line() << " "                          \
-     << std::source_location::current().function_name() << "\n";
-
-// pr1("error {} {}", v[i], v[i + 1]);
-#define pr1(fmt, ...)                                                          \
-  std::cout << std::format(fmt " " __VA_OPT__(, ) __VA_ARGS__);                \
-  pri
-
-// prv("123",i,v);
-#define prv(...)                                                               \
-  show_variables(std::cout, #__VA_ARGS__, __VA_ARGS__);                        \
-  pri
-
-// output info  to log file printlo(1234,"some")
+// output info  to log file printlog(1234,"some")
 #define printlog(...)                                                          \
   {                                                                            \
     std::ofstream log_file(getWritableFilePath("log.txt"), std::ios::app);     \
     if (log_file.is_open()) {                                                  \
-      print_variables(log_file __VA_OPT__(, ) __VA_ARGS__);                    \
-      prio(log_file);                                                          \
+      __VA_OPT__(aslovprintvariables(log_file, __VA_ARGS__);)                      \
+      aslovprio(log_file);                                                     \
     }                                                                          \
   }
 
-#define printlogi printlog("")
+#define printlogi printlog()
 
 extern std::mutex aslovcout_mutex;
 
 #define prsync(...)                                                            \
   {                                                                            \
     std::lock_guard<std::mutex> lock(aslovcout_mutex);                         \
-    prs(__VA_ARGS__);                                                          \
+    pr(__VA_ARGS__)                                                            \
   }
 
 #define prsynci                                                                \
   {                                                                            \
     std::lock_guard<std::mutex> lock(aslovcout_mutex);                         \
-    pri_short;                                                                 \
+    pri;                                                                       \
   }
 
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
