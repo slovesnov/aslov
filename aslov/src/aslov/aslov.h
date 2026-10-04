@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <ranges> //ssize
 
 #ifdef __GNUC__
 #include <cxxabi.h> //for type name this include file exists not for all compilers
@@ -106,18 +107,15 @@ extern std::mutex aslovcout_mutex;
 // #define GP GINT_TO_POINTER
 // #define GP2INT GPOINTER_TO_INT
 
-#define SIZE G_N_ELEMENTS
-#define SIZEI(a) int(G_N_ELEMENTS(a))
-#define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, SIZEI(a))
-#define JOIN(a) join(a, SIZEI(a))
-#define JOINS(a, separator) join(a, SIZEI(a), separator)
+#define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, std::ssize(a))
+#define JOIN(a) join(a, std::ssize(a))
+#define JOINS(a, separator) join(a, std::ssize(a), separator)
 
 #ifdef NOGTK
 #define g_print printf
 #define g_printerr(...) fprintf(stderr, __VA_ARGS__)
 #define G_DIR_SEPARATOR '\\'
 #define G_DIR_SEPARATOR_S "\\"
-#define G_N_ELEMENTS(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
 using VString = std::vector<std::string>;
