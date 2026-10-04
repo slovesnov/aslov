@@ -47,7 +47,7 @@ void aslovprintvariables(std::ostream &os, Args &&...args) {
 #include "aslov.h"
 */
 inline void aslovprio(std::ostream &os, const std::source_location location =
-                                     std::source_location::current()) {
+                                            std::source_location::current()) {
 #ifdef ASLOV_SHORT_LOGGING
   os << std::filesystem::path(location.file_name()).filename().string() << ":"
      << location.line() << "\n";
@@ -58,17 +58,18 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
 }
 
 #define pr(...)                                                                \
-  __VA_OPT__(aslovprintvariables(std::cout, __VA_ARGS__);)                         \
+  __VA_OPT__(aslovprintvariables(std::cout, __VA_ARGS__);)                     \
   aslovprio(std::cout);
 
 #define pri pr()
 
 // output info  to log file printlog(1234,"some")
+// assume log.txt is uses only in debug mode, so can write in the same dir
 #define printlog(...)                                                          \
   {                                                                            \
-    std::ofstream log_file(getWritableFilePath("log.txt"), std::ios::app);     \
+    std::ofstream log_file("log.txt", std::ios::app);                          \
     if (log_file.is_open()) {                                                  \
-      __VA_OPT__(aslovprintvariables(log_file, __VA_ARGS__);)                      \
+      __VA_OPT__(aslovprintvariables(log_file, __VA_ARGS__);)                  \
       aslovprio(log_file);                                                     \
     }                                                                          \
   }
@@ -147,9 +148,7 @@ FILE *open(std::string path, const char *flags);
 // use ScaleFactor
 void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
-FILE *openApplicationLog(const char *flags);
 void clearlog();
-std::string getLogPath();
 std::string const &getApplicationName();
 std::string getResourcePath(const std::string name);
 std::string getImagePath(const std::string name);

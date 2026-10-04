@@ -177,17 +177,9 @@ void aslovInit(char const *const *argv, bool storeScaleFactor /*=false*/) {
 
 int getApplicationFileSize() { return getFileSize(applicationPath); }
 
-FILE *openApplicationLog(const char *flags) {
-  return open(getWritableFilePath("log.txt"), flags);
-}
-
+// assume log.txt is uses only in debug mode, so can write in the same dir
 void clearlog() {
-  FILE *f = openApplicationLog("w+");
-  fclose(f);
-}
-
-std::string getLogPath() {
-  return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName);
+  std::ofstream ofs("log.txt", std::ios::trunc);
 }
 
 std::string const &getApplicationName() { return applicationName; }
