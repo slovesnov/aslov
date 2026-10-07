@@ -70,7 +70,7 @@ void CheckNewVersion::routine() {
         auto j = nlohmann::json::parse(readBuffer);
         if (j.is_object() && j.contains("tag_name")) {
           auto version = j["tag_name"].get<std::string>();
-          // pr(version)
+          // pr(version,m_version == version)
           if (m_version != version) {
             m_message = j.value("body", "");
             // pr(m_message)
