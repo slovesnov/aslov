@@ -176,11 +176,6 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 /* parseString("0xff",i,16), parseString("ff",i,16), parseString("+0xff",i,16)
  * ok t is changed only if parse is valid
  */
-#include <string_view>
-#include <charconv>
-#include <cctype>
-#include <type_traits>
-
 template <class T> 
 bool parseString(std::string_view d, T &t, int radix = 10) {
     if (d.empty() || std::isspace(static_cast<unsigned char>(d.front()))) {
