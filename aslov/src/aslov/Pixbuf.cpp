@@ -15,10 +15,9 @@
 #include "Pixbuf.h"
 #include "aslov.h"
 
-Pixbuf::Pixbuf() { p = nullptr; }
+Pixbuf::Pixbuf() {  }
 
 Pixbuf::Pixbuf(const std::string_view path) {
-  p = nullptr;
   set(path);
 }
 
