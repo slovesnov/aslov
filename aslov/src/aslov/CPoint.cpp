@@ -20,8 +20,8 @@ std::ostream &operator<<(std::ostream &os, const CPoint &p) {
   return os << p.x << " " << p.y;
 }
 
-std::istream &operator>>(std::istream &i, CPoint &p) {
-  return i >> p.x >> p.y;
+std::istream &operator>>(std::istream &is, CPoint &p) {
+  return is >> p.x >> p.y;
 }
 
 #endif

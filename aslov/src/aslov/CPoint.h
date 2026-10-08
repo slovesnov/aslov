@@ -45,6 +45,6 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &os, const CPoint &p);
-std::istream &operator>>(std::istream &os, CPoint &p);
+std::istream &operator>>(std::istream &is, CPoint &p);
 
 #endif

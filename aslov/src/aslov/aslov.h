@@ -85,11 +85,7 @@ extern std::mutex aslovcout_mutex;
     pr(__VA_ARGS__)                                                            \
   }
 
-#define prsynci                                                                \
-  {                                                                            \
-    std::lock_guard<std::mutex> lock(aslovcout_mutex);                         \
-    pri;                                                                       \
-  }
+#define prsynci prsync()
 
 /* https://www.geeksforgeeks.org/c-macro-preprocessor-question-5/
  * default macro value is 0 so
@@ -104,12 +100,8 @@ extern std::mutex aslovcout_mutex;
 #endif
 #endif
 
-// #define GP GINT_TO_POINTER
-// #define GP2INT GPOINTER_TO_INT
-
 #define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, std::ssize(a))
 #define JOIN(a) join(a, std::ssize(a))
-#define JOINS(a, separator) join(a, std::ssize(a), separator)
 
 #ifdef NOGTK
 #define g_print printf
@@ -120,17 +112,10 @@ extern std::mutex aslovcout_mutex;
 
 using VString = std::vector<std::string>;
 using MapStringString = std::map<std::string, std::string>;
-// using PairStringString = std::pair<std::string, std::string>;
 using PairDoubleDouble = std::pair<double, double>;
 
 // format to string example format("%d %s",1234,"some")
 std::string format(const char *f, ...);
-
-// #define forma formata
-// auto s=format("%d %s",12,"ab")	12 ab
-// auto s=formats(",",12,"ab",2.3)	12,ab,2.3
-// auto s=formatz(12,"ab",2.3)	12ab2.3
-// auto s=formata(12,"ab",2.3)	12 ab 2.3
 
 // BEGIN file functions
 enum class FILEINFO { NAME, EXTENSION, LOWER_EXTENSION, DIRECTORY, SHORT_NAME };
@@ -434,16 +419,7 @@ typename std::vector<T>::iterator find(const T &t, std::vector<T> &v) {
   return std::find(v.begin(), v.end(), t);
 }
 
-// cann't use indexOf name because sometimes compiler cann't deduce
-template <class T, class... V> int indexOfV(T const &t, V const &...v) {
-  auto l = {v...};
-  auto i = std::find(std::begin(l), std::end(l), t);
-  return i == std::end(l) ? -1 : i - std::begin(l);
-}
-
-// #include <type_traits>
-
-template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
+template <class T, class... V> int indexOf(T const &t, V const &...v) {
   auto is_equal = [](const auto &a, const auto &b) {
     if constexpr (std::is_convertible_v<decltype(a), std::string_view> &&
                   std::is_convertible_v<decltype(b), std::string_view>) {
@@ -452,27 +428,11 @@ template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
       return a == b;
     }
   };
-
   int index = 0;
   int found_index = -1;
-
   ((is_equal(t, v) ? (found_index = index, false) : (++index, true)) && ...);
-
   return found_index;
 }
-
-/*
-template <class T, class... Args> int indexOf(T const &t, Args const &...v) {
-  // Create an initializer_list containing 't' and all elements of 'v'.
-  // This guarantees the list is never empty, enabling robust type deduction.
-  auto l = {t, v...};
-
-  // Search for 't' starting from the second element (the beginning of 'v...').
-  auto it = std::find(std::next(std::begin(l)), std::end(l), t);
-
-  // If found, calculate the index relative to 'v...' by subtracting 1.
-  return it == std::end(l) ? -1 : (it - std::begin(l) - 1);
-}*/
 
 template <class T> int indexOf(const T &t, std::initializer_list<T> v) {
   auto it = std::find(v.begin(), v.end(), t);
@@ -497,13 +457,11 @@ template <class T> int indexOf(const T &t, std::vector<T> const &v) {
   return it == v.end() ? -1 : it - v.begin();
 }
 
-int indexOfNoCase(const char *t, const char *v[], int size);
-int indexOfNoCase(const std::string t, const char *v[], int size);
-/* also works with int indexOf(const char t,const char* p);
- * in this case last \0 symbols isn't matched because const char* -> string
- * and string hasn't terminal zero symbol. This is good.
- */
 int indexOf(const char t, const std::string &v);
+
+template <class T, class... V> bool oneOf(T const &t, V const &...v) {
+  return ((t == v) || ...);
+}
 
 template <class T> bool oneOf(const T &t, std::initializer_list<T> v) {
   return indexOf(t, v) != -1;
@@ -512,18 +470,6 @@ template <class T> bool oneOf(const T &t, std::initializer_list<T> v) {
 template <class T, std::size_t N>
 int oneOf(const T &t, const std::array<T, N> &v) {
   return indexOf(t, v) != -1;
-}
-
-bool oneOf(char const &t, const std::string &v);
-bool oneOf(char const &t, char const *v);
-
-// template <class T, class... V>bool oneOfV(T const& t, V const&... v){
-//	return ((t== v)|| ...);
-//	//return indexOfV(t,v...)!=-1;
-// }
-template <class T, class... V> bool oneOf(T const &t, V const &...v) {
-  return ((t == v) || ...);
-  // return indexOfV(t,v...)!=-1;
 }
 
 template <class T, class U, std::size_t N>
@@ -535,11 +481,11 @@ template <class T> bool oneOf(const T &t, std::vector<T> const &v) {
   return indexOf(t, v) != -1;
 }
 
+bool oneOf(char const &t, const std::string &v);
+bool oneOf(char const &t, char const *v);
+
 // BEGIN config functions
 #ifndef NOGTK
-std::string getConfigPath();
-std::string getConfigPathLocaled();
-bool loadConfig(MapStringString &map);
 
 template <std::size_t N, typename... T>
 bool readConfig(const std::string (&tags)[N], T &...p) {
@@ -631,6 +577,9 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
 }
 
 std::string getSystemLanguage();
+bool loadConfig(MapStringString &map);
+std::string getConfigPath();
+std::string getConfigPathLocaled();
 #endif
 // END config functions
 

@@ -86,6 +86,6 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &os, const CRect &p);
-std::istream &operator>>(std::istream &os, CRect &p);
+std::istream &operator>>(std::istream &is, CRect &p);
 
 #endif

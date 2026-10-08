@@ -22,8 +22,8 @@ std::ostream &operator<<(std::ostream &os, const CRect &p) {
   return os << p.left << p.top << p.right << p.bottom;
 }
 
-std::istream &operator>>(std::istream &i, CRect &p) {
-  return i >> p.left >> p.top >> p.right >> p.bottom;
+std::istream &operator>>(std::istream &is, CRect &p) {
+  return is >> p.left >> p.top >> p.right >> p.bottom;
 }
 
 #endif
