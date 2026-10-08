@@ -100,9 +100,6 @@ extern std::mutex aslovcout_mutex;
 #endif
 #endif
 
-#define INDEX_OF_NO_CASE(id, a) indexOfNoCase(id, a, std::ssize(a))
-#define JOIN(a) join(a, std::ssize(a))
-
 #ifdef NOGTK
 #define g_print printf
 #define g_printerr(...) fprintf(stderr, __VA_ARGS__)
@@ -119,8 +116,7 @@ std::string format(const char *f, ...);
 
 // BEGIN file functions
 enum class FILEINFO { NAME, EXTENSION, LOWER_EXTENSION, DIRECTORY, SHORT_NAME };
-bool isDir(const char *path);
-bool isDir(const std::string &path);
+bool isDir(std::string_view path);
 std::string getFileInfo(std::string path, FILEINFO fi);
 int getFileSize(const std::string &path);
 FILE *open(std::string path, const char *flags);
@@ -133,10 +129,10 @@ void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
 void clearlog();
 std::string const &getApplicationName();
-std::string getResourcePath(const std::string name);
-std::string getImagePath(const std::string name);
-std::ifstream openResourceFileAsStream(const std::string name);
-std::string getWritableFilePath(const std::string name);
+std::string getResourcePath(const std::string_view name);
+std::string getImagePath(const std::string_view name);
+std::ifstream openResourceFileAsStream(const std::string_view name);
+std::string getWritableFilePath(const std::string_view name);
 #ifndef NOGTK
 // writable resource+log+cfg files are places in same dir and should started
 // with application name
@@ -183,62 +179,31 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 /* parseString("0xff",i,16), parseString("ff",i,16), parseString("+0xff",i,16)
  * ok t is changed only if parse is valid
  */
-template <class T> bool parseString(const char *d, T &t, int radix = 10) {
-  /* strtol("") is ok so check whether empty string
-   * strtol(" 4") "\r4", "\n4", "\t4" is ok so check for space
-   * */
-  if (!d || *d == 0 || isspace(*d)) {
-    return false;
-  }
-  /*strtoul("-1") is ok*/
-  if (std::is_unsigned<T>::value && *d == '-') {
-    return false;
-  }
-  char *p;
-  T a;
+#include <string_view>
+#include <charconv>
+#include <cctype>
+#include <type_traits>
 
-  /* if correct parse then errno is not changed
-   * so set errno=0
-   */
-  errno = 0;
-  if (std::is_same_v<T, long> ||
-      (std::is_same_v<T, int> && sizeof(int) == sizeof(long))) {
-    a = strtol(d, &p, radix);
-  } else if (std::is_same_v<T, unsigned long> ||
-             (std::is_same_v<T, unsigned> && sizeof(int) == sizeof(long))) {
-    a = strtoul(d, &p, radix);
-  } else if (std::is_same_v<T, int64_t> ||
-             (std::is_same_v<T, int> && sizeof(int) == sizeof(int64_t))) {
-    a = strtoll(d, &p, radix);
-  } else if (std::is_same_v<T, uint64_t> ||
-             (std::is_same_v<T, unsigned> && sizeof(int) == sizeof(int64_t))) {
-    a = strtoull(d, &p, radix);
-  } else if (std::is_same_v<T, float>) {
-    a = strtof(d, &p);
-  } else if (std::is_same_v<T, double>) {
-    a = strtod(d, &p);
-  } else {
-    assert(0);
-    return false;
-  }
-  /*errno!=0 - out of range, *p!=0 - not full string recognized*/
-  bool b = errno == 0 && *p == 0;
-  if (b) {
-    t = a;
-  }
-  return b;
+template <class T> 
+bool parseString(std::string_view d, T &t, int radix = 10) {
+    if (d.empty() || std::isspace(static_cast<unsigned char>(d.front()))) {
+        return false;
+    }
+    
+    if constexpr (std::is_unsigned_v<T>) {
+        if (d.front() == '-') return false;
+    }
+
+    std::from_chars_result res;
+    if constexpr (std::is_floating_point_v<T>) {
+        res = std::from_chars(d.data(), d.data() + d.size(), t);
+    } else {
+        res = std::from_chars(d.data(), d.data() + d.size(), t, radix);
+    }
+
+    return res.ec == std::errc{} && res.ptr == (d.data() + d.size());
 }
 
-template <class T>
-bool parseString(std::string const &s, T &t, int radix = 10) {
-  return parseString(s.c_str(), t, radix);
-}
-
-bool startsWith(const char *s, const char *begin);
-bool startsWith(const char *s, const std::string &begin);
-bool startsWith(const std::string &s, const char *begin);
-bool startsWith(const std::string &s, const std::string &begin);
-bool endsWith(std::string const &s, std::string const &e);
 std::string replaceAll(std::string subject, const std::string &from,
                        const std::string &to);
 VString split(const std::string &subject, const std::string &separator);
@@ -250,13 +215,10 @@ VString splitr(const std::string &subject, const std::string &regex);
 int countOccurence(const std::string &subject, const std::string &a);
 int countOccurence(const std::string &subject, const char c);
 
-bool cmpnocase(const std::string &a, const char *b);
-bool cmpnocase(const char *a, const char *b);
-bool cmp(const char *a, const char *b);
-bool cmp(const std::string &a, const char *b);
-bool contains(const std::string &a, const char b);
-bool contains(const std::string &a, const char *b);
-bool contains(const std::string &a, const std::string &b);
+bool cmpnocase(std::string_view a, std::string_view b);
+bool cmp(std::string_view a, std::string_view b);
+bool contains(std::string_view a, std::string_view b);
+bool contains(std::string_view a, const char b);
 
 #ifndef NOTGK_WITHOUT_ICONV
 const std::string localeToUtf8(const std::string &s);
@@ -340,16 +302,16 @@ inline std::string joinV(const std::vector<T> &v, char separator) {
 
 // separator can be default so use as 2nd parameter. It differs from other
 // functions arguments order.
-template <typename T>
-std::string join(T const v[], int size, const char separator = ' ') {
-  std::stringstream c;
-  for (int i = 0; i < size; i++) {
-    if (i) {
-      c << separator;
+template <typename T, std::size_t N>
+std::string join(const T (&v)[N], const char separator = ' ') {
+    std::stringstream c;
+    for (std::size_t i = 0; i < N; i++) {
+        if (i > 0) {
+            c << separator;
+        }
+        c << v[i];
     }
-    c << v[i];
-  }
-  return c.str();
+    return c.str();
 }
 
 template <typename T, std::size_t N>
@@ -394,14 +356,11 @@ std::vector<std::vector<T>> create2dArray(size_t rows, size_t cols,
 void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
           int height, int sourcex, int sourcey);
 
-GdkPixbuf *pixbuf(const char *s);
-GdkPixbuf *pixbuf(const std::string &s);
-GdkPixbuf *pixbuf(std::string s, int x, int y, int width, int height);
-GdkPixbuf *writablePixbuf(const char *s);
-GdkPixbuf *writablePixbuf(const std::string &s);
+GdkPixbuf *pixbuf(std::string_view s);
+GdkPixbuf *pixbuf(std::string_view s, int x, int y, int width, int height);
+GdkPixbuf *writablePixbuf(std::string_view s);
+GtkWidget *image(std::string_view s);
 
-GtkWidget *image(const char *s);
-GtkWidget *image(const std::string &s);
 #ifdef USE_ANIMATED_IMAGE
 GtkWidget *animatedImage(const char *s);
 #endif
@@ -457,7 +416,16 @@ template <class T> int indexOf(const T &t, std::vector<T> const &v) {
   return it == v.end() ? -1 : it - v.begin();
 }
 
-int indexOf(const char t, const std::string &v);
+template <size_t N>
+int indexOfNoCase(std::string_view t, const char *(&v)[N]) {
+    for (size_t i = 0; i < N; i++) {
+        if (cmpnocase(t, v[i])) { 
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+int indexOf(const char t, std::string_view v);
 
 template <class T, class... V> bool oneOf(T const &t, V const &...v) {
   return ((t == v) || ...);
@@ -481,11 +449,14 @@ template <class T> bool oneOf(const T &t, std::vector<T> const &v) {
   return indexOf(t, v) != -1;
 }
 
-bool oneOf(char const &t, const std::string &v);
-bool oneOf(char const &t, char const *v);
+bool oneOf(const char t, std::string_view v);
 
 // BEGIN config functions
 #ifndef NOGTK
+std::string getSystemLanguage();
+bool loadConfig(MapStringString &map);
+std::string getConfigPath();
+std::string getConfigPathLocaled();
 
 template <std::size_t N, typename... T>
 bool readConfig(const std::string (&tags)[N], T &...p) {
@@ -576,10 +547,6 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
       ...);
 }
 
-std::string getSystemLanguage();
-bool loadConfig(MapStringString &map);
-std::string getConfigPath();
-std::string getConfigPathLocaled();
 #endif
 // END config functions
 
@@ -593,12 +560,9 @@ PairDoubleDouble getScaleFactor();
 #endif
 
 #ifndef NOGTK
-void addClass(GtkWidget *w, const gchar *s);
-void addClass(GtkWidget *w, const std::string &s);
-void removeClass(GtkWidget *w, const gchar *s);
-void removeClass(GtkWidget *w, const std::string &s);
-void addRemoveClass(GtkWidget *w, const gchar *s, bool add);
-void addRemoveClass(GtkWidget *w, const std::string &s, bool add);
+void addClass(GtkWidget *w, std::string_view s);
+void removeClass(GtkWidget *w, std::string_view s);
+void addRemoveClass(GtkWidget *w, std::string_view s, bool add);
 void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
 void destroy(cairo_t *p);

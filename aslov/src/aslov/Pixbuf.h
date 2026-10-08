@@ -19,15 +19,12 @@ class Pixbuf {
 	SafePixbuf p;
 public:
 	Pixbuf();
-	Pixbuf(const char *path);
-	Pixbuf(std::string const &path);
+	Pixbuf(std::string_view path);
 	Pixbuf(GdkPixbuf *pb);
-	void set(const char *path);
-	void set(std::string const &path);
+	void set(std::string_view path);
 	void set(GdkPixbuf *pb);
 
-	void operator=(const char *path);
-	void operator=(std::string const &path);
+	void operator=(std::string_view path);
 	void operator=(GdkPixbuf *pb);
 
 	operator GdkPixbuf*();

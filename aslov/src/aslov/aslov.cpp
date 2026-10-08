@@ -63,10 +63,11 @@ std::string format(const char *f, ...) {
 }
 
 // BEGIN file functions
-bool isDir(const char *path) {
+bool isDir(std::string_view path) {
+  std::string p(path);
 #ifdef NOGTK
   struct stat s;
-  if (stat(path, &s) == 0) {
+  if (stat(p.c_str(), &s) == 0) {
     return s.st_mode & S_IFDIR;
   } else {
     assert(0);
@@ -74,7 +75,7 @@ bool isDir(const char *path) {
   }
 #else
   GStatBuf b;
-  if (g_stat(path, &b) != 0) {
+  if (g_stat(p.c_str(), &b) != 0) {
     // error get file stat
     assert(0);
     return false;
@@ -83,8 +84,6 @@ bool isDir(const char *path) {
   return S_ISDIR(b.st_mode);
 #endif
 }
-
-bool isDir(const std::string &path) { return isDir(path.c_str()); }
 
 std::string getFileInfo(std::string path, FILEINFO fi) {
   //"c:\\slove.sno\\1\\rr" -> extension = ""
@@ -162,7 +161,7 @@ void aslovInit(char const *const *argv, bool storeScaleFactor /*=false*/) {
 
   std::string s = getFileInfo(p, FILEINFO::DIRECTORY);
   for (std::string r : {"Release", "Debug"}) {
-    if (endsWith(s, r)) {
+    if (s.ends_with(r)) {
       s = s.substr(0, s.length() - r.length() - 1);
     }
   }
@@ -178,31 +177,29 @@ void aslovInit(char const *const *argv, bool storeScaleFactor /*=false*/) {
 int getApplicationFileSize() { return getFileSize(applicationPath); }
 
 // assume log.txt is uses only in debug mode, so can write in the same dir
-void clearlog() {
-  std::ofstream ofs("log.txt", std::ios::trunc);
-}
+void clearlog() { std::ofstream ofs("log.txt", std::ios::trunc); }
 
 std::string const &getApplicationName() { return applicationName; }
 
-std::string getResourcePath(const std::string name) {
-  return applicationName + G_DIR_SEPARATOR + name;
+std::string getResourcePath(const std::string_view name) {
+  return applicationName + G_DIR_SEPARATOR + std::string(name);
 }
 
-std::string getImagePath(const std::string name) {
-  return getResourcePath("images/" + name);
+std::string getImagePath(const std::string_view name) {
+  return getResourcePath("images/" + std::string(name));
 }
 
-std::ifstream openResourceFileAsStream(const std::string name) {
+std::ifstream openResourceFileAsStream(const std::string_view name) {
   std::ifstream f(getResourcePath(name));
   return f;
 }
 
-std::string getWritableFilePath(const std::string name) {
+std::string getWritableFilePath(const std::string_view name) {
 #ifdef NOGTK
   return name;
 #else
   return g_get_user_config_dir() + (G_DIR_SEPARATOR + applicationName) +
-         G_DIR_SEPARATOR + name;
+         G_DIR_SEPARATOR + std::string(name);
 #endif
 }
 
@@ -313,31 +310,6 @@ std::string timeToString(const char *format, bool toLowerCase /*=false*/) {
   return s;
 }
 
-bool startsWith(const char *s, const char *begin) {
-  return strncmp(s, begin, strlen(begin)) == 0;
-}
-
-bool startsWith(const char *s, const std::string &begin) {
-  return startsWith(s, begin.c_str());
-}
-
-bool startsWith(const std::string &s, const char *begin) {
-  return startsWith(s.c_str(), begin);
-}
-
-bool startsWith(const std::string &s, const std::string &begin) {
-  return startsWith(s.c_str(), begin.c_str());
-}
-
-bool endsWith(std::string const &s, std::string const &e) {
-  auto i = e.length();
-  auto l = s.length();
-  if (l < i) {
-    return false;
-  }
-  return s.compare(s.length() - i, i, e) == 0;
-}
-
 std::string replaceAll(std::string subject, const std::string &from,
                        const std::string &to) {
   size_t pos = 0;
@@ -391,11 +363,19 @@ int countOccurence(const std::string &subject, const char c) {
                   [&c](char a) { return a == c; });
 }
 
-bool cmpnocase(const std::string &a, const char *b) {
-  return cmpnocase(a.c_str(), b);
+bool cmpnocase(std::string_view a, std::string_view b) {
+  if (a.length() != b.length())
+    return false;
+  return strncasecmp(a.data(), b.data(), a.length()) == 0;
 }
 
-bool cmpnocase(const char *a, const char *b) { return strcasecmp(a, b) == 0; }
+bool cmp(std::string_view a, std::string_view b) { return a == b; }
+bool contains(std::string_view a, std::string_view b) {
+  return a.find(b) != std::string_view::npos;
+}
+bool contains(std::string_view a, const char b) {
+  return a.find(b) != std::string_view::npos;
+}
 
 bool cmp(const char *a, const char *b) { return strcmp(a, b) == 0; }
 
@@ -541,30 +521,21 @@ void copy(GdkPixbuf *source, cairo_t *dest, int destx, int desty, int width,
   cairo_fill(dest);
 }
 
-GdkPixbuf *pixbuf(const char *s) {
-  return gdk_pixbuf_new_from_file(getImagePath(s).c_str(), NULL);
+GdkPixbuf *pixbuf(std::string_view s) {
+  return gdk_pixbuf_new_from_file(getImagePath(s).c_str(), nullptr);
 }
 
-GdkPixbuf *pixbuf(const std::string &s) { return pixbuf(s.c_str()); }
-
-GdkPixbuf *pixbuf(std::string s, int x, int y, int width, int height) {
+GdkPixbuf *pixbuf(std::string_view s, int x, int y, int width, int height) {
   return gdk_pixbuf_new_subpixbuf(pixbuf(s), x, y, width, height);
 }
 
-GdkPixbuf *writablePixbuf(const char *s) {
-  std::string q = getWritableFilePath(s);
-  return gdk_pixbuf_new_from_file(q.c_str(), NULL);
+GdkPixbuf *writablePixbuf(std::string_view s) {
+  return gdk_pixbuf_new_from_file(getWritableFilePath(s).c_str(), nullptr);
 }
 
-GdkPixbuf *writablePixbuf(const std::string &s) {
-  return writablePixbuf(s.c_str());
-}
-
-GtkWidget *image(const char *s) {
+GtkWidget *image(std::string_view s) {
   return gtk_image_new_from_file(getImagePath(s).c_str());
 }
-
-GtkWidget *image(const std::string &s) { return image(s.c_str()); }
 
 #ifdef USE_ANIMATED_IMAGE
 GtkWidget *animatedImage(const char *s) {
@@ -575,30 +546,14 @@ GtkWidget *animatedImage(const char *s) {
 #endif
 // END pixbuf functions
 
-// BEGIN 2 dimensional array functions
-// END 2 dimensional array functions
-
-int indexOfNoCase(const char *t, const char *v[], int size) {
-  for (int i = 0; i < size; i++) {
-    if (cmpnocase(v[i], t)) {
-      return i;
-    }
-  }
-  return -1;
+int indexOf(const char t, std::string_view v) {
+  auto pos = v.find(t);
+  return (pos != std::string_view::npos) ? static_cast<int>(pos) : -1;
 }
 
-int indexOfNoCase(const std::string t, const char *v[], int size) {
-  return indexOfNoCase(t.c_str(), v, size);
+bool oneOf(const char t, std::string_view v) {
+  return v.find(t) != std::string_view::npos;
 }
-
-int indexOf(const char t, const std::string &v) {
-  auto i = v.find(t);
-  return i == std::string::npos ? -1 : i;
-}
-
-bool oneOf(char const &t, const std::string &v) { return indexOf(t, v) != -1; }
-
-bool oneOf(char const &t, char const *v) { return oneOf(t, std::string(v)); }
 
 #ifdef _WIN32
 // Note this function should be called before gtk_init
@@ -630,36 +585,27 @@ PairDoubleDouble getScaleFactor() { return scale; }
 #endif
 
 #ifndef NOGTK
-void addClass(GtkWidget *w, const std::string &s) { addClass(w, s.c_str()); }
 
-void addClass(GtkWidget *w, const gchar *s) {
+void addClass(GtkWidget *w, std::string_view s) {
   GtkStyleContext *context;
   context = gtk_widget_get_style_context(w);
-  gtk_style_context_add_class(context, s);
+  std::string q(s);
+  gtk_style_context_add_class(context, q.c_str());
 }
 
-void removeClass(GtkWidget *w, const std::string &s) {
-  removeClass(w, s.c_str());
-}
-
-void addRemoveClass(GtkWidget *w, const gchar *s, bool add) {
+void removeClass(GtkWidget *w, std::string_view s) {
   GtkStyleContext *context;
   context = gtk_widget_get_style_context(w);
+  std::string q(s);
+  gtk_style_context_remove_class(context, q.c_str());
+}
+
+void addRemoveClass(GtkWidget *w, std::string_view s, bool add) {
   if (add) {
-    gtk_style_context_add_class(context, s);
+    addClass(w, s);
   } else {
-    gtk_style_context_remove_class(context, s);
+    removeClass(w, s);
   }
-}
-
-void addRemoveClass(GtkWidget *w, const std::string &s, bool add) {
-  addRemoveClass(w, s.c_str(), add);
-}
-
-void removeClass(GtkWidget *w, const gchar *s) {
-  GtkStyleContext *context;
-  context = gtk_widget_get_style_context(w);
-  gtk_style_context_remove_class(context, s);
 }
 
 void loadCSS(std::string const &additionalData /*= ""*/) {

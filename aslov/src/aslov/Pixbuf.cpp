@@ -12,86 +12,57 @@
 
 #include <cassert>
 
-#include "aslov.h"
 #include "Pixbuf.h"
+#include "aslov.h"
 
-Pixbuf::Pixbuf() {
-	p = nullptr;
+Pixbuf::Pixbuf() { p = nullptr; }
+
+Pixbuf::Pixbuf(const std::string_view path) {
+  p = nullptr;
+  set(path);
 }
 
-Pixbuf::Pixbuf(const char *path) {
-	p = nullptr;
-	set(path);
+Pixbuf::Pixbuf(GdkPixbuf *pb) { p.reset(pb); }
+
+int Pixbuf::width() const { return gdk_pixbuf_get_width(p.get()); }
+
+int Pixbuf::height() const { return gdk_pixbuf_get_height(p.get()); }
+
+CPoint Pixbuf::size() const { return {width(), height()}; }
+
+void Pixbuf::set(std::string_view path) {
+  std::string path_str(path);
+  p.reset(gdk_pixbuf_new_from_file(path_str.c_str(), nullptr));
+  assert(p.get());
 }
 
-Pixbuf::Pixbuf(const std::string &path) {
-	p = nullptr;
-	set(path);
-}
+void Pixbuf::set(GdkPixbuf *pb) { p.reset(pb); }
 
-Pixbuf::Pixbuf(GdkPixbuf *pb) {
-	p.reset(pb);
-}
+void Pixbuf::operator=(std::string_view path) { set(path); }
 
-int Pixbuf::width() const {
-	return gdk_pixbuf_get_width(p.get());
-}
+Pixbuf::operator GdkPixbuf *() { return p.get(); }
 
-int Pixbuf::height() const {
-	return gdk_pixbuf_get_height(p.get());
-}
-
-CPoint Pixbuf::size() const {
-	return {width(),height()};
-}
-
-void Pixbuf::set(const char *path) {
-	p.reset(gdk_pixbuf_new_from_file(path, NULL));
-	assert(p.get());
-}
-
-void Pixbuf::set(const std::string &path) {
-	set(path.c_str());
-}
-
-void Pixbuf::set(GdkPixbuf *pb) {
-	p.reset(pb);
-}
-
-void Pixbuf::operator =(const char *path) {
-	set(path);
-}
-
-void Pixbuf::operator =(const std::string &path) {
-	set(path);
-}
-
-Pixbuf::operator GdkPixbuf*() {
-	return p.get();
-}
-
-void Pixbuf::operator =(GdkPixbuf *pb) {
-	set(pb);
-}
+void Pixbuf::operator=(GdkPixbuf *pb) { set(pb); }
 
 void Pixbuf::createRGB(int width, int height) {
-	p.reset(gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height));
+  p.reset(gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height));
 }
 
 void Pixbuf::savePng(const std::string &path) const {
-	gdk_pixbuf_save(p.get(), path.c_str(), "png", NULL, NULL);
+  gdk_pixbuf_save(p.get(), path.c_str(), "png", NULL, NULL);
 }
 
-void Pixbuf::saveJpg(const std::string &path, int quality/*=100*/) const {
-	auto s = std::to_string(quality);
-	gdk_pixbuf_save(p.get(), path.c_str(), "jpeg", NULL, "quality", s.c_str(), NULL);
+void Pixbuf::saveJpg(const std::string &path, int quality /*=100*/) const {
+  auto s = std::to_string(quality);
+  gdk_pixbuf_save(p.get(), path.c_str(), "jpeg", NULL, "quality", s.c_str(),
+                  NULL);
 }
 
-GdkPixbuf* Pixbuf::saturate(float f) const {
-	GdkPixbuf *pb = gdk_pixbuf_copy(p.get());
-	//desaturate image
-	gdk_pixbuf_saturate_and_pixelate(p.get(), pb, f, false);
-	return pb;
+GdkPixbuf *Pixbuf::saturate(float f) const {
+  GdkPixbuf *pb = gdk_pixbuf_copy(p.get());
+  // desaturate image
+  gdk_pixbuf_saturate_and_pixelate(p.get(), pb, f, false);
+  return pb;
 }
 
 #endif
