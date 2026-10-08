@@ -378,7 +378,9 @@ typename std::vector<T>::iterator find(const T &t, std::vector<T> &v) {
   return std::find(v.begin(), v.end(), t);
 }
 
-template <class T, class... V> int indexOf(T const &t, V const &...v) {
+template <class T, class... V>
+requires (sizeof...(V) > 1)
+int indexOf(T const &t, V const &...v) {
   auto is_equal = [](const auto &a, const auto &b) {
     if constexpr (std::is_convertible_v<decltype(a), std::string_view> &&
                   std::is_convertible_v<decltype(b), std::string_view>) {
