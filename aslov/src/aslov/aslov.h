@@ -111,9 +111,6 @@ using VString = std::vector<std::string>;
 using MapStringString = std::map<std::string, std::string>;
 using PairDoubleDouble = std::pair<double, double>;
 
-// format to string example format("%d %s",1234,"some")
-std::string format(const char *f, ...);
-
 // BEGIN file functions
 enum class FILEINFO { NAME, EXTENSION, LOWER_EXTENSION, DIRECTORY, SHORT_NAME };
 bool isDir(std::string_view path);

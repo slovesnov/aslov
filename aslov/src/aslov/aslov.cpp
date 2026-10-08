@@ -45,23 +45,6 @@ static PairDoubleDouble scale;
 #endif
 static int aslovOutputWide = 40;
 
-// format to string example format("%d %s",1234,"some")
-std::string format(const char *f, ...) {
-  va_list a;
-  va_start(a, f);
-  size_t size = vsnprintf(nullptr, 0, f, a) + 1;
-  va_end(a);
-  std::string s;
-  if (size > 1) {
-    s.resize(size);
-    va_start(a, f);
-    vsnprintf(&s[0], size, f, a);
-    va_end(a);
-    s.resize(size - 1);
-  }
-  return s;
-}
-
 // BEGIN file functions
 bool isDir(std::string_view path) {
   std::string p(path);
@@ -686,15 +669,20 @@ std::string getBuildString(bool _long) {
       }
     }
   }
-  return format("build %.*s %.*s %s %s", 2 - i, __DATE__ + 4 + i,
-                _long ? strlen(b) : 3, _long ? b : __DATE__, __DATE__ + 7,
-                __TIME__);
+  int len1 = 2 - i;
+  std::string_view str1(__DATE__ + 4 + i, len1 < 0 ? 0 : len1);
+
+  const char *b_ptr = _long ? b : __DATE__;
+  size_t len2 = _long ? std::strlen(b) : 3;
+  std::string_view str2(b_ptr, len2);
+
+  return std::format("build {} {} {} {}", str1, str2, __DATE__ + 7, __TIME__);
 }
 
 std::string getVersionString(bool _long) {
-  return format("gcc%s %s, gtk%s %d.%d.%d", _long ? " version" : "",
-                __VERSION__, _long ? " version" : "", GTK_MAJOR_VERSION,
-                GTK_MINOR_VERSION, GTK_MICRO_VERSION);
+  return std::format("gcc{} {}, gtk{} {}.{}.{}", _long ? " version" : "",
+                     __VERSION__, _long ? " version" : "", GTK_MAJOR_VERSION,
+                     GTK_MINOR_VERSION, GTK_MICRO_VERSION);
 }
 
 void showHideWidget(GtkWidget *w, bool show) {
@@ -850,16 +838,15 @@ double timeElapse(clock_t begin) {
 }
 
 std::string secondsToString(double seconds) {
-  int h, m, s, t = int(seconds);
-  h = t / 3600;
-  t = t % 3600;
-  m = t / 60;
-  t = t % 60;
-  s = t;
+  int t = static_cast<int>(seconds);
+  int h = t / 3600;
+  int m = (t % 3600) / 60;
+  int s = t % 60;
+
   if (h > 0) {
-    return format("%d:%02d:%02d", h, m, s);
+    return std::format("{}:{:02}:{:02}", h, m, s);
   } else {
-    return format("%d:%02d", m, s);
+    return std::format("{}:{:02}", m, s);
   }
 }
 
