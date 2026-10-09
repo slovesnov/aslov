@@ -12,6 +12,26 @@
 
 #include "CPoint.h"
 
+CPoint::CPoint() { x = y = 0; }
+CPoint::CPoint(int _x, int _y) {
+  x = _x;
+  y = _y;
+}
+CPoint::CPoint(GdkEventButton *p) {
+  x = p->x;
+  y = p->y;
+}
+void CPoint::operator+=(const CPoint &p) {
+  x += p.x;
+  y += p.y;
+}
+void CPoint::operator-=(const CPoint &p) {
+  x -= p.x;
+  y -= p.y;
+}
+bool CPoint::operator==(const CPoint &p) const { return x == p.x && y == p.y; }
+bool CPoint::operator!=(const CPoint &p) const { return !(operator==(p)); }
+
 std::string CPoint::toString() const {
   return std::to_string(x) + "," + std::to_string(y);
 }

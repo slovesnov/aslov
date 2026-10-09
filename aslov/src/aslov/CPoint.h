@@ -17,30 +17,13 @@
 class CPoint {
 public:
   int x, y;
-  CPoint() { x = y = 0; }
-  CPoint(int _x, int _y) {
-    x = _x;
-    y = _y;
-  }
-#if GTK_MAJOR_VERSION == 3
-  CPoint(GdkEventButton *p) {
-    x = p->x;
-    y = p->y;
-  }
-#endif
-  void operator+=(const CPoint &p) {
-    x += p.x;
-    y += p.y;
-  }
-  void operator-=(const CPoint &p) {
-    x -= p.x;
-    y -= p.y;
-  }
-
-  bool operator==(const CPoint &p) const { return x == p.x && y == p.y; }
-
-  bool operator!=(const CPoint &p) const { return !(operator==(p)); }
-
+  CPoint();
+  CPoint(int _x, int _y);
+  CPoint(GdkEventButton *p);
+  void operator+=(const CPoint &p);
+  void operator-=(const CPoint &p);
+  bool operator==(const CPoint &p) const;
+  bool operator!=(const CPoint &p) const;
   std::string toString() const;
 };
 

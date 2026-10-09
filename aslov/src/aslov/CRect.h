@@ -19,68 +19,22 @@ public:
   int right;
   int bottom;
 
-  CRect() { left = top = right = bottom = 0; }
+  CRect();
+  CRect(CPoint p, CPoint s);
+  CRect(int _left, int _top, int _right, int _bottom);
+  const CRect &operator=(const CRect &r);
 
-  CRect(CPoint p, CPoint s) {
-    left = p.x;
-    top = p.y;
-    right = left + s.x;
-    bottom = top + s.y;
-  }
+  void init(int _left, int _top, int _right, int _bottom);
+  void join(const CRect &r);
 
-  CRect(int _left, int _top, int _right, int _bottom) {
-    init(_left, _top, _right, _bottom);
-  }
+  int width() const;
+  int height() const;
+  CPoint size() const;
+  CPoint centerPoint() const;
+  CPoint topLeft() const;
 
-  CRect const &operator=(CRect const &r) {
-    left = r.left;
-    top = r.top;
-    right = r.right;
-    bottom = r.bottom;
-    return *this;
-  }
-
-  void init(int _left, int _top, int _right, int _bottom) {
-    left = _left;
-    top = _top;
-    right = _right;
-    bottom = _bottom;
-  }
-
-  void join(CRect const &r) {
-    if (r.left < left) {
-      left = r.left;
-    }
-    if (r.top < top) {
-      top = r.top;
-    }
-    if (r.right > right) {
-      right = r.right;
-    }
-    if (r.bottom > bottom) {
-      bottom = r.bottom;
-    }
-  }
-
-  int width() const { return right - left; }
-
-  int height() const { return bottom - top; }
-
-  CPoint size() const { return {width(), height()}; }
-
-  CPoint centerPoint() const {
-    return CPoint((left + right) / 2, (top + bottom) / 2);
-  }
-
-  CPoint topLeft() const { return CPoint(left, top); }
-
-#if GTK_MAJOR_VERSION == 3
-  bool in(GdkEventButton *p) { return in(p->x, p->y); }
-#endif
-
-  bool in(double x, double y) {
-    return x >= left && x < right && y >= top && y < bottom;
-  }
+  bool in(GdkEventButton *p);
+  bool in(double x, double y);
 
   std::string toString() const;
 };
