@@ -559,14 +559,13 @@ void removeClass(GtkWidget *w, std::string_view s);
 void addRemoveClass(GtkWidget *w, std::string_view s, bool add);
 void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
-void destroy(cairo_t *p);
-void destroy(cairo_surface_t *p);
+// void destroy(cairo_t *p);
+// void destroy(cairo_surface_t *p);
 std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
 void showHideWidget(GtkWidget *w, bool show);
 void clearContainer(GtkWidget *w);
-// int getContainerIndex(GtkWidget *container, GtkWidget *w);
 // millimeters or inches
 PairDoubleDouble getMonitorSize(bool millimeters = true);
 double getMonitorDiagonal(bool millimeters = true);
@@ -598,8 +597,6 @@ std::string secondsToString(clock_t begin);
 std::string trim(const std::string &s);
 std::string ltrim(const std::string &s);
 std::string rtrim(const std::string &s);
-void setNumericLocale();
-void setAllLocales();
 //"1.23000" -> "1.23", "1.00" -> "1", "123" -> "123"
 std::string normalize(std::string const &s);
 double randomDouble(double from, double to);

@@ -12,14 +12,11 @@
 #ifndef NOGTK
 
 #include "CRect.h"
-#include <gtk/gtk.h>
-
+#include "SafeGtkTypes.h"
 
 class CairoSurface {
-  cairo_t *m_cairo;
-  cairo_surface_t *m_surface;
-  void init();
-  void free();
+  SafeCairo m_cairo;
+  SafeCairoSurface m_surface;
 
 public:
   CairoSurface();
@@ -31,9 +28,6 @@ public:
   void create(int width, int height);
   void create(CPoint const &size);
   void create(std::string const &path);
-  virtual ~CairoSurface();
-  //	cairo_t* cairo();
-  //	cairo_surface_t* surface();
 
   int width() const;
   int height() const;
@@ -54,15 +48,6 @@ public:
   GdkPixbuf *toPixbuf(int startx, int starty, int width, int height);
   GdkPixbuf *toPixbuf();
 
-  /*
-   cairo_t*& cairo1(){
-   return m_cairo;
-   }
-
-   cairo_surface_t*& surface1(){
-   return m_surface;
-   }
-   */
 };
 
 #endif

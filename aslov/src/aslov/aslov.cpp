@@ -626,57 +626,51 @@ void openURL(std::string url) {
    * ShellExecute(0, 0, "C:\\slovesno\\a.html", 0, 0 , SW_SHOW );
    */
 #ifdef _WIN32
-  // printv(url)
+  // pr(url)
   ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
 #else
   gtk_show_uri_on_window(0, url.c_str(), gtk_get_current_event_time(), NULL);
 #endif
 }
 
-void destroy(cairo_t *p) {
-  if (p) {
-    cairo_destroy(p);
-  }
-}
+// void destroy(cairo_t *p) {
+//   if (p) {
+//     cairo_destroy(p);
+//   }
+// }
 
-void destroy(cairo_surface_t *p) {
-  if (p) {
-    cairo_surface_destroy(p);
-  }
-}
+// void destroy(cairo_surface_t *p) {
+//   if (p) {
+//     cairo_surface_destroy(p);
+//   }
+// }
 
 std::string getBuildVersionString(bool _long) {
   return getBuildString(_long) + ", " + getVersionString(_long);
 }
 
 std::string getBuildString(bool _long) {
-  /* Note date&time will be when compiler compile file which
-   * calls getBuildString, so it's time no last compilation time
-   */
-  //__DATE__="Dec 15 2016" one needs "15 Dec 2016" or "15 December 2016"
-  int i =
-      _long ? 0 : __DATE__[4] == ' '; // day<10, avoid two spaces after 'build'
-  const char *b = 0;
-  if (_long) {
-    const char *MONTH[] = {"January",   "February", "March",    "April",
-                           "May",       "June",     "July",     "August",
-                           "September", "October",  "November", "December"};
+  std::string user_locale = std::setlocale(LC_TIME, nullptr);
+  std::setlocale(LC_TIME, "C");
+  std::tm t = {};
+  std::istringstream ss(__DATE__);
+  ss >> std::get_time(&t, "%b %d %Y"); // %b matches "Oct"
 
-    for (auto a : MONTH) {
-      if (strncasecmp(__DATE__, a, 3) == 0) {
-        b = a;
-        break;
-      }
-    }
+  std::string result = "";
+  char day_buf[4];
+  char month_year_buf[64];
+
+  std::strftime(day_buf, sizeof(day_buf), "%e", &t);
+  const char *month_token = _long ? "%B %Y" : "%b %Y";
+  std::strftime(month_year_buf, sizeof(month_year_buf), month_token, &t);
+
+  std::string day_str(day_buf);
+  if (!day_str.empty() && day_str[0] == ' ') {
+    day_str.erase(0, 1);
   }
-  int len1 = 2 - i;
-  std::string_view str1(__DATE__ + 4 + i, len1 < 0 ? 0 : len1);
-
-  const char *b_ptr = _long ? b : __DATE__;
-  size_t len2 = _long ? std::strlen(b) : 3;
-  std::string_view str2(b_ptr, len2);
-
-  return std::format("build {} {} {} {}", str1, str2, __DATE__ + 7, __TIME__);
+  result = day_str + " " + month_year_buf;
+  std::setlocale(LC_TIME, user_locale.c_str());
+  return "build " + result + " " + __TIME__;
 }
 
 std::string getVersionString(bool _long) {
@@ -701,15 +695,6 @@ void clearContainer(GtkWidget *w) {
   }
   g_list_free(children);
 }
-
-/*
-int getContainerIndex(GtkWidget *container, GtkWidget *w) {
-        GValue t = G_VALUE_INIT;
-        g_value_init(&t, G_TYPE_INT);
-        gtk_container_child_get_property(GTK_CONTAINER(container), w,
-"position", &t); return g_value_get_int(&t);
-}
-*/
 
 PairDoubleDouble getMonitorSize(bool millimeters /*=true*/) {
   auto monitor = gdk_display_get_monitor(gdk_display_get_default(), 0);
@@ -876,10 +861,6 @@ std::string rtrim(const std::string &s) {
     ;
   return s.substr(0, s.length() - (it - s.rbegin()));
 }
-
-void setNumericLocale() { setlocale(LC_NUMERIC, "C"); }
-
-void setAllLocales() { setlocale(LC_ALL, "C"); }
 
 std::string normalize(std::string const &s) {
   std::string::size_type p, p1 = 0;
