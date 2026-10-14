@@ -68,7 +68,6 @@ bool isDir(std::string_view path) {
 #endif
 }
 
-#ifndef NOGTK
 std::string getFileInfo(std::string path, FILEINFO fi) {
   //"c:\\slove.sno\\1\\rr" -> extension = ""
   std::size_t pos = path.rfind(G_DIR_SEPARATOR);
@@ -76,10 +75,13 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
     return path.substr(0, pos);
   }
 
-  //"./words.exe" also ok
+#ifdef NOGTK
+    std::string name = std::filesystem::path(path).filename().string();
+#else
   gchar *exe_name = g_path_get_basename(path.c_str());
   std::string name = exe_name;
   g_free(exe_name);
+#endif
 
   // std::string name = path.substr(pos + 1);
   if (fi == FILEINFO::NAME) {
@@ -103,7 +105,6 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
   }
   return s;
 }
-#endif
 
 int getFileSize(const std::string &path) {
 #ifdef NOGTK

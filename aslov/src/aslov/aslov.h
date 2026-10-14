@@ -123,7 +123,6 @@ FILE *open(std::string path, const char *flags);
 // call aslovInit before gtk_init just first in main() function if you need to
 // use ScaleFactor
 void clearlog();
-#ifndef NOGTK
 void aslovInit(char const *const *argv, bool storeScaleFactor = false);
 int getApplicationFileSize();
 std::string const &getApplicationName();
@@ -133,6 +132,7 @@ std::ifstream openResourceFileAsStream(const std::string_view name);
 std::string getWritableFilePath(const std::string_view name);
 // writable resource+log+cfg files are places in same dir and should started
 // with application name
+#ifndef NOGTK
 void writableFileSetContents(const std::string name, const std::string &s);
 const std::string writableFileGetContents(const std::string &name);
 #endif
