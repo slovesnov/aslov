@@ -68,6 +68,7 @@ bool isDir(std::string_view path) {
 #endif
 }
 
+#ifndef NOGTK
 std::string getFileInfo(std::string path, FILEINFO fi) {
   //"c:\\slove.sno\\1\\rr" -> extension = ""
   std::size_t pos = path.rfind(G_DIR_SEPARATOR);
@@ -102,6 +103,7 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
   }
   return s;
 }
+#endif
 
 int getFileSize(const std::string &path) {
 #ifdef NOGTK
@@ -126,6 +128,9 @@ FILE *open(std::string path, const char *flags) {
 // END file functions
 
 // BEGIN application functions
+void clearlog() { std::ofstream ofs("log.txt", std::ios::trunc); }
+
+#ifndef NOGTK
 void aslovInit(char const *const *argv, bool storeScaleFactor /*=false*/) {
 #ifdef _WIN32
   if (storeScaleFactor) {
@@ -159,9 +164,6 @@ void aslovInit(char const *const *argv, bool storeScaleFactor /*=false*/) {
 
 int getApplicationFileSize() { return getFileSize(applicationPath); }
 
-// assume log.txt is uses only in debug mode, so can write in the same dir
-void clearlog() { std::ofstream ofs("log.txt", std::ios::trunc); }
-
 std::string const &getApplicationName() { return applicationName; }
 
 std::string getResourcePath(const std::string_view name) {
@@ -186,7 +188,6 @@ std::string getWritableFilePath(const std::string_view name) {
 #endif
 }
 
-#ifndef NOGTK
 void writableFileSetContents(const std::string name, const std::string &s) {
 #ifndef NDEBUG
   gboolean b =
@@ -388,8 +389,7 @@ std::string encodeIconv(const std::string &s, bool toUtf8) {
   // const char LOCAL[]="cp1251";
   iconv_t cd = toUtf8 ? iconv_open(UTF8, LOCAL) : iconv_open(LOCAL, UTF8);
   if ((iconv_t)-1 == cd) {
-    printl("error iconv_open");
-    perror("iconv_open");
+    pr("error iconv_open");
     return r;
   }
 
@@ -401,8 +401,7 @@ std::string encodeIconv(const std::string &s, bool toUtf8) {
   char *outbuf = out;
   size_t ret = iconv(cd, &in, &inbytesleft, &outbuf, &outbytesleft);
   if ((size_t)-1 == ret) {
-    printl("error iconv ", s);
-    perror("iconv");
+    pr("error iconv ", s);
     return r;
   }
   *outbuf = 0;
@@ -632,18 +631,6 @@ void openURL(std::string url) {
   gtk_show_uri_on_window(0, url.c_str(), gtk_get_current_event_time(), NULL);
 #endif
 }
-
-// void destroy(cairo_t *p) {
-//   if (p) {
-//     cairo_destroy(p);
-//   }
-// }
-
-// void destroy(cairo_surface_t *p) {
-//   if (p) {
-//     cairo_surface_destroy(p);
-//   }
-// }
 
 std::string getBuildVersionString(bool _long) {
   return getBuildString(_long) + ", " + getVersionString(_long);
