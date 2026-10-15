@@ -472,7 +472,7 @@ std::string utf8ToUpperCase(const std::string &s
 #endif // #ifndef NOTGK_WITHOUT_ICONV
 
 #ifndef NOGTK
-int utf8Length(const std::string& s,gssize l=-1){
+int utf8Length(const std::string& s,gssize l){
   return g_utf8_strlen(s.c_str(), l);
 }
 
