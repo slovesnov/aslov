@@ -76,7 +76,7 @@ std::string getFileInfo(std::string path, FILEINFO fi) {
   }
 
 #ifdef NOGTK
-    std::string name = std::filesystem::path(path).filename().string();
+  std::string name = std::filesystem::path(path).filename().string();
 #else
   gchar *exe_name = g_path_get_basename(path.c_str());
   std::string name = exe_name;
@@ -470,6 +470,18 @@ std::string utf8ToUpperCase(const std::string &s
 #endif
 }
 #endif // #ifndef NOTGK_WITHOUT_ICONV
+
+#ifndef NOGTK
+std::string utf8Trim(const std::string &s) {
+  if (s.empty())
+    return s;
+  gchar *c_str = g_strdup(s.c_str());
+  g_strstrip(c_str);
+  std::string result(c_str);
+  g_free(c_str);
+  return result;
+}
+#endif
 
 #ifndef NOGTK
 std::string utf8Substring(const std::string &s, glong start_pos,
