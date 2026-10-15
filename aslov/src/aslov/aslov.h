@@ -231,6 +231,7 @@ std::string utf8ToUpperCase(const std::string &s
 
 #ifndef NOGTK
 std::string utf8Trim(const std::string& s);
+int utf8Length(const std::string& s,gssize l=-1);
 std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos);
 #endif
 // convert localed string to lowercase

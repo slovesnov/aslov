@@ -472,6 +472,10 @@ std::string utf8ToUpperCase(const std::string &s
 #endif // #ifndef NOTGK_WITHOUT_ICONV
 
 #ifndef NOGTK
+int utf8Length(const std::string& s,gssize l=-1){
+  return g_utf8_strlen(s.c_str(), l);
+}
+
 std::string utf8Trim(const std::string &s) {
   if (s.empty())
     return s;
@@ -481,9 +485,7 @@ std::string utf8Trim(const std::string &s) {
   g_free(c_str);
   return result;
 }
-#endif
 
-#ifndef NOGTK
 std::string utf8Substring(const std::string &s, glong start_pos,
                           glong end_pos) {
   gchar *p = g_utf8_substring(s.c_str(), start_pos, end_pos);
