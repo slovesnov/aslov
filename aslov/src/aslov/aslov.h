@@ -408,9 +408,13 @@ int indexOf(const U &t, const T (&v)[N]) {
   return i == N ? -1 : i;
 }
 
-template <class T> int indexOf(const T &t, std::vector<T> const &v) {
-  typename std::vector<T>::const_iterator it = find(t, v);
-  return it == v.end() ? -1 : it - v.begin();
+template <class T> 
+int indexOf(const T &t, const std::vector<T> &v, int start = 0) {
+  if (start >= int(v.size())) {
+    return -1;
+  }
+  typename std::vector<T>::const_iterator it = std::find(v.begin() + start, v.end(), t);
+  return it == v.end() ? -1 : std::distance(v.begin(), it);
 }
 
 template <size_t N>
