@@ -472,7 +472,7 @@ std::string utf8ToUpperCase(const std::string &s
 #endif // #ifndef NOTGK_WITHOUT_ICONV
 
 #ifndef NOGTK
-int utf8Length(const std::string& s,gssize l){
+int utf8Length(const std::string &s, gssize l) {
   return g_utf8_strlen(s.c_str(), l);
 }
 
@@ -491,6 +491,25 @@ std::string utf8Substring(const std::string &s, glong start_pos,
   gchar *p = g_utf8_substring(s.c_str(), start_pos, end_pos);
   std::string r = p;
   g_free(p);
+  return r;
+}
+
+std::optional<std::string> tryUtf8ToLocale(const std::string &s) {
+  if (!g_utf8_validate(s.c_str(), s.length(), NULL)) {
+    return std::nullopt;
+  }
+
+  GError *error = NULL;
+  gchar *a = g_locale_from_utf8(s.c_str(), s.length(), NULL, NULL, &error);
+
+  if (a == NULL) {
+    if (error != NULL)
+      g_error_free(error);
+    return std::nullopt;
+  }
+
+  std::string r(a);
+  g_free(a);
   return r;
 }
 #endif

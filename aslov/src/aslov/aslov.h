@@ -233,6 +233,7 @@ std::string utf8ToUpperCase(const std::string &s
 std::string utf8Trim(const std::string& s);
 int utf8Length(const std::string& s,gssize l=-1);
 std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos);
+std::optional<std::string> tryUtf8ToLocale(const std::string &s);
 #endif
 // convert localed string to lowercase
 std::string localeToLowerCase(const std::string &s,
