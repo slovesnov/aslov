@@ -494,6 +494,23 @@ std::string utf8Substring(const std::string &s, glong start_pos,
   return r;
 }
 
+bool canConvertToLocale(const std::string &s) {
+    if (!g_utf8_validate(s.c_str(), s.length(), NULL)) {
+        return false;
+    }
+
+    GError *error = NULL;
+    gchar *a = g_locale_from_utf8(s.c_str(), s.length(), NULL, NULL, &error);
+
+    if (a == NULL) {
+        if (error != NULL) g_error_free(error);
+        return false;
+    }
+
+    g_free(a);
+    return true; 
+}
+
 std::optional<std::string> tryUtf8ToLocale(const std::string &s) {
   if (!g_utf8_validate(s.c_str(), s.length(), NULL)) {
     return std::nullopt;
