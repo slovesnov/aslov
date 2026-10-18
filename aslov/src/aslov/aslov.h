@@ -553,8 +553,6 @@ void removeClass(GtkWidget *w, std::string_view s);
 void addRemoveClass(GtkWidget *w, std::string_view s, bool add);
 void loadCSS(std::string const &additionalData = "");
 void openURL(std::string url);
-// void destroy(cairo_t *p);
-// void destroy(cairo_surface_t *p);
 std::string getBuildVersionString(bool _long);
 std::string getBuildString(bool _long);
 std::string getVersionString(bool _long);
