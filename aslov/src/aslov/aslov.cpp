@@ -437,14 +437,9 @@ const std::string utf8ToLocale(const std::string &s) {
 #endif
 }
 
-std::string utf8ToLowerCase(const std::string &s
+std::string utf8ToLowerCase(const std::string &s) {
 #ifdef NOGTK
-                            ,
-                            bool onlyRussainChars /*=false*/
-#endif
-) {
-#ifdef NOGTK
-  return localeToUtf8(localeToLowerCase(utf8ToLocale(s), onlyRussainChars));
+  return localeToUtf8(localeToLowerCase(utf8ToLocale(s)));
 #else
   gchar *a = g_utf8_strdown(s.c_str(), s.length());
   std::string r(a);
@@ -453,12 +448,7 @@ std::string utf8ToLowerCase(const std::string &s
 #endif
 }
 
-std::string utf8ToUpperCase(const std::string &s
-#ifdef NOGTK
-                            ,
-                            bool onlyRussainChars /*=false*/
-#endif
-) {
+std::string utf8ToUpperCase(const std::string &s) {
 #ifdef NOGTK
   assert(0); // TODO
   return "";
@@ -495,20 +485,21 @@ std::string utf8Substring(const std::string &s, glong start_pos,
 }
 
 bool canConvertToLocale(const std::string &s) {
-    if (!g_utf8_validate(s.c_str(), s.length(), NULL)) {
-        return false;
-    }
+  if (!g_utf8_validate(s.c_str(), s.length(), NULL)) {
+    return false;
+  }
 
-    GError *error = NULL;
-    gchar *a = g_locale_from_utf8(s.c_str(), s.length(), NULL, NULL, &error);
+  GError *error = NULL;
+  gchar *a = g_locale_from_utf8(s.c_str(), s.length(), NULL, NULL, &error);
 
-    if (a == NULL) {
-        if (error != NULL) g_error_free(error);
-        return false;
-    }
+  if (a == NULL) {
+    if (error != NULL)
+      g_error_free(error);
+    return false;
+  }
 
-    g_free(a);
-    return true; 
+  g_free(a);
+  return true;
 }
 
 std::optional<std::string> tryUtf8ToLocale(const std::string &s) {
@@ -531,15 +522,12 @@ std::optional<std::string> tryUtf8ToLocale(const std::string &s) {
 }
 #endif
 
-std::string localeToLowerCase(const std::string &s, bool onlyRussainChars) {
-  typedef const unsigned char *cpuchar;
-  cpuchar p;
-  std::string q;
-  for (p = cpuchar(s.c_str()); *p != 0; p++) {
-    q += (*p >= 0xc0 && *p < 0xe0) ? (*p) + 0x20
-                                   : (onlyRussainChars ? *p : tolower(*p));
-  }
-  return q;
+std::string localeToLowerCase(const std::string &s) {
+  std::locale loc("");
+  std::string result = s;
+  std::transform(result.begin(), result.end(), result.begin(),
+                 [&loc](char c) { return std::tolower(c, loc); });
+  return result;
 }
 
 // END string functions

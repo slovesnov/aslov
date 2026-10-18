@@ -215,18 +215,8 @@ bool contains(std::string_view a, const char b);
 const std::string localeToUtf8(const std::string &s);
 const std::string utf8ToLocale(const std::string &s);
 
-std::string utf8ToLowerCase(const std::string &s
-#ifdef NOGTK
-                            ,
-                            bool onlyRussainChars = false
-#endif
-);
-std::string utf8ToUpperCase(const std::string &s
-#ifdef NOGTK
-                            ,
-                            bool onlyRussainChars = false
-#endif
-);
+std::string utf8ToLowerCase(const std::string &s);
+std::string utf8ToUpperCase(const std::string &s);
 #endif
 
 #ifndef NOGTK
@@ -237,9 +227,6 @@ bool canConvertToLocale(const std::string &s);
 std::optional<std::string> tryUtf8ToLocale(const std::string &s);
 #endif
 // convert localed string to lowercase
-std::string localeToLowerCase(const std::string &s,
-                              bool onlyRussainChars = false);
-
 template <typename T, typename... P>
 std::string joinS(const std::string separator, T &&t, P &&...p) {
   std::stringstream c;
