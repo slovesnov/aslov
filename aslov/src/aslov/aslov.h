@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-
 #ifdef __GNUC__
 #include <cxxabi.h> //for type name this include file exists not for all compilers
 #include <memory>   //for type name
@@ -85,12 +84,21 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
                                             std::source_location::current()) {
 #ifdef ASLOV_SHORT_LOGGING
   os << std::filesystem::path(location.file_name()).filename().string() << ":"
-     << location.line() << " " << get_gcc_clean_name(location.function_name())
-     << "\n";
+     << location.line() << " " << get_gcc_clean_name(location.function_name());
 #else
   os << location.file_name() << ":" << location.line() << " "
-     << location.function_name() << "\n";
+     << location.function_name();
 #endif
+
+  if (dynamic_cast<std::filebuf *>(os.rdbuf()) != nullptr) { // file
+    std::time_t now_c = std::time(nullptr);
+    std::tm *local_tm = std::localtime(&now_c);
+    char time_buffer[32];
+    std::strftime(time_buffer, sizeof(time_buffer), " %H:%M:%S %d%b%Y",
+                  local_tm);
+    os << time_buffer;
+  }
+  os << "\n";
 }
 
 #define pr(...)                                                                \
