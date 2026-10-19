@@ -43,7 +43,6 @@ static cairo_font_weight_t fontWeight;
 #ifdef _WIN32
 static PairDoubleDouble scale;
 #endif
-static int aslovOutputWide = 40;
 
 // BEGIN file functions
 bool isDir(std::string_view path) {
@@ -924,5 +923,3 @@ void preventThreadSleep() {
                           ES_AWAYMODE_REQUIRED);
 #endif
 }
-
-void aslovSetOutputWidth(int width) { aslovOutputWide = width; }

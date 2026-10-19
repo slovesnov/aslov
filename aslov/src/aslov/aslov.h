@@ -17,10 +17,11 @@
 #include <fstream>
 #include <map>
 #include <mutex>
+#include <ranges> //ssize
 #include <sstream>
 #include <string>
 #include <vector>
-#include <ranges> //ssize
+
 
 #ifdef __GNUC__
 #include <cxxabi.h> //for type name this include file exists not for all compilers
@@ -43,6 +44,39 @@ void aslovprintvariables(std::ostream &os, Args &&...args) {
   ((os << std::forward<Args>(args) << " "), ...);
 }
 
+constexpr std::string_view get_gcc_clean_name(std::string_view raw_name) {
+  // 1. Отрезаем шаблонную информацию GCC в конце ( "[with T = ...]" )
+  size_t template_pos = raw_name.find(" [with");
+  if (template_pos != std::string_view::npos) {
+    raw_name = raw_name.substr(0, template_pos);
+  }
+
+  // 2. Отрезаем круглые скобки с аргументами: ищем первую '('
+  size_t bracket = raw_name.find('(');
+  if (bracket != std::string_view::npos) {
+    raw_name = raw_name.substr(0, bracket);
+  }
+
+  // Тримминг пробелов с конца (на случай "func ")
+  while (!raw_name.empty() && raw_name.back() == ' ') {
+    raw_name.remove_suffix(1);
+  }
+
+  // 3. Отрезаем пространства имен и классы: ищем последнее '::'
+  size_t colons = raw_name.rfind("::");
+  if (colons != std::string_view::npos) {
+    raw_name = raw_name.substr(colons + 2);
+  }
+
+  // 4. Отрезаем возвращаемый тип: ищем последний пробел перед именем
+  size_t space = raw_name.rfind(' ');
+  if (space != std::string_view::npos) {
+    raw_name = raw_name.substr(space + 1);
+  }
+
+  return raw_name;
+}
+
 /*make inline to allow write like this
 #define ASLOV_SHORT_LOGGING
 #include "aslov.h"
@@ -51,7 +85,8 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
                                             std::source_location::current()) {
 #ifdef ASLOV_SHORT_LOGGING
   os << std::filesystem::path(location.file_name()).filename().string() << ":"
-     << location.line() << "\n";
+     << location.line() << " " << get_gcc_clean_name(location.function_name())
+     << "\n";
 #else
   os << location.file_name() << ":" << location.line() << " "
      << location.function_name() << "\n";
@@ -175,24 +210,24 @@ std::string toString(T t, char separator = ' ', int digits = 3) {
 /* parseString("0xff",i,16), parseString("ff",i,16), parseString("+0xff",i,16)
  * ok t is changed only if parse is valid
  */
-template <class T> 
-bool parseString(std::string_view d, T &t, int radix = 10) {
-    if (d.empty() || std::isspace(static_cast<unsigned char>(d.front()))) {
-        return false;
-    }
-    
-    if constexpr (std::is_unsigned_v<T>) {
-        if (d.front() == '-') return false;
-    }
+template <class T> bool parseString(std::string_view d, T &t, int radix = 10) {
+  if (d.empty() || std::isspace(static_cast<unsigned char>(d.front()))) {
+    return false;
+  }
 
-    std::from_chars_result res;
-    if constexpr (std::is_floating_point_v<T>) {
-        res = std::from_chars(d.data(), d.data() + d.size(), t);
-    } else {
-        res = std::from_chars(d.data(), d.data() + d.size(), t, radix);
-    }
+  if constexpr (std::is_unsigned_v<T>) {
+    if (d.front() == '-')
+      return false;
+  }
 
-    return res.ec == std::errc{} && res.ptr == (d.data() + d.size());
+  std::from_chars_result res;
+  if constexpr (std::is_floating_point_v<T>) {
+    res = std::from_chars(d.data(), d.data() + d.size(), t);
+  } else {
+    res = std::from_chars(d.data(), d.data() + d.size(), t, radix);
+  }
+
+  return res.ec == std::errc{} && res.ptr == (d.data() + d.size());
 }
 
 std::string replaceAll(std::string subject, const std::string &from,
@@ -220,8 +255,8 @@ std::string utf8ToUpperCase(const std::string &s);
 #endif
 
 #ifndef NOGTK
-std::string utf8Trim(const std::string& s);
-int utf8Length(const std::string& s,gssize l=-1);
+std::string utf8Trim(const std::string &s);
+int utf8Length(const std::string &s, gssize l = -1);
 std::string utf8Substring(const std::string &s, glong start_pos, glong end_pos);
 bool canConvertToLocale(const std::string &s);
 std::optional<std::string> tryUtf8ToLocale(const std::string &s);
@@ -286,14 +321,14 @@ inline std::string joinV(const std::vector<T> &v, char separator) {
 // functions arguments order.
 template <typename T, std::size_t N>
 std::string join(const T (&v)[N], const char separator = ' ') {
-    std::stringstream c;
-    for (std::size_t i = 0; i < N; i++) {
-        if (i > 0) {
-            c << separator;
-        }
-        c << v[i];
+  std::stringstream c;
+  for (std::size_t i = 0; i < N; i++) {
+    if (i > 0) {
+      c << separator;
     }
-    return c.str();
+    c << v[i];
+  }
+  return c.str();
 }
 
 template <typename T, std::size_t N>
@@ -361,7 +396,7 @@ typename std::vector<T>::iterator find(const T &t, std::vector<T> &v) {
 }
 
 template <class T, class... V>
-requires (sizeof...(V) > 1)
+  requires(sizeof...(V) > 1)
 int indexOf(T const &t, V const &...v) {
   auto is_equal = [](const auto &a, const auto &b) {
     if constexpr (std::is_convertible_v<decltype(a), std::string_view> &&
@@ -395,23 +430,23 @@ int indexOf(const U &t, const T (&v)[N]) {
   return i == N ? -1 : i;
 }
 
-template <class T> 
+template <class T>
 int indexOf(const T &t, const std::vector<T> &v, int start = 0) {
   if (start >= int(v.size())) {
     return -1;
   }
-  typename std::vector<T>::const_iterator it = std::find(v.begin() + start, v.end(), t);
+  typename std::vector<T>::const_iterator it =
+      std::find(v.begin() + start, v.end(), t);
   return it == v.end() ? -1 : std::distance(v.begin(), it);
 }
 
-template <size_t N>
-int indexOfNoCase(std::string_view t, const char *(&v)[N]) {
-    for (size_t i = 0; i < N; i++) {
-        if (cmpnocase(t, v[i])) { 
-            return static_cast<int>(i);
-        }
+template <size_t N> int indexOfNoCase(std::string_view t, const char *(&v)[N]) {
+  for (size_t i = 0; i < N; i++) {
+    if (cmpnocase(t, v[i])) {
+      return static_cast<int>(i);
     }
-    return -1;
+  }
+  return -1;
 }
 int indexOf(const char t, std::string_view v);
 
@@ -617,5 +652,3 @@ template <class T> std::string aslovTypeName() {
  * */
 #define OBJECT_TYPE(v) aslovTypeName<decltype(v)>()
 #endif /* __GNUC__ */
-
-void aslovSetOutputWidth(int width);
