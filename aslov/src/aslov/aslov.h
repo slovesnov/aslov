@@ -44,30 +44,25 @@ void aslovprintvariables(std::ostream &os, Args &&...args) {
 }
 
 constexpr std::string_view get_gcc_clean_name(std::string_view raw_name) {
-  // 1. Отрезаем шаблонную информацию GCC в конце ( "[with T = ...]" )
   size_t template_pos = raw_name.find(" [with");
   if (template_pos != std::string_view::npos) {
     raw_name = raw_name.substr(0, template_pos);
   }
 
-  // 2. Отрезаем круглые скобки с аргументами: ищем первую '('
   size_t bracket = raw_name.find('(');
   if (bracket != std::string_view::npos) {
     raw_name = raw_name.substr(0, bracket);
   }
 
-  // Тримминг пробелов с конца (на случай "func ")
   while (!raw_name.empty() && raw_name.back() == ' ') {
     raw_name.remove_suffix(1);
   }
 
-  // 3. Отрезаем пространства имен и классы: ищем последнее '::'
   size_t colons = raw_name.rfind("::");
   if (colons != std::string_view::npos) {
     raw_name = raw_name.substr(colons + 2);
   }
 
-  // 4. Отрезаем возвращаемый тип: ищем последний пробел перед именем
   size_t space = raw_name.rfind(' ');
   if (space != std::string_view::npos) {
     raw_name = raw_name.substr(space + 1);
@@ -84,7 +79,8 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
                                             std::source_location::current()) {
 #ifdef ASLOV_SHORT_LOGGING
   os << std::filesystem::path(location.file_name()).filename().string() << ":"
-     << location.line() << " " << get_gcc_clean_name(location.function_name());
+     << location.line() << " " << get_gcc_clean_name(location.function_name())
+     << "()";
 #else
   os << location.file_name() << ":" << location.line() << " "
      << location.function_name();
@@ -94,8 +90,12 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
     std::time_t now_c = std::time(nullptr);
     std::tm *local_tm = std::localtime(&now_c);
     char time_buffer[32];
+    std::string old_locale = std::setlocale(LC_TIME, "C");
     std::strftime(time_buffer, sizeof(time_buffer), " %H:%M:%S %d%b%Y",
                   local_tm);
+    // month lowercased
+    time_buffer[12] = std::tolower(static_cast<unsigned char>(time_buffer[12]));
+    std::setlocale(LC_TIME, old_locale.c_str());
     os << time_buffer;
   }
   os << "\n";
@@ -244,6 +244,7 @@ VString split(const std::string &subject, const std::string &separator);
 VString split(const std::string &subject, const char separator = ' ');
 #ifndef NOGTK
 VString splitr(const std::string &subject, const std::string &regex);
+std::string replaceAllr(const std::string& subject, const std::string& regex, const std::string& replacement);
 #endif
 
 int countOccurence(const std::string &subject, const std::string &a);

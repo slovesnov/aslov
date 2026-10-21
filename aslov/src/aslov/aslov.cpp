@@ -330,6 +330,45 @@ VString splitr(const std::string &subject, const std::string &regex) {
   g_strfreev(fields);
   return v;
 }
+
+std::string replaceAllr(const std::string& subject, const std::string& regex, const std::string& replacement) {
+    GError *error = NULL;
+    
+    // 1. Компилируем регулярное выражение
+    GRegex *re = g_regex_new(regex.c_str(), G_REGEX_OPTIMIZE, (GRegexMatchFlags)0, &error);
+    if (error != NULL) {
+        g_printerr("Regex Error: %s\n", error->message);
+        g_error_free(error);
+        return subject; // возвращаем оригинал при ошибке
+    }
+
+    // 2. Делаем глобальную замену (заменяет ALL)
+    gchar *result_c_str = g_regex_replace(
+        re, 
+        subject.c_str(), 
+        -1,             // -1 означает, что строка оканчивается на \0
+        0,              // стартовая позиция поиска
+        replacement.c_str(), 
+        (GRegexMatchFlags)0, 
+        &error
+    );
+
+    std::string result_str = "";
+    if (error == NULL && result_c_str != NULL) {
+        result_str = result_c_str;
+    } else if (error != NULL) {
+        g_printerr("Replace Error: %s\n", error->message);
+        g_error_free(error);
+        result_str = subject;
+    }
+
+    // 3. Освобождаем ресурсы C-style
+    g_regex_unref(re);
+    if (result_c_str) g_free(result_c_str);
+
+    return result_str;
+}
+
 #endif
 
 int countOccurence(const std::string &subject, const std::string &a) {
