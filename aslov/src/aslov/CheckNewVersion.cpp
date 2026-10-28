@@ -71,7 +71,7 @@ void CheckNewVersion::routine() {
         if (j.is_object() && j.contains("tag_name")) {
           auto version = j["tag_name"].get<std::string>();
           // pr(version,m_version == version)
-          if (m_version != version) {
+          if (version > m_version) {
             m_message = j.value("body", "");
             // pr(m_message)
             g_idle_add(m_callback, NULL);
