@@ -472,6 +472,8 @@ const std::string utf8ToLocale(const std::string &s) {
 #endif
 }
 
+std::string localeToLowerCase(const std::string &s);
+
 std::string utf8ToLowerCase(const std::string &s) {
 #ifdef NOGTK
   return localeToUtf8(localeToLowerCase(utf8ToLocale(s)));
