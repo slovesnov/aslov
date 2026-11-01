@@ -102,8 +102,10 @@ inline void aslovprio(std::ostream &os, const std::source_location location =
 }
 
 #define pr(...)                                                                \
-  __VA_OPT__(aslovprintvariables(std::cout, __VA_ARGS__);)                     \
-  aslovprio(std::cout);
+  {                                                                            \
+    __VA_OPT__(aslovprintvariables(std::cout, __VA_ARGS__);)                   \
+    aslovprio(std::cout);                                                      \
+  }
 
 #define pri pr()
 
@@ -244,7 +246,8 @@ VString split(const std::string &subject, const std::string &separator);
 VString split(const std::string &subject, const char separator = ' ');
 #ifndef NOGTK
 VString splitr(const std::string &subject, const std::string &regex);
-std::string replaceAllr(const std::string& subject, const std::string& regex, const std::string& replacement);
+std::string replaceAllr(const std::string &subject, const std::string &regex,
+                        const std::string &replacement);
 #endif
 
 int countOccurence(const std::string &subject, const std::string &a);
