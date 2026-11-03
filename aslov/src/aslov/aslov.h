@@ -566,7 +566,7 @@ void writeConfig(const std::string (&tags)[N], T &&...p) {
 
   int i = 0;
   (
-      [&](auto &&a) { // Используем auto&& для универсальности
+      [&](auto &&a) {
         using PureType = std::decay_t<decltype(a)>;
         f << tags[i++] << " = ";
         if constexpr (std::is_same_v<PureType, PangoFontDescription *>) {
