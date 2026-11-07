@@ -224,10 +224,12 @@ bool filePutContent(const std::string &path, const std::string &content,
 #ifdef NOTGK_WITHOUT_ICONV
   std::ofstream t(path, m);
 #else
-  std::ofstream t(utf8ToLocale(path), m);
+  std::filesystem::path safe_path((const char8_t*)path.c_str());
+  std::ofstream t(safe_path, m);
 #endif
 
   if (!t.is_open()) {
+    pri;
     return false;
   }
 
@@ -331,39 +333,36 @@ VString splitr(const std::string &subject, const std::string &regex) {
   return v;
 }
 
-std::string replaceAllr(const std::string& subject, const std::string& regex, const std::string& replacement) {
-    GError *error = NULL;
-    
-    GRegex *re = g_regex_new(regex.c_str(), G_REGEX_OPTIMIZE, (GRegexMatchFlags)0, &error);
-    if (error != NULL) {
-        g_printerr("Regex Error: %s\n", error->message);
-        g_error_free(error);
-        return subject;
-    }
+std::string replaceAllr(const std::string &subject, const std::string &regex,
+                        const std::string &replacement) {
+  GError *error = NULL;
 
-    gchar *result_c_str = g_regex_replace(
-        re, 
-        subject.c_str(), 
-        -1,            
-        0,             
-        replacement.c_str(), 
-        (GRegexMatchFlags)0, 
-        &error
-    );
+  GRegex *re =
+      g_regex_new(regex.c_str(), G_REGEX_OPTIMIZE, (GRegexMatchFlags)0, &error);
+  if (error != NULL) {
+    g_printerr("Regex Error: %s\n", error->message);
+    g_error_free(error);
+    return subject;
+  }
 
-    std::string result_str = "";
-    if (error == NULL && result_c_str != NULL) {
-        result_str = result_c_str;
-    } else if (error != NULL) {
-        g_printerr("Replace Error: %s\n", error->message);
-        g_error_free(error);
-        result_str = subject;
-    }
+  gchar *result_c_str =
+      g_regex_replace(re, subject.c_str(), -1, 0, replacement.c_str(),
+                      (GRegexMatchFlags)0, &error);
 
-    g_regex_unref(re);
-    if (result_c_str) g_free(result_c_str);
+  std::string result_str = "";
+  if (error == NULL && result_c_str != NULL) {
+    result_str = result_c_str;
+  } else if (error != NULL) {
+    g_printerr("Replace Error: %s\n", error->message);
+    g_error_free(error);
+    result_str = subject;
+  }
 
-    return result_str;
+  g_regex_unref(re);
+  if (result_c_str)
+    g_free(result_c_str);
+
+  return result_str;
 }
 
 #endif
