@@ -229,7 +229,6 @@ bool filePutContent(const std::string &path, const std::string &content,
 #endif
 
   if (!t.is_open()) {
-    pri;
     return false;
   }
 
